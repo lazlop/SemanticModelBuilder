@@ -1,0 +1,578 @@
+@prefix bldg: <urn:hpflex/test-site#> .
+@prefix hpflex: <urn:hpflex#> .
+@prefix hpfs: <urn:hpflex/shapes#> .
+@prefix ns1: <https://brickschema.org/schema/Brick/ref#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix s223: <http://data.ashrae.org/standard223#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+bldg: a owl:Ontology,
+        hpflex:Project .
+
+bldg:hvac1 a s223:AirToAirHeatPump,
+        hpfs:hp-rtu ;
+    s223:cnx bldg:outlet_cp_09aeeb22 ;
+    s223:connectsTo bldg:zone1 ;
+    s223:hasProperty bldg:hvac1_cooling_COP,
+        bldg:hvac1_cooling_capacity,
+        bldg:hvac1_heating_COP,
+        bldg:hvac1_heating_capacity ;
+    hpfs:air-connects-to bldg:zone1 ;
+    hpfs:has-point bldg:hvac1_cooling_COP,
+        bldg:hvac1_cooling_capacity,
+        bldg:hvac1_heating_COP,
+        bldg:hvac1_heating_capacity .
+
+bldg:hvac2 a s223:AirToAirHeatPump,
+        hpfs:hp-rtu ;
+    s223:cnx bldg:outlet_cp_8c85b8b5 ;
+    s223:connectsTo bldg:zone2 ;
+    s223:hasProperty bldg:hvac2_cooling_COP,
+        bldg:hvac2_cooling_capacity,
+        bldg:hvac2_heating_COP,
+        bldg:hvac2_heating_capacity ;
+    hpfs:air-connects-to bldg:zone2 ;
+    hpfs:has-point bldg:hvac2_cooling_COP,
+        bldg:hvac2_cooling_capacity,
+        bldg:hvac2_heating_COP,
+        bldg:hvac2_heating_capacity .
+
+bldg:test-site a s223:PhysicalSpace,
+        hpflex:Site,
+        hpfs:site ;
+    s223:hasProperty bldg:test-site.latitude,
+        bldg:test-site.longitude,
+        bldg:test-site.noaastation,
+        bldg:test-site.timezone ;
+    hpfs:has-point bldg:test-site.latitude,
+        bldg:test-site.longitude,
+        bldg:test-site.noaastation,
+        bldg:test-site.timezone .
+
+bldg:tstat1 a s223:Thermostat,
+        hpfs:tstat-static-properties ;
+    s223:hasPhysicalLocation bldg:zone1 ;
+    s223:hasProperty bldg:tstat1_active,
+        bldg:tstat1_resolution,
+        bldg:tstat1_setpoint_deadband,
+        bldg:tstat1_stage_count,
+        bldg:tstat1_tolerance ;
+    hpfs:has-location bldg:zone1 ;
+    hpfs:has-point bldg:tstat1_active,
+        bldg:tstat1_resolution,
+        bldg:tstat1_setpoint_deadband,
+        bldg:tstat1_stage_count,
+        bldg:tstat1_tolerance .
+
+bldg:tstat2 a s223:Thermostat,
+        hpfs:tstat-static-properties ;
+    s223:hasPhysicalLocation bldg:zone2 ;
+    s223:hasProperty bldg:tstat2_active,
+        bldg:tstat2_resolution,
+        bldg:tstat2_setpoint_deadband,
+        bldg:tstat2_stage_count,
+        bldg:tstat2_tolerance ;
+    hpfs:has-location bldg:zone2 ;
+    hpfs:has-point bldg:tstat2_active,
+        bldg:tstat2_resolution,
+        bldg:tstat2_setpoint_deadband,
+        bldg:tstat2_stage_count,
+        bldg:tstat2_tolerance .
+
+bldg:zone1_physical_space s223:contains bldg:space1 ;
+    s223:encloses bldg:zone1 .
+
+bldg:zone2_physical_space s223:contains bldg:space2 ;
+    s223:encloses bldg:zone2 .
+
+bldg:connection_0b1f162b a s223:Connection,
+        hpfs:connection ;
+    s223:cnx bldg:inlet_cp_b09a0cbb .
+
+bldg:connection_5bf3433d a s223:Connection,
+        hpfs:connection ;
+    s223:cnx bldg:inlet_cp_280a9712 .
+
+bldg:name-connection_271cd90c a s223:Connection,
+        hpfs:connection ;
+    s223:cnx bldg:name-target_cp_9383b8ba .
+
+bldg:name-connection_560906e7 a s223:Connection,
+        hpfs:connection ;
+    s223:cnx bldg:name-target_cp_dfac8a88 .
+
+bldg:name-name_cp_6de243ec a s223:BidirectionalConnectionPoint,
+        hpfs:air-bidirectional-connectionpoint ;
+    s223:cnx bldg:name-connection_271cd90c ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:name-name_cp_fdae5477 a s223:BidirectionalConnectionPoint,
+        hpfs:air-bidirectional-connectionpoint ;
+    s223:cnx bldg:name-connection_560906e7 ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:outlet_cp_09aeeb22 a s223:OutletConnectionPoint,
+        hpfs:air-outlet-connectionpoint ;
+    s223:cnx bldg:connection_0b1f162b ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:outlet_cp_8c85b8b5 a s223:OutletConnectionPoint,
+        hpfs:air-outlet-connectionpoint ;
+    s223:cnx bldg:connection_5bf3433d ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:Active_Cooling_Stages_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/actcstgs",
+        "aql/1610102/actcstgs" .
+
+bldg:Active_Heating_Stages_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/acthstgs",
+        "aql/1610102/acthstgs" .
+
+bldg:Effective_Cooling_Temperature_Setpoint_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/csp_eff",
+        "aql/1610102/csp_eff" .
+
+bldg:Effective_Heating_Temperature_Setpoint_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/hsp_eff",
+        "aql/1610102/hsp_eff" .
+
+bldg:Effective_Zone_Air_Temperature_Setpoint_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/effsp",
+        "aql/1610102/effsp" .
+
+bldg:Occupied_Cooling_Temperature_Setpoint_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/ocsp",
+        "aql/1610102/ocsp" .
+
+bldg:Occupied_Heating_Temperature_Setpoint_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/ohsp",
+        "aql/1610102/ohsp" .
+
+bldg:Unoccupied_Cooling_Temperature_Setpoint_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/ucsp",
+        "aql/1610102/ucsp" .
+
+bldg:Unoccupied_Heating_Temperature_Setpoint_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/uhsp",
+        "aql/1610102/uhsp" .
+
+bldg:Zone_Air_Temperature_Sensor_ref a s223:ExternalReference ;
+    ns1:hasTopicName "aql/1610101/ZSZoneTemp",
+        "aql/1610102/ZSZoneTemp" .
+
+bldg:hvac1_cooling_COP a s223:QuantifiableObservableProperty,
+        hpfs:cooling-COP ;
+    s223:hasAspect s223:Role-Cooling ;
+    s223:hasValue 3.5e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:hvac1_cooling_capacity a s223:QuantifiableObservableProperty,
+        hpfs:cooling-capacity ;
+    s223:hasAspect s223:Role-Cooling ;
+    s223:hasValue 5e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:hvac1_heating_COP a s223:QuantifiableObservableProperty,
+        hpfs:heating-COP ;
+    s223:hasAspect s223:Role-Heating ;
+    s223:hasValue 3e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:hvac1_heating_capacity a s223:QuantifiableObservableProperty,
+        hpfs:heating-capacity ;
+    s223:hasAspect s223:Role-Heating ;
+    s223:hasValue 4e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:hvac2_cooling_COP a s223:QuantifiableObservableProperty,
+        hpfs:cooling-COP ;
+    s223:hasAspect s223:Role-Cooling ;
+    s223:hasValue 3.5e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:hvac2_cooling_capacity a s223:QuantifiableObservableProperty,
+        hpfs:cooling-capacity ;
+    s223:hasAspect s223:Role-Cooling ;
+    s223:hasValue 5e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:hvac2_heating_COP a s223:QuantifiableObservableProperty,
+        hpfs:heating-COP ;
+    s223:hasAspect s223:Role-Heating ;
+    s223:hasValue 3e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:hvac2_heating_capacity a s223:QuantifiableObservableProperty,
+        hpfs:heating-capacity ;
+    s223:hasAspect s223:Role-Heating ;
+    s223:hasValue 4e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+bldg:inlet_cp_280a9712 a s223:InletConnectionPoint,
+        hpfs:air-inlet-connectionpoint ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:inlet_cp_b09a0cbb a s223:InletConnectionPoint,
+        hpfs:air-inlet-connectionpoint ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:name-target_cp_9383b8ba a s223:BidirectionalConnectionPoint,
+        hpfs:air-bidirectional-connectionpoint ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:name-target_cp_dfac8a88 a s223:BidirectionalConnectionPoint,
+        hpfs:air-bidirectional-connectionpoint ;
+    s223:hasMedium s223:Medium-Air .
+
+bldg:space1 a s223:PhysicalSpace,
+        hpfs:space ;
+    s223:hasProperty bldg:space1_area ;
+    hpfs:has-point bldg:space1_area .
+
+bldg:space1_area a s223:QuantifiableObservableProperty,
+        hpfs:area ;
+    s223:hasValue 5e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:M2 .
+
+bldg:space2 a s223:PhysicalSpace,
+        hpfs:space ;
+    s223:hasProperty bldg:space2_area ;
+    hpfs:has-point bldg:space2_area .
+
+bldg:space2_area a s223:QuantifiableObservableProperty,
+        hpfs:area ;
+    s223:hasValue 5e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:M2 .
+
+bldg:test-site.latitude a s223:QuantifiableProperty,
+        hpflex:Latitude,
+        hpfs:latitude ;
+    s223:hasValue 4.07128e+01 ;
+    qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
+    qudt:hasUnit unit:Degree .
+
+bldg:test-site.longitude a s223:QuantifiableProperty,
+        hpflex:Longitude,
+        hpfs:longitude ;
+    s223:hasValue -7.4006e+01 ;
+    qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
+    qudt:hasUnit unit:Degree .
+
+bldg:test-site.noaastation a s223:EnumeratedProperty,
+        hpflex:NOAAStation,
+        hpfs:noaastation ;
+    s223:hasValue "KJFK" .
+
+bldg:test-site.timezone a s223:EnumeratedProperty,
+        hpflex:Timezone,
+        hpfs:timezone ;
+    s223:hasValue "America/New_York" .
+
+bldg:tstat1_active a s223:EnumeratedObservableProperty,
+        hpfs:tstat-active ;
+    s223:hasAspect s223:Aspect-Cooling,
+        s223:Aspect-Heating,
+        s223:Binary-Logical,
+        s223:Effectiveness-Active ;
+    s223:hasValue true ;
+    qudt:hasUnit unit:NUM .
+
+bldg:tstat1_resolution a s223:QuantifiableObservableProperty,
+        hpfs:tstat-resolution ;
+    s223:hasValue 1 ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true .
+
+bldg:tstat1_setpoint_deadband a s223:QuantifiableObservableProperty,
+        hpfs:tstat-deadband ;
+    s223:hasAspect s223:Aspect-Deadband ;
+    s223:hasValue 1 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true .
+
+bldg:tstat1_stage_count a s223:EnumeratedObservableProperty,
+        hpfs:tstat-stage_count ;
+    s223:hasAspect s223:Aspect-OperatingMode,
+        s223:Role-Cooling ;
+    s223:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM .
+
+bldg:tstat1_tolerance a s223:QuantifiableObservableProperty,
+        hpfs:tstat-tolerance ;
+    s223:hasAspect s223:Aspect-Cooling,
+        s223:Aspect-Heating,
+        s223:Aspect-Threshold ;
+    s223:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true .
+
+bldg:tstat2_active a s223:EnumeratedObservableProperty,
+        hpfs:tstat-active ;
+    s223:hasAspect s223:Aspect-Cooling,
+        s223:Aspect-Heating,
+        s223:Binary-Logical,
+        s223:Effectiveness-Active ;
+    s223:hasValue true ;
+    qudt:hasUnit unit:NUM .
+
+bldg:tstat2_resolution a s223:QuantifiableObservableProperty,
+        hpfs:tstat-resolution ;
+    s223:hasValue 1 ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true .
+
+bldg:tstat2_setpoint_deadband a s223:QuantifiableObservableProperty,
+        hpfs:tstat-deadband ;
+    s223:hasAspect s223:Aspect-Deadband ;
+    s223:hasValue 1 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true .
+
+bldg:tstat2_stage_count a s223:EnumeratedObservableProperty,
+        hpfs:tstat-stage_count ;
+    s223:hasAspect s223:Aspect-OperatingMode,
+        s223:Role-Cooling ;
+    s223:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM .
+
+bldg:tstat2_tolerance a s223:QuantifiableObservableProperty,
+        hpfs:tstat-tolerance ;
+    s223:hasAspect s223:Aspect-Cooling,
+        s223:Aspect-Heating,
+        s223:Aspect-Threshold ;
+    s223:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true .
+
+bldg:window1_area a s223:QuantifiableObservableProperty,
+        hpfs:area ;
+    s223:hasValue 1.05e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 .
+
+bldg:window1_azimuth a s223:QuantifiableObservableProperty,
+        hpfs:azimuth ;
+    s223:hasValue 180 ;
+    qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree .
+
+bldg:window1_tilt a s223:QuantifiableObservableProperty,
+        hpfs:tilt ;
+    s223:hasValue 30 ;
+    qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree .
+
+bldg:window2_area a s223:QuantifiableObservableProperty,
+        hpfs:area ;
+    s223:hasValue 1.05e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 .
+
+bldg:window2_azimuth a s223:QuantifiableObservableProperty,
+        hpfs:azimuth ;
+    s223:hasValue 180 ;
+    qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree .
+
+bldg:window2_tilt a s223:QuantifiableObservableProperty,
+        hpfs:tilt ;
+    s223:hasValue 30 ;
+    qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree .
+
+bldg:window1 a s223:Window,
+        hpfs:window ;
+    s223:cnx bldg:name-target_cp_9383b8ba ;
+    s223:hasProperty bldg:window1_area,
+        bldg:window1_azimuth,
+        bldg:window1_tilt ;
+    hpfs:has-point bldg:window1_area,
+        bldg:window1_azimuth,
+        bldg:window1_tilt .
+
+bldg:window2 a s223:Window,
+        hpfs:window ;
+    s223:cnx bldg:name-target_cp_dfac8a88 ;
+    s223:hasProperty bldg:window2_area,
+        bldg:window2_azimuth,
+        bldg:window2_tilt ;
+    hpfs:has-point bldg:window2_area,
+        bldg:window2_azimuth,
+        bldg:window2_tilt .
+
+bldg:Active_Cooling_Stages a s223:EnumeratedObservableProperty,
+        hpfs:active-cooling-stages ;
+    s223:hasAspect s223:Aspect-OperatingStatus,
+        s223:Role-Cooling ;
+    s223:hasExternalReference bldg:Active_Cooling_Stages_ref ;
+    qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    hpfs:has-reference bldg:Active_Cooling_Stages_ref .
+
+bldg:Active_Heating_Stages a s223:EnumeratedObservableProperty,
+        hpfs:active-heating-stages ;
+    s223:hasAspect s223:Aspect-OperatingStatus,
+        s223:Role-Heating ;
+    s223:hasExternalReference bldg:Active_Heating_Stages_ref ;
+    qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    hpfs:has-reference bldg:Active_Heating_Stages_ref .
+
+bldg:Effective_Cooling_Temperature_Setpoint a s223:QuantifiableObservableProperty,
+        hpfs:effective-cooling-setpoint ;
+    s223:hasAspect s223:Aspect-Setpoint,
+        s223:Effectiveness-Active,
+        s223:Role-Cooling ;
+    s223:hasExternalReference bldg:Effective_Cooling_Temperature_Setpoint_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Effective_Cooling_Temperature_Setpoint_ref .
+
+bldg:Effective_Heating_Temperature_Setpoint a s223:QuantifiableObservableProperty,
+        hpfs:effective-heating-setpoint ;
+    s223:hasAspect s223:Aspect-Setpoint,
+        s223:Effectiveness-Active,
+        s223:Role-Heating ;
+    s223:hasExternalReference bldg:Effective_Heating_Temperature_Setpoint_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Effective_Heating_Temperature_Setpoint_ref .
+
+bldg:Effective_Zone_Air_Temperature_Setpoint a s223:QuantifiableObservableProperty,
+        hpfs:effective-temperature-setpoint ;
+    s223:hasAspect s223:Aspect-Setpoint,
+        s223:Effectiveness-Active ;
+    s223:hasExternalReference bldg:Effective_Zone_Air_Temperature_Setpoint_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Effective_Zone_Air_Temperature_Setpoint_ref .
+
+bldg:Occupied_Cooling_Temperature_Setpoint a s223:QuantifiableObservableProperty,
+        hpfs:occ-cooling-setpoint ;
+    s223:hasAspect s223:Aspect-Setpoint,
+        s223:Occupancy-Occupied,
+        s223:Role-Cooling ;
+    s223:hasExternalReference bldg:Occupied_Cooling_Temperature_Setpoint_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Occupied_Cooling_Temperature_Setpoint_ref .
+
+bldg:Occupied_Heating_Temperature_Setpoint a s223:QuantifiableObservableProperty,
+        hpfs:occ-heating-setpoint ;
+    s223:hasAspect s223:Aspect-Setpoint,
+        s223:Occupancy-Occupied,
+        s223:Role-Heating ;
+    s223:hasExternalReference bldg:Occupied_Heating_Temperature_Setpoint_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Occupied_Heating_Temperature_Setpoint_ref .
+
+bldg:Unoccupied_Cooling_Temperature_Setpoint a s223:QuantifiableObservableProperty,
+        hpfs:unocc-cooling-setpoint ;
+    s223:hasAspect s223:Aspect-Setpoint,
+        s223:Occupancy-Unoccupied,
+        s223:Role-Cooling ;
+    s223:hasExternalReference bldg:Unoccupied_Cooling_Temperature_Setpoint_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Unoccupied_Cooling_Temperature_Setpoint_ref .
+
+bldg:Unoccupied_Heating_Temperature_Setpoint a s223:QuantifiableObservableProperty,
+        hpfs:unocc-heating-setpoint ;
+    s223:hasAspect s223:Aspect-Setpoint,
+        s223:Occupancy-Unoccupied,
+        s223:Role-Heating ;
+    s223:hasExternalReference bldg:Unoccupied_Heating_Temperature_Setpoint_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Unoccupied_Heating_Temperature_Setpoint_ref .
+
+bldg:Zone_Air_Temperature_Sensor a s223:QuantifiableObservableProperty,
+        hpfs:temperature ;
+    s223:hasExternalReference bldg:Zone_Air_Temperature_Sensor_ref ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    hpfs:has-reference bldg:Zone_Air_Temperature_Sensor_ref .
+
+bldg:zone1 a s223:DomainSpace,
+        s223:Zone,
+        hpfs:hvac-zone ;
+    s223:cnx bldg:inlet_cp_b09a0cbb,
+        bldg:name-name_cp_6de243ec ;
+    s223:connectsTo bldg:window1 ;
+    s223:hasDomain s223:Domain-HVAC ;
+    s223:hasProperty bldg:Active_Cooling_Stages,
+        bldg:Active_Heating_Stages,
+        bldg:Effective_Cooling_Temperature_Setpoint,
+        bldg:Effective_Heating_Temperature_Setpoint,
+        bldg:Effective_Zone_Air_Temperature_Setpoint,
+        bldg:Occupied_Cooling_Temperature_Setpoint,
+        bldg:Occupied_Heating_Temperature_Setpoint,
+        bldg:Unoccupied_Cooling_Temperature_Setpoint,
+        bldg:Unoccupied_Heating_Temperature_Setpoint,
+        bldg:Zone_Air_Temperature_Sensor ;
+    hpfs:air-bidirectional-connects-to bldg:window1 ;
+    hpfs:has-point bldg:Active_Cooling_Stages,
+        bldg:Active_Heating_Stages,
+        bldg:Effective_Cooling_Temperature_Setpoint,
+        bldg:Effective_Heating_Temperature_Setpoint,
+        bldg:Effective_Zone_Air_Temperature_Setpoint,
+        bldg:Occupied_Cooling_Temperature_Setpoint,
+        bldg:Occupied_Heating_Temperature_Setpoint,
+        bldg:Unoccupied_Cooling_Temperature_Setpoint,
+        bldg:Unoccupied_Heating_Temperature_Setpoint,
+        bldg:Zone_Air_Temperature_Sensor ;
+    hpfs:has-space bldg:space1 ;
+    hpfs:has-window bldg:window1 .
+
+bldg:zone2 a s223:DomainSpace,
+        s223:Zone,
+        hpfs:hvac-zone ;
+    s223:cnx bldg:inlet_cp_280a9712,
+        bldg:name-name_cp_fdae5477 ;
+    s223:connectsTo bldg:window2 ;
+    s223:hasDomain s223:Domain-HVAC ;
+    s223:hasProperty bldg:Active_Cooling_Stages,
+        bldg:Active_Heating_Stages,
+        bldg:Effective_Cooling_Temperature_Setpoint,
+        bldg:Effective_Heating_Temperature_Setpoint,
+        bldg:Effective_Zone_Air_Temperature_Setpoint,
+        bldg:Occupied_Cooling_Temperature_Setpoint,
+        bldg:Occupied_Heating_Temperature_Setpoint,
+        bldg:Unoccupied_Cooling_Temperature_Setpoint,
+        bldg:Unoccupied_Heating_Temperature_Setpoint,
+        bldg:Zone_Air_Temperature_Sensor ;
+    hpfs:air-bidirectional-connects-to bldg:window2 ;
+    hpfs:has-point bldg:Active_Cooling_Stages,
+        bldg:Active_Heating_Stages,
+        bldg:Effective_Cooling_Temperature_Setpoint,
+        bldg:Effective_Heating_Temperature_Setpoint,
+        bldg:Effective_Zone_Air_Temperature_Setpoint,
+        bldg:Occupied_Cooling_Temperature_Setpoint,
+        bldg:Occupied_Heating_Temperature_Setpoint,
+        bldg:Unoccupied_Cooling_Temperature_Setpoint,
+        bldg:Unoccupied_Heating_Temperature_Setpoint,
+        bldg:Zone_Air_Temperature_Sensor ;
+    hpfs:has-space bldg:space2 ;
+    hpfs:has-window bldg:window2 .
+

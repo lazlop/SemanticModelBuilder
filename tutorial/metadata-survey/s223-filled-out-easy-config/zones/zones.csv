@@ -1,0 +1,2 @@
+tstat_id,zone_id,stage_count,setpoint_deadband,tolerance,active,resolution,temperature_unit
+tstat_zone_1,zone_1,1,1,1,1,1,DEG_F

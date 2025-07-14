@@ -1,0 +1,599 @@
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix hpflex: <urn:hpflex#> .
+@prefix ns1: <http://data.ashrae.org/standard223#> .
+@prefix ns2: <https://brickschema.org/schema/Brick/ref#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:hpflex/test-site#> a owl:Ontology,
+        hpflex:Project .
+
+<urn:hpflex/test-site#aql_1610101_ZSZoneTemp> a brick:Zone_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_ZSZoneTemp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_ZSZoneTemp_external_reference> ns2:hasTopic "aql/1610101/ZSZoneTemp" .
+
+<urn:hpflex/test-site#aql_1610101_actcstgs> a brick:Cooling_Demand_Sensor ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_actcstgs_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_actcstgs_external_reference> ns2:hasTopic "aql/1610101/actcstgs" .
+
+<urn:hpflex/test-site#aql_1610101_acthstgs> a brick:Heating_Mode_Status ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_acthstgs_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_acthstgs_external_reference> ns2:hasTopic "aql/1610101/acthstgs" .
+
+<urn:hpflex/test-site#aql_1610101_bms_occ> a brick:Occupancy_Command ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_bms_occ_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_bms_occ_external_reference> ns2:hasTopic "aql/1610101/bms_occ" .
+
+<urn:hpflex/test-site#aql_1610101_csp_eff> a brick:Cooling_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_csp_eff_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_csp_eff_external_reference> ns2:hasTopic "aql/1610101/csp_eff" .
+
+<urn:hpflex/test-site#aql_1610101_effdb> a brick:Temperature_Deadband_Setpoint ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_effdb_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_effdb_external_reference> ns2:hasTopic "aql/1610101/effdb" .
+
+<urn:hpflex/test-site#aql_1610101_effsp> a brick:Effective_Zone_Air_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_effsp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_effsp_external_reference> ns2:hasTopic "aql/1610101/effsp" .
+
+<urn:hpflex/test-site#aql_1610101_hsp_eff> a brick:Heating_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_hsp_eff_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_hsp_eff_external_reference> ns2:hasTopic "aql/1610101/hsp_eff" .
+
+<urn:hpflex/test-site#aql_1610101_max_free_cl_temp> a brick:High_Outside_Air_Lockout_Temeprature_Differential_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_max_free_cl_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_max_free_cl_temp_external_reference> ns2:hasTopic "aql/1610101/max_free_cl_temp" .
+
+<urn:hpflex/test-site#aql_1610101_min_free_cl_temp> a brick:Low_Outside_Air_Lockout_Temperature_Differential_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_min_free_cl_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_min_free_cl_temp_external_reference> ns2:hasTopic "aql/1610101/min_free_cl_temp" .
+
+<urn:hpflex/test-site#aql_1610101_oa_dmpr_pos> a brick:Damper_Position_Sensor ;
+    qudt:hasQuantityKind quantitykind:DimensionlessRatio ;
+    qudt:hasUnit unit:PERCENT ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_oa_dmpr_pos_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_oa_dmpr_pos_external_reference> ns2:hasTopic "aql/1610101/oa_dmpr_pos" .
+
+<urn:hpflex/test-site#aql_1610101_oa_enth> a brick:Outside_Air_Enthalpy_Sensor ;
+    qudt:hasQuantityKind quantitykind:SpecificEnergy ;
+    qudt:hasUnit unit:BTU_TH-PER-LB ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_oa_enth_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_oa_enth_external_reference> ns2:hasTopic "aql/1610101/oa_enth" .
+
+<urn:hpflex/test-site#aql_1610101_oa_ra_diff_temp> a brick:Lockout_Temperature_Differential ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_oa_ra_diff_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_oa_ra_diff_temp_external_reference> ns2:hasTopic "aql/1610101/oa_ra_diff_temp" .
+
+<urn:hpflex/test-site#aql_1610101_oa_temp> a brick:Outside_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_oa_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_oa_temp_external_reference> ns2:hasTopic "aql/1610101/oa_temp" .
+
+<urn:hpflex/test-site#aql_1610101_oarh> a brick:Outside_Air_Humidity_Sensor ;
+    qudt:hasQuantityKind quantitykind:DimensionlessRatio ;
+    qudt:hasUnit unit:PERCENT ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_oarh_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_oarh_external_reference> ns2:hasTopic "aql/1610101/oarh" .
+
+<urn:hpflex/test-site#aql_1610101_ra_enth> a brick:Return_Air_Enthalpy_Sensor ;
+    qudt:hasQuantityKind quantitykind:SpecificEnergy ;
+    qudt:hasUnit unit:BTU_TH-PER-LB ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_ra_enth_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_ra_enth_external_reference> ns2:hasTopic "aql/1610101/ra_enth" .
+
+<urn:hpflex/test-site#aql_1610101_ra_temp> a brick:Return_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_ra_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_ra_temp_external_reference> ns2:hasTopic "aql/1610101/ra_temp" .
+
+<urn:hpflex/test-site#aql_1610101_rarh> a brick:Relative_Humidity_Sensor ;
+    qudt:hasQuantityKind quantitykind:DimensionlessRatio ;
+    qudt:hasUnit unit:PERCENT ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_rarh_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_rarh_external_reference> ns2:hasTopic "aql/1610101/rarh" .
+
+<urn:hpflex/test-site#aql_1610101_sa_temp> a brick:Supply_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_sa_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_sa_temp_external_reference> ns2:hasTopic "aql/1610101/sa_temp" .
+
+<urn:hpflex/test-site#aql_1610101_space_rh> a brick:Zone_Air_Humidity_Sensor ;
+    qudt:hasQuantityKind quantitykind:DimensionlessRatio ;
+    qudt:hasUnit unit:PERCENT ;
+    brick:isPointOf <urn:hpflex/test-site#zone1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_space_rh_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_space_rh_external_reference> ns2:hasTopic "aql/1610101/space_rh" .
+
+<urn:hpflex/test-site#aql_1610101_sup_air_temp_setpt> a brick:Supply_Air_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_sup_air_temp_setpt_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_sup_air_temp_setpt_external_reference> ns2:hasTopic "aql/1610101/sup_air_temp_setpt" .
+
+<urn:hpflex/test-site#aql_1610101_sys_demand> a brick:Mode_Status ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_sys_demand_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_sys_demand_external_reference> ns2:hasTopic "aql/1610101/sys_demand" .
+
+<urn:hpflex/test-site#aql_1610101_sys_mode> a brick:System_Mode_Status ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_sys_mode_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_sys_mode_external_reference> ns2:hasTopic "aql/1610101/sys_mode" .
+
+<urn:hpflex/test-site#aql_1610101_uhsp> a brick:Unoccupied_Heating_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_uhsp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_uhsp_external_reference> ns2:hasTopic "aql/1610101/uhsp" .
+
+<urn:hpflex/test-site#aql_1610101_vfd_output> a brick:Speed_Status ;
+    qudt:hasQuantityKind quantitykind:DimensionlessRatio ;
+    qudt:hasUnit unit:PERCENT ;
+    brick:isPointOf <urn:hpflex/test-site#hvac1> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610101_vfd_output_external_reference> .
+
+<urn:hpflex/test-site#aql_1610101_vfd_output_external_reference> ns2:hasTopic "aql/1610101/vfd_output" .
+
+<urn:hpflex/test-site#aql_1610102_ZSZoneTemp> a brick:Zone_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_ZSZoneTemp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_ZSZoneTemp_external_reference> ns2:hasTopic "aql/1610102/ZSZoneTemp" .
+
+<urn:hpflex/test-site#aql_1610102_actcstgs> a brick:Cooling_Demand_Sensor ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_actcstgs_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_actcstgs_external_reference> ns2:hasTopic "aql/1610102/actcstgs" .
+
+<urn:hpflex/test-site#aql_1610102_acthstgs> a brick:Stages_Status ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_acthstgs_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_acthstgs_external_reference> ns2:hasTopic "aql/1610102/acthstgs" .
+
+<urn:hpflex/test-site#aql_1610102_bms_occ> a brick:Occupancy_Command ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_bms_occ_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_bms_occ_external_reference> ns2:hasTopic "aql/1610102/bms_occ" .
+
+<urn:hpflex/test-site#aql_1610102_csp_eff> a brick:Cooling_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_csp_eff_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_csp_eff_external_reference> ns2:hasTopic "aql/1610102/csp_eff" .
+
+<urn:hpflex/test-site#aql_1610102_hsp_eff> a brick:Heating_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_hsp_eff_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_hsp_eff_external_reference> ns2:hasTopic "aql/1610102/hsp_eff" .
+
+<urn:hpflex/test-site#aql_1610102_max_free_cl_temp> a brick:Outside_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_max_free_cl_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_max_free_cl_temp_external_reference> ns2:hasTopic "aql/1610102/max_free_cl_temp" .
+
+<urn:hpflex/test-site#aql_1610102_oa_dmpr_pos> a brick:Damper_Position_Sensor ;
+    qudt:hasQuantityKind quantitykind:DimensionlessRatio ;
+    qudt:hasUnit unit:PERCENT ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_oa_dmpr_pos_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_oa_dmpr_pos_external_reference> ns2:hasTopic "aql/1610102/oa_dmpr_pos" .
+
+<urn:hpflex/test-site#aql_1610102_oa_ra_diff_temp> a brick:Outside_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_oa_ra_diff_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_oa_ra_diff_temp_external_reference> ns2:hasTopic "aql/1610102/oa_ra_diff_temp" .
+
+<urn:hpflex/test-site#aql_1610102_oa_temp> a brick:Outside_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_oa_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_oa_temp_external_reference> ns2:hasTopic "aql/1610102/oa_temp" .
+
+<urn:hpflex/test-site#aql_1610102_ra_temp> a brick:Return_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_ra_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_ra_temp_external_reference> ns2:hasTopic "aql/1610102/ra_temp" .
+
+<urn:hpflex/test-site#aql_1610102_sa_temp> a brick:Supply_Air_Temperature_Sensor ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_sa_temp_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_sa_temp_external_reference> ns2:hasTopic "aql/1610102/sa_temp" .
+
+<urn:hpflex/test-site#aql_1610102_sup_air_temp_setpt> a brick:Supply_Air_Temperature_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_sup_air_temp_setpt_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_sup_air_temp_setpt_external_reference> ns2:hasTopic "aql/1610102/sup_air_temp_setpt" .
+
+<urn:hpflex/test-site#aql_1610102_sys_mode> a brick:System_Mode_Status ;
+    brick:isPointOf <urn:hpflex/test-site#hvac2> ;
+    ns2:hasExternalReference <urn:hpflex/test-site#aql_1610102_sys_mode_external_reference> .
+
+<urn:hpflex/test-site#aql_1610102_sys_mode_external_reference> ns2:hasTopic "aql/1610102/sys_mode" .
+
+<urn:hpflex/test-site#hvac1_cooling_COP> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Cooling ;
+    ns1:hasValue 3.5e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#hvac1_cooling_capacity> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Cooling ;
+    ns1:hasValue 5e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#hvac1_heating_COP> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Heating ;
+    ns1:hasValue 3e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#hvac1_heating_capacity> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Heating ;
+    ns1:hasValue 4e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#hvac2_cooling_COP> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Cooling ;
+    ns1:hasValue 3.5e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#hvac2_cooling_capacity> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Cooling ;
+    ns1:hasValue 5e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#hvac2_heating_COP> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Heating ;
+    ns1:hasValue 3e+00 ;
+    qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#hvac2_heating_capacity> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Role-Heating ;
+    ns1:hasValue 4e+00 ;
+    qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW .
+
+<urn:hpflex/test-site#space1> a ns1:PhysicalSpace ;
+    ns1:hasProperty <urn:hpflex/test-site#space1_area> ;
+    brick:isPartOf <urn:hpflex/test-site#zone1> .
+
+<urn:hpflex/test-site#space1_area> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 5e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:M2 .
+
+<urn:hpflex/test-site#space2> a ns1:PhysicalSpace ;
+    ns1:hasProperty <urn:hpflex/test-site#space2_area> ;
+    brick:isPartOf <urn:hpflex/test-site#zone2> .
+
+<urn:hpflex/test-site#space2_area> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 5e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:M2 .
+
+<urn:hpflex/test-site#test-site.latitude> a ns1:QuantifiableProperty,
+        hpflex:Latitude ;
+    ns1:hasValue 4.07128e+01 ;
+    qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
+    qudt:hasUnit unit:Degree .
+
+<urn:hpflex/test-site#test-site.longitude> a ns1:QuantifiableProperty,
+        hpflex:Longitude ;
+    ns1:hasValue -7.4006e+01 ;
+    qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
+    qudt:hasUnit unit:Degree .
+
+<urn:hpflex/test-site#test-site.noaastation> a ns1:EnumeratedProperty,
+        hpflex:NOAAStation ;
+    ns1:hasValue "KJFK" .
+
+<urn:hpflex/test-site#test-site.timezone> a ns1:EnumeratedProperty,
+        hpflex:Timezone ;
+    ns1:hasValue "America/New_York" .
+
+<urn:hpflex/test-site#tstat1> a ns1:Thermostat ;
+    ns1:hasProperty <urn:hpflex/test-site#tstat1_active>,
+        <urn:hpflex/test-site#tstat1_resolution>,
+        <urn:hpflex/test-site#tstat1_setpoint_deadband>,
+        <urn:hpflex/test-site#tstat1_stage_count>,
+        <urn:hpflex/test-site#tstat1_tolerance> ;
+    brick:hasLocation <urn:hpflex/test-site#zone1> .
+
+<urn:hpflex/test-site#tstat1_active> a ns1:EnumeratedObservableProperty ;
+    ns1:hasAspect ns1:Aspect-Cooling,
+        ns1:Aspect-Heating,
+        ns1:Binary-Logical,
+        ns1:Effectiveness-Active ;
+    ns1:hasValue true ;
+    qudt:hasUnit unit:NUM .
+
+<urn:hpflex/test-site#tstat1_resolution> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 1 ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true .
+
+<urn:hpflex/test-site#tstat1_setpoint_deadband> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Aspect-Deadband ;
+    ns1:hasValue 1 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true .
+
+<urn:hpflex/test-site#tstat1_stage_count> a ns1:EnumeratedObservableProperty ;
+    ns1:hasAspect ns1:Aspect-OperatingMode,
+        ns1:Role-Cooling ;
+    ns1:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM .
+
+<urn:hpflex/test-site#tstat1_tolerance> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Aspect-Cooling,
+        ns1:Aspect-Heating,
+        ns1:Aspect-Threshold ;
+    ns1:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true .
+
+<urn:hpflex/test-site#tstat2> a ns1:Thermostat ;
+    ns1:hasProperty <urn:hpflex/test-site#tstat2_active>,
+        <urn:hpflex/test-site#tstat2_resolution>,
+        <urn:hpflex/test-site#tstat2_setpoint_deadband>,
+        <urn:hpflex/test-site#tstat2_stage_count>,
+        <urn:hpflex/test-site#tstat2_tolerance> ;
+    brick:hasLocation <urn:hpflex/test-site#zone2> .
+
+<urn:hpflex/test-site#tstat2_active> a ns1:EnumeratedObservableProperty ;
+    ns1:hasAspect ns1:Aspect-Cooling,
+        ns1:Aspect-Heating,
+        ns1:Binary-Logical,
+        ns1:Effectiveness-Active ;
+    ns1:hasValue true ;
+    qudt:hasUnit unit:NUM .
+
+<urn:hpflex/test-site#tstat2_resolution> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 1 ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true .
+
+<urn:hpflex/test-site#tstat2_setpoint_deadband> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Aspect-Deadband ;
+    ns1:hasValue 1 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true .
+
+<urn:hpflex/test-site#tstat2_stage_count> a ns1:EnumeratedObservableProperty ;
+    ns1:hasAspect ns1:Aspect-OperatingMode,
+        ns1:Role-Cooling ;
+    ns1:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM .
+
+<urn:hpflex/test-site#tstat2_tolerance> a ns1:QuantifiableObservableProperty ;
+    ns1:hasAspect ns1:Aspect-Cooling,
+        ns1:Aspect-Heating,
+        ns1:Aspect-Threshold ;
+    ns1:hasValue 2 ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true .
+
+<urn:hpflex/test-site#window1> a ns1:Window ;
+    ns1:hasProperty <urn:hpflex/test-site#window1_area>,
+        <urn:hpflex/test-site#window1_azimuth>,
+        <urn:hpflex/test-site#window1_tilt> ;
+    brick:isPartOf <urn:hpflex/test-site#zone1> .
+
+<urn:hpflex/test-site#window1_area> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 1.05e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 .
+
+<urn:hpflex/test-site#window1_azimuth> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 180 ;
+    qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree .
+
+<urn:hpflex/test-site#window1_tilt> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 30 ;
+    qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree .
+
+<urn:hpflex/test-site#window2> a ns1:Window ;
+    ns1:hasProperty <urn:hpflex/test-site#window2_area>,
+        <urn:hpflex/test-site#window2_azimuth>,
+        <urn:hpflex/test-site#window2_tilt> ;
+    brick:isPartOf <urn:hpflex/test-site#zone2> .
+
+<urn:hpflex/test-site#window2_area> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 1.05e+01 ;
+    qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 .
+
+<urn:hpflex/test-site#window2_azimuth> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 180 ;
+    qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree .
+
+<urn:hpflex/test-site#window2_tilt> a ns1:QuantifiableObservableProperty ;
+    ns1:hasValue 30 ;
+    qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree .
+
+<urn:hpflex/test-site#test-site> a ns1:PhysicalSpace,
+        hpflex:Site ;
+    ns1:hasProperty <urn:hpflex/test-site#test-site.latitude>,
+        <urn:hpflex/test-site#test-site.longitude>,
+        <urn:hpflex/test-site#test-site.noaastation>,
+        <urn:hpflex/test-site#test-site.timezone> ;
+    brick:hasPart <urn:hpflex/test-site#zone1>,
+        <urn:hpflex/test-site#zone2> .
+
+<urn:hpflex/test-site#zone2> a ns1:DomainSpace ;
+    ns1:hasDomain ns1:Domain-HVAC ;
+    brick:hasPart <urn:hpflex/test-site#space2>,
+        <urn:hpflex/test-site#window2> ;
+    brick:isFedBy <urn:hpflex/test-site#hvac2> ;
+    brick:isLocationOf <urn:hpflex/test-site#tstat2> ;
+    brick:isPartOf <urn:hpflex/test-site#test-site> .
+
+<urn:hpflex/test-site#zone1> a ns1:DomainSpace ;
+    ns1:hasDomain ns1:Domain-HVAC ;
+    brick:hasPart <urn:hpflex/test-site#space1>,
+        <urn:hpflex/test-site#window1> ;
+    brick:hasPoint <urn:hpflex/test-site#aql_1610101_space_rh> ;
+    brick:isFedBy <urn:hpflex/test-site#hvac1> ;
+    brick:isLocationOf <urn:hpflex/test-site#tstat1> ;
+    brick:isPartOf <urn:hpflex/test-site#test-site> .
+
+<urn:hpflex/test-site#hvac2> a ns1:AirToAirHeatPump ;
+    ns1:hasProperty <urn:hpflex/test-site#hvac2_cooling_COP>,
+        <urn:hpflex/test-site#hvac2_cooling_capacity>,
+        <urn:hpflex/test-site#hvac2_heating_COP>,
+        <urn:hpflex/test-site#hvac2_heating_capacity> ;
+    brick:feeds <urn:hpflex/test-site#zone2> ;
+    brick:hasPoint <urn:hpflex/test-site#aql_1610102_ZSZoneTemp>,
+        <urn:hpflex/test-site#aql_1610102_actcstgs>,
+        <urn:hpflex/test-site#aql_1610102_acthstgs>,
+        <urn:hpflex/test-site#aql_1610102_bms_occ>,
+        <urn:hpflex/test-site#aql_1610102_csp_eff>,
+        <urn:hpflex/test-site#aql_1610102_hsp_eff>,
+        <urn:hpflex/test-site#aql_1610102_max_free_cl_temp>,
+        <urn:hpflex/test-site#aql_1610102_oa_dmpr_pos>,
+        <urn:hpflex/test-site#aql_1610102_oa_ra_diff_temp>,
+        <urn:hpflex/test-site#aql_1610102_oa_temp>,
+        <urn:hpflex/test-site#aql_1610102_ra_temp>,
+        <urn:hpflex/test-site#aql_1610102_sa_temp>,
+        <urn:hpflex/test-site#aql_1610102_sup_air_temp_setpt>,
+        <urn:hpflex/test-site#aql_1610102_sys_mode> .
+
+<urn:hpflex/test-site#hvac1> a ns1:AirToAirHeatPump ;
+    ns1:hasProperty <urn:hpflex/test-site#hvac1_cooling_COP>,
+        <urn:hpflex/test-site#hvac1_cooling_capacity>,
+        <urn:hpflex/test-site#hvac1_heating_COP>,
+        <urn:hpflex/test-site#hvac1_heating_capacity> ;
+    brick:feeds <urn:hpflex/test-site#zone1> ;
+    brick:hasPoint <urn:hpflex/test-site#aql_1610101_ZSZoneTemp>,
+        <urn:hpflex/test-site#aql_1610101_actcstgs>,
+        <urn:hpflex/test-site#aql_1610101_acthstgs>,
+        <urn:hpflex/test-site#aql_1610101_bms_occ>,
+        <urn:hpflex/test-site#aql_1610101_csp_eff>,
+        <urn:hpflex/test-site#aql_1610101_effdb>,
+        <urn:hpflex/test-site#aql_1610101_effsp>,
+        <urn:hpflex/test-site#aql_1610101_hsp_eff>,
+        <urn:hpflex/test-site#aql_1610101_max_free_cl_temp>,
+        <urn:hpflex/test-site#aql_1610101_min_free_cl_temp>,
+        <urn:hpflex/test-site#aql_1610101_oa_dmpr_pos>,
+        <urn:hpflex/test-site#aql_1610101_oa_enth>,
+        <urn:hpflex/test-site#aql_1610101_oa_ra_diff_temp>,
+        <urn:hpflex/test-site#aql_1610101_oa_temp>,
+        <urn:hpflex/test-site#aql_1610101_oarh>,
+        <urn:hpflex/test-site#aql_1610101_ra_enth>,
+        <urn:hpflex/test-site#aql_1610101_ra_temp>,
+        <urn:hpflex/test-site#aql_1610101_rarh>,
+        <urn:hpflex/test-site#aql_1610101_sa_temp>,
+        <urn:hpflex/test-site#aql_1610101_sup_air_temp_setpt>,
+        <urn:hpflex/test-site#aql_1610101_sys_demand>,
+        <urn:hpflex/test-site#aql_1610101_sys_mode>,
+        <urn:hpflex/test-site#aql_1610101_uhsp>,
+        <urn:hpflex/test-site#aql_1610101_vfd_output> .
+

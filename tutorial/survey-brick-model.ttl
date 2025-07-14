@@ -1,0 +1,89 @@
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix easy-config-test: <urn:hpflex/easy-config-test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix qudtqk: <http://qudt.org/vocab/quantitykind/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+easy-config-test: a owl:Ontology,
+        <urn:hpflex#Project> .
+
+easy-config-test:easy-config-test a brick:Site ;
+    brick:hasNOAAStation "1" ;
+    brick:hasPart easy-config-test:zone_1 ;
+    brick:latitude 1e+00 ;
+    brick:longitude 1e+00 ;
+    brick:timezone "1" .
+
+easy-config-test:space_1_1 a brick:Space ;
+    brick:area easy-config-test:space_1_1_area ;
+    brick:isPartOf easy-config-test:zone_1 .
+
+easy-config-test:space_1_1_area qudt:hasQuantityKind qudtqk:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1e+00 .
+
+easy-config-test:tstat_zone_1_active a brick:Availability_Status ;
+    brick:isPointOf easy-config-test:tstat_zone_1 ;
+    brick:value false .
+
+easy-config-test:tstat_zone_1_control_group a brick:Collection,
+        <urn:hpflex#ControlGroup> ;
+    brick:hasPart easy-config-test:tstat_zone_1 .
+
+easy-config-test:tstat_zone_1_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "1" .
+
+easy-config-test:tstat_zone_1_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind qudtqk:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf easy-config-test:tstat_zone_1 ;
+    brick:value 1e+00 .
+
+easy-config-test:tstat_zone_1_stage_count qudt:hasQuantityKind qudtqk:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 1 .
+
+easy-config-test:tstat_zone_1_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind qudtqk:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf easy-config-test:tstat_zone_1 ;
+    brick:value 1e+00 .
+
+easy-config-test:window_1_1 a brick:Window ;
+    brick:area easy-config-test:window_1_1_area ;
+    brick:azimuth easy-config-test:window_1_1_azimuth ;
+    brick:isPartOf easy-config-test:zone_1 ;
+    brick:tilt easy-config-test:window_1_1_tilt .
+
+easy-config-test:window_1_1_area qudt:hasQuantityKind qudtqk:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1e+00 .
+
+easy-config-test:window_1_1_azimuth qudt:hasQuantityKind qudtqk:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1e+00 .
+
+easy-config-test:window_1_1_tilt qudt:hasQuantityKind qudtqk:tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1e+00 .
+
+easy-config-test:zone_1 a brick:HVAC_Zone ;
+    brick:hasPart easy-config-test:space_1_1,
+        easy-config-test:window_1_1 ;
+    brick:isLocationOf easy-config-test:tstat_zone_1 ;
+    brick:isPartOf easy-config-test:easy-config-test .
+
+easy-config-test:tstat_zone_1 a brick:Thermostat ;
+    brick:hasLocation easy-config-test:zone_1 ;
+    brick:hasPoint easy-config-test:tstat_zone_1_active,
+        easy-config-test:tstat_zone_1_setpoint_deadband,
+        easy-config-test:tstat_zone_1_tolerance ;
+    brick:isPartOf easy-config-test:tstat_zone_1_control_group ;
+    brick:operationalStageCount easy-config-test:tstat_zone_1_stage_count ;
+    brick:resolution easy-config-test:tstat_zone_1_resolution .
+

@@ -1,0 +1,54 @@
+{
+    "site_name": "custom-config-test",
+    "hvac_type": "vrf",
+    "hvacs_feed_hvacs": {
+        "HP1": [
+            "FCU1",
+            "FCU2",
+            "FCU3"
+        ],
+        "HP2": [
+            "FCU1",
+            "FCU2",
+            "FCU3"
+        ]
+    },
+    "hvacs_feed_zones": {
+        "FCU1": [
+            "Zone1"
+        ],
+        "FCU2": [
+            "Zone2"
+        ],
+        "FCU3": [
+            "Zone3"
+        ]
+    },
+    "zones_contain_spaces": {
+        "Zone1": [
+            "Z1S1",
+            "Z1S2"
+        ],
+        "Zone2": [
+            "Z1S2",
+            "Z2S3"
+        ],
+        "Zone3": [
+            "Z3S1"
+        ]
+    },
+    "zones_contain_windows": {
+        "Zone1": [
+            "W1"
+        ],
+        "Zone2": [
+            "W2"
+        ],
+        "Zone3": [
+            "W3",
+            "W4",
+            "W5",
+            "W6"
+        ]
+    }
+}

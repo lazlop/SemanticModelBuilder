@@ -1,0 +1,184 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix hpf: <urn:hpflex#> .
+
+# Shape for the site information
+hpf:SiteShape
+    a rdfs:Class, sh:NodeShape ;
+    sh:targetClass brick:Site ;
+    sh:property hpf:timezone ;
+    sh:property hpf:latitude ;
+    sh:property hpf:longitude ;
+    sh:property hpf:noaastation ;
+.
+hpf:timezone 
+    a rdfs:Class, sh:PropertyShape ;
+    sh:path brick:timezone ;
+    sh:datatype xsd:string ;
+    sh:description "The timezone of the site." ;
+.
+hpf:latitude 
+    a rdfs:Class, sh:PropertyShape ;
+    sh:path brick:latitude ;
+    sh:datatype xsd:float ;
+    sh:description "The latitude of the site." ;
+.
+hpf:longitude 
+    a rdfs:Class, sh:PropertyShape ;
+    sh:path brick:longitude ;
+    sh:datatype xsd:float ;
+    sh:description "The longitude of the site." ;
+.
+hpf:noaastation 
+    a rdfs:Class, sh:PropertyShape ;
+    sh:path hpf:hasNOAAStation ;
+    sh:datatype xsd:string ;
+    sh:description "The NOAA station associated with the site." ;
+.
+hpf:heat_availability 
+    a rdfs:Class, sh:PropertyShape ;
+.
+hpf:cool_availability 
+    a rdfs:Class, sh:PropertyShape ;
+.
+hpf:heat_measurement
+    a rdfs:Class, sh:PropertyShape ;
+.
+
+hpf:ThermostatShape
+    a sh:NodeShape ;
+    sh:targetClass brick:Thermostat ;
+    sh:property [
+        sh:path hpf:isHeatAvailable ;
+        sh:datatype xsd:boolean ;
+        sh:description "Indicates if heating is available." ;
+    ] ;
+    sh:property [
+        sh:path hpf:isCoolAvailable ;
+        sh:datatype xsd:boolean ;
+        sh:description "Indicates if cooling is available." ;
+    ] ;
+    sh:property [
+        sh:path brick:hasPoint ;
+        sh:node [
+            sh:property [
+                sh:path brick:Temperature_Deadband_Setpoint ;
+                sh:datatype xsd:float ;
+                sh:description "The temperature deadband setpoint." ;
+            ] ;
+            sh:property [
+                sh:path brick:Temperature_Tolerence_Parameter ;
+                sh:datatype xsd:float ;
+                sh:description "The temperature tolerance parameter." ;
+            ] ;
+            sh:property [
+                sh:path brick:Availability_Status ;
+                sh:datatype xsd:boolean ;
+                sh:description "The availability status." ;
+            ] ;
+        ] ;
+    ] ;
+    sh:property [
+        sh:path brick:isPartOf ;
+        sh:node [
+            sh:property [
+                sh:path brick:Collection ;
+                sh:description "The control group the thermostat is part of." ;
+            ] ;
+        ] ;
+    ] ;
+    sh:property [
+        sh:path brick:operationalStageCount ;
+        sh:datatype xsd:integer ;
+        sh:description "The number of operational stages." ;
+    ] .
+
+# Shape for the HVAC zone information
+hpf:HVACZoneShape
+    a sh:NodeShape ;
+    sh:targetClass brick:HVAC_Zone ;
+    sh:property [
+        sh:path brick:isFedBy ;
+        sh:node [
+            sh:property [
+                sh:path brick:coolingCapacity ;
+                sh:datatype xsd:float ;
+                sh:description "The cooling capacity of the HVAC system." ;
+            ] ;
+            sh:property [
+                sh:path brick:heatingCapacity ;
+                sh:datatype xsd:float ;
+                sh:description "The heating capacity of the HVAC system." ;
+            ] ;
+        ] ;
+    ] ;
+    sh:property [
+        sh:path brick:hasPart ;
+        sh:node [
+            sh:property [
+                sh:path brick:Space ;
+                sh:property [
+                    sh:path brick:area ;
+                    sh:datatype xsd:float ;
+                    sh:description "The floor area of the space." ;
+                ] ;
+            ] ;
+            sh:property [
+                sh:path brick:Window ;
+                sh:property [
+                    sh:path brick:area ;
+                    sh:datatype xsd:float ;
+                    sh:description "The window area." ;
+                ] ;
+                sh:property [
+                    sh:path brick:azimuth ;
+                    sh:datatype xsd:float ;
+                    sh:description "The azimuth of the window." ;
+                ] ;
+                sh:property [
+                    sh:path brick:tilt ;
+                    sh:datatype xsd:float ;
+                    sh:description "The tilt of the window." ;
+                ] ;
+            ] ;
+        ] ;
+    ] .
+
+# Shape for the HVAC metadata
+hpf:HVACMetadataShape
+    a sh:NodeShape ;
+    sh:targetClass brick:RTU ;
+    sh:property [
+        sh:path brick:feeds ;
+        sh:node [
+            sh:property [
+                sh:path brick:HVAC_Zone ;
+                sh:description "The HVAC zone that the RTU feeds." ;
+            ] ;
+        ] ;
+    ] ;
+    sh:property [
+        sh:path brick:coolingCapacity ;
+        sh:datatype xsd:float ;
+        sh:description "The cooling capacity of the RTU." ;
+    ] ;
+    sh:property [
+        sh:path brick:heatingCapacity ;
+        sh:datatype xsd:float ;
+        sh:description "The heating capacity of the RTU." ;
+    ] ;
+    sh:property [
+        sh:path brick:coolingCoefficientOfPerformance ;
+        sh:datatype xsd:float ;
+        sh:description "The cooling coefficient of performance of the RTU." ;
+    ] ;
+    sh:property [
+        sh:path brick:heatingCoefficientOfPerformance ;
+        sh:datatype xsd:float ;
+        sh:description "The heating coefficient of performance of the RTU." ;
+    ] ;
+    sh:property [
+        sh:path brick:Packaged_Heat_Pump ;
+        sh:description "Indicates if the RTU is a packaged heat pump." ;
+    ] .
