@@ -1,4 +1,4 @@
-# New package for interacting with brick models
+# Package for interacting with semantic models
 
 - BrickModelInterface package is still in development.
 - development_files are messy files used to understand code develop the package.
