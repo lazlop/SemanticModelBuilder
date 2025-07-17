@@ -58,6 +58,7 @@ def bind_prefixes(graph):
     graph.bind("hpflex", HPF)
     graph.bind("hpfs", HPFS)
     graph.bind('s223', S223)
+    graph.bind('ref',REF)
 
 def get_prefixes(g):
     return "\n".join(f"PREFIX {prefix}: <{namespace}>" for prefix, namespace in g.namespace_manager.namespaces())

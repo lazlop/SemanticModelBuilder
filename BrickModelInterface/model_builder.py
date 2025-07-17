@@ -5,6 +5,7 @@ from buildingmotif.dataclasses import Library, Model
 from importlib.resources import files
 import typing
 from .utils import add_brick_inverse_relations
+import os
 
 #TODO: if this is actually going to be a separate packge should change this behavior
 brick_template_dir = str(files('BrickModelInterface').joinpath('brick-templates'))
@@ -42,9 +43,11 @@ class BrickModelBuilder:
         self.tstat_type = tstat_type
         # TODO: Download ontologies and get rid of hard coding
         if ontology == 'brick':
+            # Load both nodes and relations templates for Brick
             self.templates = Library.load(directory=brick_template_dir)
             self.ontology_ns = BRICK
         elif ontology == 's223':
+            # Load both nodes and relations templates for S223
             self.templates = Library.load(directory=s223_template_dir)
             self.ontology_ns = S223
         else:

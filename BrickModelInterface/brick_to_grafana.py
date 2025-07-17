@@ -14,7 +14,8 @@ import yaml
 from .utils import get_prefixes
 from grafanalib._gen import DashboardEncoder
 
-DEFAULT_QUERY = """SELECT 
+DEFAULT_QUERY = """
+            SELECT 
                 ts AS "time", 
                 CAST(value_string AS FLOAT) AS "{point_type}"
             FROM 
@@ -43,6 +44,7 @@ class BrickToGrafana:
         self.grafana_api_key = grafana_api_key
         self.datasource = datasource
         self.g = Graph(store = 'Oxigraph')
+        # self.g = Graph()
         self.g.parse('https://brickschema.org/schema/Brick.ttl', format='turtle')
         bind_prefixes(self.g)
         self.g.parse(ttl_path, format="turtle")

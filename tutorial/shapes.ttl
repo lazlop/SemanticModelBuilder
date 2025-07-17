@@ -1,11 +1,12 @@
 @prefix P: <urn:___param___#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
 @prefix hpflex: <urn:hpflex#> .
 @prefix hpfs: <urn:hpflex/shapes#> .
-@prefix ns1: <https://brickschema.org/schema/Brick/ref#> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ref: <https://brickschema.org/schema/Brick/ref#> .
 @prefix s223: <http://data.ashrae.org/standard223#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix unit: <http://qudt.org/vocab/unit/> .
@@ -421,11 +422,11 @@ hpfs:air-bidirectional-connectionpointAnnotation a sh:NodeShape ;
 
 hpfs:air-bidirectional-connects-toAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-bidirectional-connects-toAnnotationRule ;
-    sh:targetSubjectsOf s223:cnx .
+    sh:targetSubjectsOf brick:feeds .
 
 hpfs:air-connects-toAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-connects-toAnnotationRule ;
-    sh:targetSubjectsOf s223:connectsTo .
+    sh:targetSubjectsOf brick:feeds .
 
 hpfs:air-inlet-connectionpointAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-inlet-connectionpointAnnotationRule ;
@@ -469,23 +470,23 @@ hpfs:effective-temperature-setpointAnnotation a sh:NodeShape ;
 
 hpfs:has-locationAnnotation a sh:NodeShape ;
     sh:rule hpfs:has-locationAnnotationRule ;
-    sh:targetSubjectsOf s223:hasPhysicalLocation .
+    sh:targetSubjectsOf brick:hasLocation .
 
 hpfs:has-pointAnnotation a sh:NodeShape ;
     sh:rule hpfs:has-pointAnnotationRule ;
-    sh:targetSubjectsOf s223:hasProperty .
+    sh:targetSubjectsOf brick:hasPoint .
 
 hpfs:has-referenceAnnotation a sh:NodeShape ;
     sh:rule hpfs:has-referenceAnnotationRule ;
-    sh:targetSubjectsOf s223:hasExternalReference .
+    sh:targetSubjectsOf ref:hasExternalReference .
 
 hpfs:has-spaceAnnotation a sh:NodeShape ;
     sh:rule hpfs:has-spaceAnnotationRule ;
-    sh:targetSubjectsOf rdf:type .
+    sh:targetSubjectsOf brick:hasPart .
 
 hpfs:has-windowAnnotation a sh:NodeShape ;
     sh:rule hpfs:has-windowAnnotationRule ;
-    sh:targetSubjectsOf rdf:type .
+    sh:targetSubjectsOf brick:hasPart .
 
 hpfs:heating-COPAnnotation a sh:NodeShape ;
     sh:rule hpfs:heating-COPAnnotationRule ;
@@ -745,16 +746,8 @@ hpfs:air-bidirectional-connects-toAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#air-bidirectional-connects-to> ?target .
                 }
                 WHERE {
-	?target <http://data.ashrae.org/standard223#cnx> ?target_cp . 
-	?connection <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Connection> . 
-	?name_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-	?target_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#BidirectionalConnectionPoint> . 
-	?target_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-	?name_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#BidirectionalConnectionPoint> . 
-	?name <http://data.ashrae.org/standard223#cnx> ?name_cp . 
-	?name <http://data.ashrae.org/standard223#connectsTo> ?target . 
-	?connection <http://data.ashrae.org/standard223#cnx> ?target_cp . 
-	?name_cp <http://data.ashrae.org/standard223#cnx> ?connection . 
+	?target <https://brickschema.org/schema/Brick#feed> ?name . 
+	?name <https://brickschema.org/schema/Brick#feeds> ?target . 
 }""" .
 
 hpfs:air-connects-toAnnotationRule a sh:SPARQLRule ;
@@ -763,16 +756,7 @@ hpfs:air-connects-toAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#air-connects-to> ?target .
                 }
                 WHERE {
-	?connection <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Connection> . 
-	?inlet_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#InletConnectionPoint> . 
-	?inlet_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-	?outlet_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-	?name <http://data.ashrae.org/standard223#connectsTo> ?target . 
-	?outlet_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#OutletConnectionPoint> . 
-	?connection <http://data.ashrae.org/standard223#cnx> ?inlet_cp . 
-	?outlet_cp <http://data.ashrae.org/standard223#cnx> ?connection . 
-	?name <http://data.ashrae.org/standard223#cnx> ?outlet_cp . 
-	?target <http://data.ashrae.org/standard223#cnx> ?inlet_cp . 
+	?name <https://brickschema.org/schema/Brick#feeds> ?target . 
 }""" .
 
 hpfs:air-inlet-connectionpointAnnotationRule a sh:TripleRule ;
@@ -1211,7 +1195,7 @@ hpfs:has-locationAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-location> ?target .
                 }
                 WHERE {
-	?name <http://data.ashrae.org/standard223#hasPhysicalLocation> ?target . 
+	?name <https://brickschema.org/schema/Brick#hasLocation> ?target . 
 }""" .
 
 hpfs:has-pointAnnotationRule a sh:SPARQLRule ;
@@ -1220,7 +1204,7 @@ hpfs:has-pointAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-point> ?target .
                 }
                 WHERE {
-	?name <http://data.ashrae.org/standard223#hasProperty> ?target . 
+	?name <https://brickschema.org/schema/Brick#hasPoint> ?target . 
 }""" .
 
 hpfs:has-referenceAnnotationRule a sh:SPARQLRule ;
@@ -1229,7 +1213,7 @@ hpfs:has-referenceAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-reference> ?target .
                 }
                 WHERE {
-	?name <http://data.ashrae.org/standard223#hasExternalReference> ?target . 
+	?name <https://brickschema.org/schema/Brick/ref#hasExternalReference> ?target . 
 }""" .
 
 hpfs:has-spaceAnnotationRule a sh:SPARQLRule ;
@@ -1238,10 +1222,7 @@ hpfs:has-spaceAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-space> ?target .
                 }
                 WHERE {
-	?name_physical_space <http://data.ashrae.org/standard223#encloses> ?name . 
-	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
-	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#PhysicalSpace> . 
-	?name_physical_space <http://data.ashrae.org/standard223#contains> ?target . 
+	?name <https://brickschema.org/schema/Brick#hasPart> ?target . 
 }""" .
 
 hpfs:has-windowAnnotationRule a sh:SPARQLRule ;
@@ -1250,18 +1231,7 @@ hpfs:has-windowAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-window> ?target .
                 }
                 WHERE {
-	?name_connection <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Connection> . 
-	?name <http://data.ashrae.org/standard223#cnx> ?name_name_cp . 
-	?name_connection <http://data.ashrae.org/standard223#cnx> ?name_target_cp . 
-	?name_name_cp <http://data.ashrae.org/standard223#cnx> ?name_connection . 
-	?name_name_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#BidirectionalConnectionPoint> . 
-	?name <http://data.ashrae.org/standard223#connectsTo> ?target . 
-	?name_target_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-	?name_target_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#BidirectionalConnectionPoint> . 
-	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
-	?name_name_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Window> . 
-	?target <http://data.ashrae.org/standard223#cnx> ?name_target_cp . 
+	?name <https://brickschema.org/schema/Brick#hasPart> ?target . 
 }""" .
 
 hpfs:heating-COPAnnotationRule a sh:TripleRule ;
@@ -2267,7 +2237,7 @@ hpfs:volttron-external-referenceAnnotationRule a sh:TripleRule ;
 hpfs:volttron-external-reference_hasTopicName rdfs:label "volttron-external-reference_hasTopicName" ;
     sh:maxCount 1 ;
     sh:minCount 1 ;
-    sh:path ns1:hasTopicName .
+    sh:path ref:hasTopicName .
 
 hpfs:volttron-external-reference_noAspects rdfs:label "volttron-external-reference_noAspects" ;
     sh:maxCount 0 ;

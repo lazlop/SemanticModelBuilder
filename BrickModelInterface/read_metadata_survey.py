@@ -5,10 +5,11 @@ from typing import Dict, Any, Union
 from .model_builder import BrickModelBuilder
 
 class SurveyReader:
-    def __init__(self, survey_directory: str):
+    def __init__(self, survey_directory: str, ontology = 'brick'):
         self.base_dir = Path(survey_directory)
         self.config = self._load_config()
         self.site_info = self._load_site_info()
+        self.ontology = ontology
         
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from config.json"""
@@ -62,12 +63,14 @@ class SurveyReader:
         # Initialize the model builder with site information
         builder = BrickModelBuilder(
             site_id=self.site_info['site_id'],
+            ontology = self.ontology
+        )
+        builder.add_site(
             timezone=self.site_info['timezone'],
             latitude=float(self.site_info['latitude']),
             longitude=float(self.site_info['longitude']),
             noaa_station=self.site_info['noaa_station']
         )
-
         # Process zones and their associated equipment
         zones = self._load_zones()
         for zone in zones:

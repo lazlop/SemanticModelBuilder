@@ -1,6 +1,7 @@
 @prefix bldg: <urn:hpflex/test-site#> .
 @prefix brick: <https://brickschema.org/schema/Brick#> .
 @prefix hpflex: <urn:hpflex#> .
+@prefix hpfs: <urn:hpflex/shapes#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
@@ -16,6 +17,117 @@ bldg:test-site a brick:Site ;
     brick:latitude bldg:test-site.latitude ;
     brick:longitude bldg:test-site.longitude ;
     brick:timezone bldg:test-site.timezone .
+
+bldg:hvac1 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac1_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac1_cooling_COP ;
+    brick:feeds bldg:zone1 ;
+    brick:heatingCapacity bldg:hvac1_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac1_heating_COP ;
+    hpfs:air-connects-to bldg:zone1 .
+
+bldg:hvac1_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 3.5e+00 .
+
+bldg:hvac1_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 5e+00 .
+
+bldg:hvac1_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 3e+00 .
+
+bldg:hvac1_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 4e+00 .
+
+bldg:hvac2 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac2_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac2_cooling_COP ;
+    brick:feeds bldg:zone2 ;
+    brick:heatingCapacity bldg:hvac2_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac2_heating_COP ;
+    hpfs:air-connects-to bldg:zone2 .
+
+bldg:hvac2_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 3.5e+00 .
+
+bldg:hvac2_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 5e+00 .
+
+bldg:hvac2_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 3e+00 .
+
+bldg:hvac2_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 4e+00 .
+
+bldg:space1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:M2 ;
+    brick:value 5e+01 .
+
+bldg:space2_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:M2 ;
+    brick:value 5e+01 .
+
+bldg:test-site.latitude qudt:hasQuantityKind quantitykind:Latitude ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 4.07128e+01 .
+
+bldg:test-site.longitude qudt:hasQuantityKind quantitykind:Longitude ;
+    qudt:hasUnit unit:Degree ;
+    brick:value -7.4006e+01 .
+
+bldg:test-site.noaastation hpflex:hasNOAAStation "KJFK" .
+
+bldg:test-site.timezone qudt:hasUnit unit:Timezone ;
+    brick:value "America/New_York" .
+
+bldg:tstat1_resolution qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true ;
+    brick:value 1 .
+
+bldg:tstat1_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 2 .
+
+bldg:tstat2_resolution qudt:hasUnit unit:DEG_C ;
+    qudt:isDeltaQuantity true ;
+    brick:value 1 .
+
+bldg:tstat2_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 2 .
+
+bldg:window1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.05e+01 .
+
+bldg:window1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 180 .
+
+bldg:window1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 30 .
+
+bldg:window2_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.05e+01 .
+
+bldg:window2_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 180 .
+
+bldg:window2_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 30 .
 
 bldg:Active_Cooling_Stages_ref a brick:ExternalReference ;
     ref:hasTopicName "aql/1610101/actcstgs",
@@ -57,90 +169,9 @@ bldg:Zone_Air_Temperature_Sensor_ref a brick:ExternalReference ;
     ref:hasTopicName "aql/1610101/ZSZoneTemp",
         "aql/1610102/ZSZoneTemp" .
 
-bldg:hvac1 a brick:Packaged_Heat_Pump,
-        brick:RTU ;
-    brick:coolingCapacity bldg:hvac1_cooling_capacity ;
-    brick:coolingCoefficientOfPerformance bldg:hvac1_cooling_COP ;
-    brick:feeds bldg:zone1 ;
-    brick:heatingCapacity bldg:hvac1_heating_capacity ;
-    brick:heatingCoefficientOfPerformance bldg:hvac1_heating_COP .
-
-bldg:hvac1_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 3.5e+00 .
-
-bldg:hvac1_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 5e+00 .
-
-bldg:hvac1_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 3e+00 .
-
-bldg:hvac1_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 4e+00 .
-
-bldg:hvac2 a brick:Packaged_Heat_Pump,
-        brick:RTU ;
-    brick:coolingCapacity bldg:hvac2_cooling_capacity ;
-    brick:coolingCoefficientOfPerformance bldg:hvac2_cooling_COP ;
-    brick:feeds bldg:zone2 ;
-    brick:heatingCapacity bldg:hvac2_heating_capacity ;
-    brick:heatingCoefficientOfPerformance bldg:hvac2_heating_COP .
-
-bldg:hvac2_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 3.5e+00 .
-
-bldg:hvac2_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 5e+00 .
-
-bldg:hvac2_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 3e+00 .
-
-bldg:hvac2_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
-    brick:value 4e+00 .
-
-bldg:space1 a brick:Space ;
-    brick:area bldg:space1_area ;
-    brick:isPartOf bldg:zone1 .
-
-bldg:space1_area qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:M2 ;
-    brick:value 5e+01 .
-
-bldg:space2 a brick:Space ;
-    brick:area bldg:space2_area ;
-    brick:isPartOf bldg:zone2 .
-
-bldg:space2_area qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:M2 ;
-    brick:value 5e+01 .
-
-bldg:test-site.latitude qudt:hasQuantityKind quantitykind:Latitude ;
-    qudt:hasUnit unit:Degree ;
-    brick:value 4.07128e+01 .
-
-bldg:test-site.longitude qudt:hasQuantityKind quantitykind:Longitude ;
-    qudt:hasUnit unit:Degree ;
-    brick:value -7.4006e+01 .
-
-bldg:test-site.noaastation hpflex:hasNOAAStation "KJFK" .
-
-bldg:test-site.timezone qudt:hasUnit unit:Timezone ;
-    brick:value "America/New_York" .
-
 bldg:tstat1_active a brick:Availability_Status ;
     brick:isPointOf bldg:tstat1 ;
     brick:value true .
-
-bldg:tstat1_resolution qudt:hasUnit unit:DEG_C ;
-    qudt:isDeltaQuantity true ;
-    brick:value 1 .
 
 bldg:tstat1_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
@@ -148,10 +179,6 @@ bldg:tstat1_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
     qudt:isDeltaQuantity true ;
     brick:isPointOf bldg:tstat1 ;
     brick:value 1 .
-
-bldg:tstat1_stage_count qudt:hasQuantityKind quantitykind:Count ;
-    qudt:hasUnit unit:NUM ;
-    brick:value 2 .
 
 bldg:tstat1_tolerance a brick:Temperature_Tolerance_Parameter ;
     qudt:hasQuantityKind quantitykind:Temperature ;
@@ -164,20 +191,12 @@ bldg:tstat2_active a brick:Availability_Status ;
     brick:isPointOf bldg:tstat2 ;
     brick:value true .
 
-bldg:tstat2_resolution qudt:hasUnit unit:DEG_C ;
-    qudt:isDeltaQuantity true ;
-    brick:value 1 .
-
 bldg:tstat2_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_C ;
     qudt:isDeltaQuantity true ;
     brick:isPointOf bldg:tstat2 ;
     brick:value 1 .
-
-bldg:tstat2_stage_count qudt:hasQuantityKind quantitykind:Count ;
-    qudt:hasUnit unit:NUM ;
-    brick:value 2 .
 
 bldg:tstat2_tolerance a brick:Temperature_Tolerance_Parameter ;
     qudt:hasQuantityKind quantitykind:Temperature ;
@@ -186,23 +205,19 @@ bldg:tstat2_tolerance a brick:Temperature_Tolerance_Parameter ;
     brick:isPointOf bldg:tstat2 ;
     brick:value 2 .
 
+bldg:space1 a brick:Space ;
+    brick:area bldg:space1_area ;
+    brick:isPartOf bldg:zone1 .
+
+bldg:space2 a brick:Space ;
+    brick:area bldg:space2_area ;
+    brick:isPartOf bldg:zone2 .
+
 bldg:window1 a brick:Window ;
     brick:area bldg:window1_area ;
     brick:azimuth bldg:window1_azimuth ;
     brick:isPartOf bldg:zone1 ;
     brick:tilt bldg:window1_tilt .
-
-bldg:window1_area qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:FT2 ;
-    brick:value 1.05e+01 .
-
-bldg:window1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
-    qudt:hasUnit unit:Degree ;
-    brick:value 180 .
-
-bldg:window1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
-    qudt:hasUnit unit:Degree ;
-    brick:value 30 .
 
 bldg:window2 a brick:Window ;
     brick:area bldg:window2_area ;
@@ -210,87 +225,85 @@ bldg:window2 a brick:Window ;
     brick:isPartOf bldg:zone2 ;
     brick:tilt bldg:window2_tilt .
 
-bldg:window2_area qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:FT2 ;
-    brick:value 1.05e+01 .
-
-bldg:window2_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
-    qudt:hasUnit unit:Degree ;
-    brick:value 180 .
-
-bldg:window2_tilt qudt:hasQuantityKind quantitykind:Tilt ;
-    qudt:hasUnit unit:Degree ;
-    brick:value 30 .
-
 bldg:Active_Cooling_Stages a brick:Cooling_Stage_Status ;
     qudt:hasQuantityKind quantitykind:Count ;
     qudt:hasUnit unit:NUM ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Active_Cooling_Stages_ref .
+    ref:hasExternalReference bldg:Active_Cooling_Stages_ref ;
+    hpfs:has-reference bldg:Active_Cooling_Stages_ref .
 
 bldg:Active_Heating_Stages a brick:Heating_Stage_Status ;
     qudt:hasQuantityKind quantitykind:Count ;
     qudt:hasUnit unit:NUM ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Active_Heating_Stages_ref .
+    ref:hasExternalReference bldg:Active_Heating_Stages_ref ;
+    hpfs:has-reference bldg:Active_Heating_Stages_ref .
 
 bldg:Effective_Cooling_Temperature_Setpoint a brick:Cooling_Temperature_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Effective_Cooling_Temperature_Setpoint_ref .
+    ref:hasExternalReference bldg:Effective_Cooling_Temperature_Setpoint_ref ;
+    hpfs:has-reference bldg:Effective_Cooling_Temperature_Setpoint_ref .
 
 bldg:Effective_Heating_Temperature_Setpoint a brick:Heating_Temperature_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Effective_Heating_Temperature_Setpoint_ref .
+    ref:hasExternalReference bldg:Effective_Heating_Temperature_Setpoint_ref ;
+    hpfs:has-reference bldg:Effective_Heating_Temperature_Setpoint_ref .
 
 bldg:Effective_Zone_Air_Temperature_Setpoint a brick:Temperature_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Effective_Zone_Air_Temperature_Setpoint_ref .
+    ref:hasExternalReference bldg:Effective_Zone_Air_Temperature_Setpoint_ref ;
+    hpfs:has-reference bldg:Effective_Zone_Air_Temperature_Setpoint_ref .
 
 bldg:Occupied_Cooling_Temperature_Setpoint a brick:Occupied_Cooling_Temperature_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Occupied_Cooling_Temperature_Setpoint_ref .
+    ref:hasExternalReference bldg:Occupied_Cooling_Temperature_Setpoint_ref ;
+    hpfs:has-reference bldg:Occupied_Cooling_Temperature_Setpoint_ref .
 
 bldg:Occupied_Heating_Temperature_Setpoint a brick:Occupied_Heating_Temperature_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Occupied_Heating_Temperature_Setpoint_ref .
+    ref:hasExternalReference bldg:Occupied_Heating_Temperature_Setpoint_ref ;
+    hpfs:has-reference bldg:Occupied_Heating_Temperature_Setpoint_ref .
 
 bldg:Unoccupied_Cooling_Temperature_Setpoint a brick:Unoccupied_Cooling_Temperature_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Unoccupied_Cooling_Temperature_Setpoint_ref .
+    ref:hasExternalReference bldg:Unoccupied_Cooling_Temperature_Setpoint_ref ;
+    hpfs:has-reference bldg:Unoccupied_Cooling_Temperature_Setpoint_ref .
 
 bldg:Unoccupied_Heating_Temperature_Setpoint a brick:Unoccupied_Heating_Temperature_Setpoint ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Unoccupied_Heating_Temperature_Setpoint_ref .
+    ref:hasExternalReference bldg:Unoccupied_Heating_Temperature_Setpoint_ref ;
+    hpfs:has-reference bldg:Unoccupied_Heating_Temperature_Setpoint_ref .
 
 bldg:Zone_Air_Temperature_Sensor a brick:Zone_Air_Temperature_Sensor ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F ;
     brick:isPointOf bldg:zone1,
         bldg:zone2 ;
-    ref:hasExternalReference bldg:Zone_Air_Temperature_Sensor_ref .
+    ref:hasExternalReference bldg:Zone_Air_Temperature_Sensor_ref ;
+    hpfs:has-reference bldg:Zone_Air_Temperature_Sensor_ref .
 
 bldg:tstat1 a brick:Thermostat ;
     brick:hasLocation bldg:zone1 ;
@@ -298,7 +311,11 @@ bldg:tstat1 a brick:Thermostat ;
         bldg:tstat1_setpoint_deadband,
         bldg:tstat1_tolerance ;
     brick:operationalStageCount bldg:tstat1_stage_count ;
-    brick:resolution bldg:tstat1_resolution .
+    brick:resolution bldg:tstat1_resolution ;
+    hpfs:has-location bldg:zone1 ;
+    hpfs:has-point bldg:tstat1_active,
+        bldg:tstat1_setpoint_deadband,
+        bldg:tstat1_tolerance .
 
 bldg:tstat2 a brick:Thermostat ;
     brick:hasLocation bldg:zone2 ;
@@ -306,7 +323,11 @@ bldg:tstat2 a brick:Thermostat ;
         bldg:tstat2_setpoint_deadband,
         bldg:tstat2_tolerance ;
     brick:operationalStageCount bldg:tstat2_stage_count ;
-    brick:resolution bldg:tstat2_resolution .
+    brick:resolution bldg:tstat2_resolution ;
+    hpfs:has-location bldg:zone2 ;
+    hpfs:has-point bldg:tstat2_active,
+        bldg:tstat2_setpoint_deadband,
+        bldg:tstat2_tolerance .
 
 bldg:zone1 a brick:HVAC_Zone ;
     brick:hasPart bldg:space1,
@@ -322,7 +343,21 @@ bldg:zone1 a brick:HVAC_Zone ;
         bldg:Unoccupied_Heating_Temperature_Setpoint,
         bldg:Zone_Air_Temperature_Sensor ;
     brick:isFedBy bldg:hvac1 ;
-    brick:isLocationOf bldg:tstat1 .
+    brick:isLocationOf bldg:tstat1 ;
+    hpfs:has-point bldg:Active_Cooling_Stages,
+        bldg:Active_Heating_Stages,
+        bldg:Effective_Cooling_Temperature_Setpoint,
+        bldg:Effective_Heating_Temperature_Setpoint,
+        bldg:Effective_Zone_Air_Temperature_Setpoint,
+        bldg:Occupied_Cooling_Temperature_Setpoint,
+        bldg:Occupied_Heating_Temperature_Setpoint,
+        bldg:Unoccupied_Cooling_Temperature_Setpoint,
+        bldg:Unoccupied_Heating_Temperature_Setpoint,
+        bldg:Zone_Air_Temperature_Sensor ;
+    hpfs:has-space bldg:space1,
+        bldg:window1 ;
+    hpfs:has-window bldg:space1,
+        bldg:window1 .
 
 bldg:zone2 a brick:HVAC_Zone ;
     brick:hasPart bldg:space2,
@@ -338,5 +373,19 @@ bldg:zone2 a brick:HVAC_Zone ;
         bldg:Unoccupied_Heating_Temperature_Setpoint,
         bldg:Zone_Air_Temperature_Sensor ;
     brick:isFedBy bldg:hvac2 ;
-    brick:isLocationOf bldg:tstat2 .
+    brick:isLocationOf bldg:tstat2 ;
+    hpfs:has-point bldg:Active_Cooling_Stages,
+        bldg:Active_Heating_Stages,
+        bldg:Effective_Cooling_Temperature_Setpoint,
+        bldg:Effective_Heating_Temperature_Setpoint,
+        bldg:Effective_Zone_Air_Temperature_Setpoint,
+        bldg:Occupied_Cooling_Temperature_Setpoint,
+        bldg:Occupied_Heating_Temperature_Setpoint,
+        bldg:Unoccupied_Cooling_Temperature_Setpoint,
+        bldg:Unoccupied_Heating_Temperature_Setpoint,
+        bldg:Zone_Air_Temperature_Sensor ;
+    hpfs:has-space bldg:space2,
+        bldg:window2 ;
+    hpfs:has-window bldg:space2,
+        bldg:window2 .
 

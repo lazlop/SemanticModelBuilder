@@ -65,7 +65,6 @@ sparql_queries = {
                 SELECT DISTINCT ?deadband_value ?tolerance_value ?active_value
                         ?stage_count ?resolution ?control_group WHERE {
                 <%s> brick:hasPoint ?deadband, ?tolerance, ?active;
-                    brick:isPartOf ?control_group ;
                     brick:operationalStageCount/brick:value ?stage_count ;
                     brick:resolution/brick:value ?resolution .
                 ?deadband a brick:Temperature_Deadband_Setpoint ;
@@ -74,7 +73,7 @@ sparql_queries = {
                     brick:value ?tolerance_value .
                 ?active a brick:Availability_Status ;
                     brick:value ?active_value .
-                ?control_group a brick:Collection .
+                BIND("DEPRECATED" as ?control_group)
             }""",
         "s223": """ SELECT DISTINCT ?deadband_value ?tolerance_value ?active_value ?stage_count ?resolution ?control_group
                 WHERE {
@@ -141,9 +140,11 @@ sparql_queries = {
 
             }"""
         },
+        # Need to double check change to ask dual sp
+        # <%s> (brick:isPartOf?|brick:feeds?|brick:hasLocation/brick:isFedBy)/brick:hasPoint ?hsp, ?csp . to ?p
         'ask-dual-sp':{'brick':"""
                 ASK {
-                <%s> (brick:isPartOf?|brick:feeds?|brick:hasLocation/brick:isFedBy)/brick:hasPoint ?hsp, ?csp .
+                <%s> (brick:isPartOf?|brick:feeds?|brick:hasLocation/brick:isFedBy?)/brick:hasPoint ?hsp, ?csp .
                 ?hsp a brick:Heating_Temperature_Setpoint .
                 ?csp a brick:Cooling_Temperature_Setpoint .
             }""",
@@ -181,10 +182,11 @@ sparql_queries = {
                 }""" },
         "ask-electric-heat":{"brick":"""
                 ASK {
+                <%s> brick:hasLocation/brick:isFedBy*/a/rdfs:isSubclassOf* ?system .
                 {
-                    <%s> brick:isPartOf*/a/rdfs:isSubclassOf* brick:VRF_System .
+                     ?system a brick:VRF_System .
                 } UNION {
-                    <%s> brick:isPartOf*/a/rdfs:isSubclassOf* brick:Packaged_Heat_Pump . 
+                     ?system a brick:Packaged_Heat_Pump . 
                 } 
             }""",
             "s223":f"""

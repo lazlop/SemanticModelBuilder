@@ -12,7 +12,7 @@ bldg: a owl:Ontology,
         hpflex:Project .
 
 bldg:hvac1 a s223:AirToAirHeatPump ;
-    s223:cnx bldg:outlet_cp_09aeeb22 ;
+    s223:cnx bldg:outlet_cp_c0e2cd98 ;
     s223:connectsTo bldg:zone1 ;
     s223:hasProperty bldg:hvac1_cooling_COP,
         bldg:hvac1_cooling_capacity,
@@ -20,7 +20,7 @@ bldg:hvac1 a s223:AirToAirHeatPump ;
         bldg:hvac1_heating_capacity .
 
 bldg:hvac2 a s223:AirToAirHeatPump ;
-    s223:cnx bldg:outlet_cp_8c85b8b5 ;
+    s223:cnx bldg:outlet_cp_6a35efc1 ;
     s223:connectsTo bldg:zone2 ;
     s223:hasProperty bldg:hvac2_cooling_COP,
         bldg:hvac2_cooling_capacity,
@@ -96,11 +96,11 @@ bldg:Zone_Air_Temperature_Sensor_ref a s223:ExternalReference ;
     ns1:hasTopicName "aql/1610101/ZSZoneTemp",
         "aql/1610102/ZSZoneTemp" .
 
-bldg:connection_0b1f162b a s223:Connection ;
-    s223:cnx bldg:inlet_cp_b09a0cbb .
+bldg:connection_2285130e a s223:Connection ;
+    s223:cnx bldg:inlet_cp_8558a214 .
 
-bldg:connection_5bf3433d a s223:Connection ;
-    s223:cnx bldg:inlet_cp_280a9712 .
+bldg:connection_f887877d a s223:Connection ;
+    s223:cnx bldg:inlet_cp_00acb7e1 .
 
 bldg:hvac1_cooling_COP a s223:QuantifiableObservableProperty ;
     s223:hasAspect s223:Role-Cooling ;
@@ -150,26 +150,26 @@ bldg:hvac2_heating_capacity a s223:QuantifiableObservableProperty ;
     qudt:hasQuantityKind quantitykind:Power ;
     qudt:hasUnit unit:KiloW .
 
-bldg:name-connection_271cd90c a s223:Connection ;
-    s223:cnx bldg:name-target_cp_9383b8ba .
+bldg:name-connection_231a27f7 a s223:Connection ;
+    s223:cnx bldg:name-target_cp_c44775ba .
 
-bldg:name-connection_560906e7 a s223:Connection ;
-    s223:cnx bldg:name-target_cp_dfac8a88 .
+bldg:name-connection_621a6fa6 a s223:Connection ;
+    s223:cnx bldg:name-target_cp_856bd088 .
 
-bldg:name-name_cp_6de243ec a s223:BidirectionalConnectionPoint ;
-    s223:cnx bldg:name-connection_271cd90c ;
+bldg:name-name_cp_07123fc7 a s223:BidirectionalConnectionPoint ;
+    s223:cnx bldg:name-connection_621a6fa6 ;
     s223:hasMedium s223:Medium-Air .
 
-bldg:name-name_cp_fdae5477 a s223:BidirectionalConnectionPoint ;
-    s223:cnx bldg:name-connection_560906e7 ;
+bldg:name-name_cp_869d7848 a s223:BidirectionalConnectionPoint ;
+    s223:cnx bldg:name-connection_231a27f7 ;
     s223:hasMedium s223:Medium-Air .
 
-bldg:outlet_cp_09aeeb22 a s223:OutletConnectionPoint ;
-    s223:cnx bldg:connection_0b1f162b ;
+bldg:outlet_cp_6a35efc1 a s223:OutletConnectionPoint ;
+    s223:cnx bldg:connection_2285130e ;
     s223:hasMedium s223:Medium-Air .
 
-bldg:outlet_cp_8c85b8b5 a s223:OutletConnectionPoint ;
-    s223:cnx bldg:connection_5bf3433d ;
+bldg:outlet_cp_c0e2cd98 a s223:OutletConnectionPoint ;
+    s223:cnx bldg:connection_f887877d ;
     s223:hasMedium s223:Medium-Air .
 
 bldg:space1 a s223:PhysicalSpace ;
@@ -281,7 +281,7 @@ bldg:tstat2_tolerance a s223:QuantifiableObservableProperty ;
     qudt:isDeltaQuantity true .
 
 bldg:window1 a s223:Window ;
-    s223:cnx bldg:name-target_cp_9383b8ba ;
+    s223:cnx bldg:name-target_cp_856bd088 ;
     s223:hasProperty bldg:window1_area,
         bldg:window1_azimuth,
         bldg:window1_tilt .
@@ -302,7 +302,7 @@ bldg:window1_tilt a s223:QuantifiableObservableProperty ;
     qudt:hasUnit unit:Degree .
 
 bldg:window2 a s223:Window ;
-    s223:cnx bldg:name-target_cp_dfac8a88 ;
+    s223:cnx bldg:name-target_cp_c44775ba ;
     s223:hasProperty bldg:window2_area,
         bldg:window2_azimuth,
         bldg:window2_tilt .
@@ -396,22 +396,22 @@ bldg:Zone_Air_Temperature_Sensor a s223:QuantifiableObservableProperty ;
     qudt:hasQuantityKind quantitykind:Temperature ;
     qudt:hasUnit unit:DEG_F .
 
-bldg:inlet_cp_280a9712 a s223:InletConnectionPoint ;
+bldg:inlet_cp_00acb7e1 a s223:InletConnectionPoint ;
     s223:hasMedium s223:Medium-Air .
 
-bldg:inlet_cp_b09a0cbb a s223:InletConnectionPoint ;
+bldg:inlet_cp_8558a214 a s223:InletConnectionPoint ;
     s223:hasMedium s223:Medium-Air .
 
-bldg:name-target_cp_9383b8ba a s223:BidirectionalConnectionPoint ;
+bldg:name-target_cp_856bd088 a s223:BidirectionalConnectionPoint ;
     s223:hasMedium s223:Medium-Air .
 
-bldg:name-target_cp_dfac8a88 a s223:BidirectionalConnectionPoint ;
+bldg:name-target_cp_c44775ba a s223:BidirectionalConnectionPoint ;
     s223:hasMedium s223:Medium-Air .
 
 bldg:zone1 a s223:DomainSpace,
         s223:Zone ;
-    s223:cnx bldg:inlet_cp_b09a0cbb,
-        bldg:name-name_cp_6de243ec ;
+    s223:cnx bldg:inlet_cp_00acb7e1,
+        bldg:name-name_cp_07123fc7 ;
     s223:connectsTo bldg:window1 ;
     s223:hasDomain s223:Domain-HVAC ;
     s223:hasProperty bldg:Active_Cooling_Stages,
@@ -427,8 +427,8 @@ bldg:zone1 a s223:DomainSpace,
 
 bldg:zone2 a s223:DomainSpace,
         s223:Zone ;
-    s223:cnx bldg:inlet_cp_280a9712,
-        bldg:name-name_cp_fdae5477 ;
+    s223:cnx bldg:inlet_cp_8558a214,
+        bldg:name-name_cp_869d7848 ;
     s223:connectsTo bldg:window2 ;
     s223:hasDomain s223:Domain-HVAC ;
     s223:hasProperty bldg:Active_Cooling_Stages,

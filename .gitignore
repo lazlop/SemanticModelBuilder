@@ -210,3 +210,4 @@ __marimo__/
 *.log
 # leaving out development files
 development_files
+.DS_Store
