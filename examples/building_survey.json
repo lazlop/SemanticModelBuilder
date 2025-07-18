@@ -1,0 +1,141 @@
+{
+  "survey_info": {
+    "title": "Building Metadata Survey",
+    "version": "1.0",
+    "description": "Collect building information for semantic model creation"
+  },
+  "sections": [
+    {
+      "id": "site_info",
+      "title": "Site Information",
+      "fields": [
+        {
+          "id": "site_id",
+          "type": "text",
+          "label": "Site ID",
+          "required": true
+        },
+        {
+          "id": "timezone",
+          "type": "select",
+          "label": "Timezone",
+          "options": [
+            "America/New_York",
+            "America/Chicago",
+            "America/Denver",
+            "America/Los_Angeles"
+          ],
+          "required": true
+        },
+        {
+          "id": "latitude",
+          "type": "number",
+          "label": "Latitude",
+          "required": true
+        },
+        {
+          "id": "longitude",
+          "type": "number",
+          "label": "Longitude",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "spaces",
+      "title": "Spaces and Zones",
+      "type": "repeatable",
+      "fields": [
+        {
+          "id": "space_id",
+          "type": "text",
+          "label": "Space ID",
+          "required": true
+        },
+        {
+          "id": "zone_id",
+          "type": "text",
+          "label": "Zone ID",
+          "required": true
+        },
+        {
+          "id": "area",
+          "type": "number",
+          "label": "Floor Area",
+          "required": true
+        },
+        {
+          "id": "area_unit",
+          "type": "select",
+          "label": "Area Unit",
+          "options": [
+            "M2",
+            "FT2"
+          ],
+          "default": "M2"
+        }
+      ]
+    },
+    {
+      "id": "hvac",
+      "title": "HVAC Equipment",
+      "type": "repeatable",
+      "fields": [
+        {
+          "id": "equipment_id",
+          "type": "text",
+          "label": "Equipment ID",
+          "required": true
+        },
+        {
+          "id": "equipment_type",
+          "type": "select",
+          "label": "Equipment Type",
+          "options": [
+            "hp-rtu",
+            "boiler",
+            "chiller",
+            "ahu"
+          ],
+          "required": true
+        },
+        {
+          "id": "serves_zones",
+          "type": "text",
+          "label": "Serves Zones (comma-separated)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "points",
+      "title": "Sensor and Control Points",
+      "type": "repeatable",
+      "fields": [
+        {
+          "id": "point_id",
+          "type": "text",
+          "label": "Point ID",
+          "required": true
+        },
+        {
+          "id": "point_type",
+          "type": "select",
+          "label": "Point Type",
+          "options": [
+            "Temperature_Sensor",
+            "Temperature_Setpoint",
+            "Occupancy_Sensor"
+          ],
+          "required": true
+        },
+        {
+          "id": "equipment_id",
+          "type": "text",
+          "label": "Associated Equipment",
+          "required": false
+        }
+      ]
+    }
+  ]
+}
