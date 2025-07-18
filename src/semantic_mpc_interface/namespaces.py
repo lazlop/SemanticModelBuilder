@@ -1,7 +1,17 @@
-#%% 
-from buildingmotif.namespaces import bind_prefixes, A, XSD, QUDT, RDFS, A, SH, Namespace, RDF
+# %%
+from buildingmotif.namespaces import (
+    QUDT,
+    RDF,
+    RDFS,
+    SH,
+    XSD,
+    A,
+    Namespace,
+    bind_prefixes,
+)
+
 HPF = Namespace(f"urn:hpflex#")
-HPFS = Namespace('urn:hpflex/shapes#')
+HPFS = Namespace("urn:hpflex/shapes#")
 
 PARAM = Namespace("urn:___param___#")
 # all versions of Brick > 1.1 have these namespaces
@@ -34,6 +44,7 @@ S223 = Namespace("http://data.ashrae.org/standard223#")
 
 A = RDF.type
 
+
 def bind_prefixes(graph):
     """Associate common prefixes with the graph.
 
@@ -57,8 +68,12 @@ def bind_prefixes(graph):
     graph.bind("bmotif", BM)
     graph.bind("hpflex", HPF)
     graph.bind("hpfs", HPFS)
-    graph.bind('s223', S223)
-    graph.bind('ref',REF)
+    graph.bind("s223", S223)
+    graph.bind("ref", REF)
+
 
 def get_prefixes(g):
-    return "\n".join(f"PREFIX {prefix}: <{namespace}>" for prefix, namespace in g.namespace_manager.namespaces())
+    return "\n".join(
+        f"PREFIX {prefix}: <{namespace}>"
+        for prefix, namespace in g.namespace_manager.namespaces()
+    )
