@@ -1,0 +1,558 @@
+
+# three kinds of templates: 
+# 1) Nodes: have a type and some relations.
+# 2) Additional optional: expands on another template. name is directly in a dependency
+# 3) Relations: no classes defined, just relations. Must have name and target
+# may be best served just having relation templates and node templates in separate files.
+# TODO: Need to handle units/variations better.
+# Do we want to deprecate control group?
+hvac-zone:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:Zone ;
+      s223:hasDomain s223:Domain-HVAC .
+space:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:PhysicalSpace ;
+        s223:hasProperty p:area_name .
+  dependencies:
+    - template: area
+      args: {"name": "area_name", "value": "area_value", "unit":"area_unit"}
+window:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    p:name a s223:Window ;
+        s223:hasProperty p:area_name ;
+        s223:hasProperty p:azimuth_name ;
+        s223:hasProperty p:tilt_name .
+  dependencies:
+    - template: area
+      args: {"name": "area_name", "value": "area_value", "unit":"area_unit"}
+    - template: azimuth
+      args: {"name": "azimuth_name", "value": "azimuth_value"}
+    - template: tilt
+      args: {"name": "tilt_name", "value": "tilt_value"}
+# treating units as consistent for now
+area:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ; 
+        s223:hasValue p:value ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Area .
+tilt:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:Degree ;
+        qudt:hasQuantityKind quantitykind:Tilt .
+azimuth:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:Degree ;
+        qudt:hasQuantityKind quantitykind:Azimuth .
+
+hp-rtu:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:AirToAirHeatPump ;
+      s223:hasProperty p:cooling_capacity_name ;
+      s223:hasProperty p:heating_capacity_name ;
+      s223:hasProperty p:heating_COP_name ;
+      s223:hasProperty p:cooling_COP_name ;
+      .
+  dependencies:
+    - template: cooling-capacity
+      args: {"name": "cooling_capacity_name", "value": "cooling_capacity_value"}
+    - template: heating-capacity
+      args: {"name": "heating_capacity_name", "value": "heating_capacity_value"}
+    - template: cooling-COP
+      args: {"name": "cooling_COP_name", "value": "cooling_COP_value"}
+    - template: heating-COP
+      args: {"name": "heating_COP_name", "value": "heating_COP_value"}
+
+cooling-COP:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Cooling ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:KiloW ;
+        qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
+
+heating-COP:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Heating ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:KiloW ;
+        qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
+cooling-capacity:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Cooling ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:KiloW ;
+        qudt:hasQuantityKind quantitykind:Power .
+heating-capacity:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Heating ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:KiloW ;
+        qudt:hasQuantityKind quantitykind:Power .
+tstat-static-properties:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:Thermostat ;
+      s223:hasProperty p:stage_count ;
+      s223:hasProperty p:setpoint_deadband ;
+      s223:hasProperty p:tolerance ;
+      s223:hasProperty p:active ;
+      s223:hasProperty p:resolution ;
+      .
+  dependencies:
+    - template: tstat-stage_count
+      args: {"name": "stage_count"}
+    - template: tstat-deadband
+      args: {"name": "setpoint_deadband"}
+    - template: tstat-tolerance
+      args: {"name": "tolerance"}
+    - template: tstat-active
+      args: {"name": "active"}
+    - template: tstat-resolution
+      args: {"name": "resolution"}
+# one possible way of doing different types of thermostats without having to redo a lot of things.
+tstat-heating-cooling-occupancy:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:Thermostat ;
+      s223:hasProperty p:occ-heating-setpoint ;
+      s223:hasProperty p:occ-cooling-setpoint ;
+      s223:hasProperty p:unocc-heating-setpoint ;
+      s223:hasProperty p:unocc-cooling-setpoint ;
+      s223:hasProperty p:active-heating-stages ;
+      s223:hasProperty p:active-cooling-stages ;
+      s223:hasProperty p:temperature ;
+      .
+  dependencies:
+    - template: occ-heating-setpoint
+      args: {"name": "occ-heating-setpoint"}
+    - template: occ-cooling-setpoint
+      args: {"name": "occ-cooling-setpoint"}
+    - template: unocc-heating-setpoint
+      args: {"name": "unocc-heating-setpoint"}
+    - template: unocc-cooling-setpoint
+      args: {"name": "unocc-cooling-setpoint"}
+    - template: tstat-static-properties
+      args: {"name": "name"}
+    - template: temperature
+      args: {"name": "temperature"}  
+    - template: active-heating-stages
+      args: {"name": "active-heating-stages"}
+    - template: active-cooling-stages
+      args: {"name": "active-cooling-stages"}
+temperature:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+active-heating-stages:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:EnumeratedObservableProperty ;
+        s223:hasAspect s223:Role-Heating, s223:Aspect-OperatingStatus ;
+        qudt:hasUnit unit:NUM ;
+        qudt:hasQuantityKind quantitykind:Count .
+active-cooling-stages:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .  
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:EnumeratedObservableProperty ;
+        s223:hasAspect s223:Role-Cooling, s223:Aspect-OperatingStatus ;
+        qudt:hasUnit unit:NUM ;
+        qudt:hasQuantityKind quantitykind:Count .
+occ-heating-setpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Heating, s223:Occupancy-Occupied, s223:Aspect-Setpoint ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+occ-cooling-setpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Cooling, s223:Occupancy-Occupied, s223:Aspect-Setpoint ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+unocc-heating-setpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Heating, s223:Occupancy-Unoccupied, s223:Aspect-Setpoint ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+unocc-cooling-setpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Cooling, s223:Occupancy-Unoccupied, s223:Aspect-Setpoint ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+effective-temperature-setpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Effectiveness-Active, s223:Aspect-Setpoint ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+effective-heating-setpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Heating, s223:Effectiveness-Active, s223:Aspect-Setpoint ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+effective-cooling-setpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Role-Cooling, s223:Effectiveness-Active, s223:Aspect-Setpoint ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+tstat-stage_count:  
+  body: > 
+    @prefix p: <urn:___param___#> .    
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:EnumeratedObservableProperty ;
+        s223:hasAspect s223:Role-Cooling, s223:Aspect-OperatingMode ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:NUM ;
+        qudt:hasQuantityKind quantitykind:Count .
+tstat-deadband:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Aspect-Deadband ;
+        s223:hasValue p:value ;
+        qudt:hasUnit p:unit ;
+        qudt:isDeltaQuantity true ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+tstat-tolerance:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasAspect s223:Aspect-Heating, s223:Aspect-Cooling, s223:Aspect-Threshold ;
+        s223:hasValue p:value ;
+        qudt:hasUnit p:unit ;
+        qudt:isDeltaQuantity true ;
+        qudt:hasQuantityKind quantitykind:Temperature .
+
+tstat-resolution:
+# Resolution in 223 is different, it is applied to properties not equipment 
+# TODO: When we update how setpoints are defined for thermostats, this will have to be added as a requirement somehow
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:QuantifiableObservableProperty ;
+        s223:hasValue p:value ;
+        qudt:isDeltaQuantity true ;
+        qudt:hasUnit p:unit .
+
+
+tstat-active:
+# including heating and cooling to say we can 
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:EnumeratedObservableProperty ;
+        s223:hasAspect s223:Aspect-Heating, s223:Aspect-Cooling, s223:Effectiveness-Active, s223:Binary-Logical ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:NUM ;
+    .
+site:
+# No good notion for a site, would have to make use of another ontology (could also be rec)
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    p:name a s223:PhysicalSpace ;
+      s223:hasProperty p:timezone ;
+      s223:hasProperty p:latitude ;
+      s223:hasProperty p:longitude ;
+      s223:hasProperty p:noaastation ;
+      a hpf:Site .
+  dependencies:
+    - template: timezone
+      args: {"name": "timezone", "value": "timezone_value"}
+    - template: latitude
+      args: {"name": "latitude", "value": "latitude_value"}
+    - template: longitude
+      args: {"name": "longitude", "value": "longitude_value"}
+    - template: noaastation
+      args: {"name": "noaastation", "value": "noaastation_value"}
+
+timezone:
+# Not represented in 223P 
+# Could use another ontology for this, but won't make a change for now 
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    p:name a s223:EnumeratedProperty ;
+        s223:hasValue p:value ;
+        a hpf:Timezone ;
+    .
+latitude:
+# Would have to use anotehr ontology for latitude, longitude, and noaastation as well. 
+# latitude and longitude not in qudt, we can have in our own ontology. Makes the shape stuff a little strange
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:QuantifiableProperty ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:Degree ;
+        qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
+        a hpf:Latitude .
+longitude:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:QuantifiableProperty ;
+        s223:hasValue p:value ;
+        qudt:hasUnit unit:Degree ;
+        qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
+        a hpf:Longitude .
+noaastation:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:EnumeratedProperty ;
+        s223:hasValue p:value ;
+        a hpf:NOAAStation .
+volttron-external-reference:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    @prefix ref: <https://brickschema.org/schema/Brick/ref#> .
+    p:name a s223:ExternalReference ;
+        ref:hasTopicName p:ref_name ;
+    .
+point:
+# TODO: Probably create base property classes aligning with 223P 
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:Property, p:point_type ;
+        qudt:hasUnit p:unit ;
+    .
+
+air-bidirectional-connectionpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:BidirectionalConnectionPoint;
+      s223:hasMedium s223:Medium-Air ;
+    .
+air-outlet-connectionpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:OutletConnectionPoint;
+      s223:hasMedium s223:Medium-Air ;
+    .
+air-inlet-connectionpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:InletConnectionPoint;
+      s223:hasMedium s223:Medium-Air ;
+    .
+connection:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:Connection .
+    
+

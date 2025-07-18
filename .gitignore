@@ -210,4 +210,13 @@ __marimo__/
 *.log
 # leaving out development files
 development_files
-.DS_Store
+.DS_Store#
+ Development files (keep original development folder)
+development_files/
+
+# Generated files
+*.ttl
+*.rdf
+survey_*.json
+responses_*.json
+dashboard_*.json

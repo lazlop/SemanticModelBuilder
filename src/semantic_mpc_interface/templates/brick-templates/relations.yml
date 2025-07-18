@@ -1,0 +1,87 @@
+has-point:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:hasPoint p:target.
+
+has-reference:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix ref: <https://brickschema.org/schema/Brick/ref#> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name ref:hasExternalReference p:target.
+
+has-space:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:hasPart p:target.
+
+has-location:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:hasLocation p:target.
+
+# For window should also add light
+has-window:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:hasPart p:target .
+
+air-connects-to:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:feeds p:target .
+  # dependencies:
+  #   - template: air-outlet-connectionpoint
+  #     args: {"name": "outlet_cp"}
+  #   - template: air-inlet-connectionpoint
+  #     args: {"name": "inlet_cp"}
+  #   - template: connection
+  #     args: {"name": "connection"}
+
+# Adding bidirectional connection to match S223
+air-bidirectional-connects-to:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:feeds p:target .
+    p:target brick:feed p:name .
+  # dependencies:
+  #   - template: air-bidirectional-connectionpoint
+  #     args: {"name": "name_cp"}
+  #   - template: air-bidirectional-connectionpoint
+  #     args: {"name": "target_cp"}
+  #   - template: connection
+  #     args: {"name": "connection"}
