@@ -1,0 +1,4 @@
+window_id,zone_id,area_value,azimuth_value,tilt_value,area_unit
+window_3_1,zone_3,50,180,90,FT2
+window_3_2,zone_3,50,180,90,FT2
+window_3_3,zone_3,50,180,90,FT2

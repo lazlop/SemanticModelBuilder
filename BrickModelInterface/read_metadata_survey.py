@@ -16,11 +16,65 @@ class SurveyReader:
         with open(self.base_dir / "config.json", 'r') as f:
             return json.load(f)
 
+    def _validate_csv_row(self, row: Dict[str, str], context: str) -> bool:
+        """
+        Validate a CSV row for empty values.
+        
+        Args:
+            row: Dictionary representing a CSV row
+            context: Context string for error messages (e.g., "Zone", "HVAC")
+            
+        Returns:
+            bool: True if row is valid, False if row should be skipped
+            
+        Raises:
+            ValueError: If row has partial empty values
+        """
+        def is_empty_value(value):
+            """Check if a value is considered empty"""
+            if value is None:
+                return True
+            if isinstance(value, str):
+                # Check for empty string, whitespace-only string, or common empty representations
+                stripped = value.strip()
+                return (stripped == '' or 
+                       stripped.lower() in ['nan', 'none', 'null', 'na', 'n/a', ''] or
+                       stripped == '')
+            # Handle other types that might be empty (e.g., from pandas)
+            try:
+                import numpy as np
+                if isinstance(value, (float, int)) and np.isnan(value):
+                    return True
+            except (ImportError, TypeError):
+                pass
+            try:
+                import pandas as pd
+                if pd.isna(value):
+                    return True
+            except (ImportError, AttributeError):
+                pass
+            return False
+        
+        # Check if row is completely empty
+        if all(is_empty_value(value) for value in row.values()):
+            return False
+        
+        # Check for any empty values
+        skip_fields = ['NOAAstation','noaa_station']
+        empty_fields = [field for field, value in row.items() if is_empty_value(value) and field not in skip_fields]
+        if empty_fields:
+            raise ValueError(f"{context} row has empty values for fields: {', '.join(empty_fields)}")
+        
+        return True
+
     def _load_site_info(self) -> Dict[str, str]:
         """Load site information from site_info.csv"""
         with open(self.base_dir / "site_info.csv", 'r') as f:
             reader = csv.DictReader(f)
-            return next(reader)
+            for row in reader:
+                if self._validate_csv_row(row, "Site info"):
+                    return row
+        raise ValueError("No valid site info found")
 
     def _load_zones(self) -> list:
         """Load zone information from zones.csv"""
@@ -28,7 +82,8 @@ class SurveyReader:
         with open(self.base_dir / "zones" / "zones.csv", 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                zones.append(row)
+                if self._validate_csv_row(row, "Zone"):
+                    zones.append(row)
         return zones
 
     def _load_spaces(self, zone_id: str) -> list:
@@ -37,7 +92,8 @@ class SurveyReader:
         with open(self.base_dir / "spaces" / f"{zone_id}_spaces.csv", 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                spaces.append(row)
+                if self._validate_csv_row(row, f"Space for zone {zone_id}"):
+                    spaces.append(row)
         return spaces
 
     def _load_hvac(self) -> list:
@@ -46,7 +102,8 @@ class SurveyReader:
         with open(self.base_dir / "hvac" / "hvac_units.csv", 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                hvac_units.append(row)
+                if self._validate_csv_row(row, "HVAC"):
+                    hvac_units.append(row)
         return hvac_units
 
     def _load_windows(self, zone_id) -> list:
@@ -55,7 +112,8 @@ class SurveyReader:
         with open(self.base_dir / "windows" / f"{zone_id}_windows.csv", 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                windows.append(row)
+                if self._validate_csv_row(row, f"Window for zone {zone_id}"):
+                    windows.append(row)
         return windows
 
     def create_model(self, output_file: Union[str, None] = None):
