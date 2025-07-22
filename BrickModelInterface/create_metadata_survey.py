@@ -28,11 +28,12 @@ def validate_dict(input_dict):
     return True
 
 class SurveyGenerator:
-    def __init__(self, site_name, hvac_type, system_of_units="IP"):
+    def __init__(self, site_id,building_id, hvac_type, system_of_units="IP"):
         # TODO: is there any default for windows added?
         # hvac_type currently unused, but may be used later for creation of the brick model
         # SYSTEM of units can either be IP or SI, and default units will be filled out for all values
-        self.site_name = site_name
+        self.site_id = site_id
+        self.building_id = building_id
         self.base_dir = None
         self.hvac_type = hvac_type
         self.system_of_units = system_of_units
@@ -72,16 +73,22 @@ class SurveyGenerator:
                 
     def _create_directory_structure(self, base_path):
         """Create the directory structure for the Brick model"""
-        self.base_dir = Path(base_path) / self.site_name
+        self.base_dir = Path(base_path) / self.site_id / self.building_id
         
-        # Create main directory
+        # Check if main directory exists and is not empty
+        if self.base_dir.exists() and any(self.base_dir.iterdir()):
+            raise FileExistsError(f"Directory '{self.base_dir}' already exists and is not empty. Please use a different path or clear the directory.")
+        
+        # Create main directory and parent directories if they don't exist
         self.base_dir.mkdir(parents=True, exist_ok=True)
         
         # Create subdirectories
-        (self.base_dir / "spaces").mkdir(exist_ok=True)
-        (self.base_dir / "hvac").mkdir(exist_ok=True)
-        (self.base_dir / "zones").mkdir(exist_ok=True)
-        (self.base_dir / "windows").mkdir(exist_ok=True)
+        subdirs = ["spaces", "hvac", "zones", "windows"]
+        for subdir in subdirs:
+            subdir_path = self.base_dir / subdir
+            if subdir_path.exists() and any(subdir_path.iterdir()):
+                raise FileExistsError(f"Subdirectory '{subdir_path}' already exists and is not empty. Please use a different path or clear the directory.")
+            subdir_path.mkdir(parents=True, exist_ok=True)
 
     def _create_site_info_file(self):
         """Create site information CSV file"""
@@ -93,7 +100,7 @@ class SurveyGenerator:
         with open(self.base_dir / site_info["file"], 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(site_info["headers"])
-            writer.writerow([self.site_name, "", "", "", ""])  # Empty row for user input
+            writer.writerow([self.site_id, "", "", "", ""])  # Empty row for user input
 
 
     def _create_space_files(self, zones_contain_spaces):
@@ -167,7 +174,7 @@ class SurveyGenerator:
             writer = csv.writer(f)
             writer.writerow(tstat_headers)
             for zone in zones_contain_spaces.keys():
-                writer.writerow([f"tstat_{zone}", zone, "", "", "", self.default_temperature_unit])
+                writer.writerow([f"tstat_{zone}", zone, "", "", "","","",self.default_temperature_unit])
 
     # Windoes also linked to zones, not spaces. Should make sure that's correct
     def _create_window_files(self, zones_contain_windows):
@@ -226,7 +233,7 @@ class SurveyGenerator:
 
         # Save configuration
         config = {
-            "site_name": self.site_name,
+            "site_id": self.site_id,
             "hvac_type": self.hvac_type,
             "hvacs_feed_hvacs": hvacs_feed_hvacs,
             "hvacs_feed_zones": hvacs_feed_zones,

@@ -262,7 +262,7 @@ class BuildingMetadataLoader:
             "tz": self._get_value(self.site, BRICK.timezone),
             "latitude": self._get_value(self.site, BRICK.latitude),
             "longitude": self._get_value(self.site, BRICK.longitude),
-            "NOAAstation": self._get_value(self.site, self.HPF.hasNOAAStation),
+            "NOAAstation": self._get_value(self.site, BRICK.hasNOAAStation),
             # project_id and site_id are currently the same
             "project_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
             "site_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
@@ -311,7 +311,7 @@ class BuildingMetadataLoader:
         # TODO: Add error messages for when zone is or isn't present
         for tstat, zone in tstats_zones:
         # Method for filtering depends on if URIs should be used elsewere, can just use id, and not namespace if that is more suitable
-            if (for_zone != None) & (self.g.compute_qname(zone)[-1] != for_zone):
+            if (for_zone is not None) & (self.g.compute_qname(zone)[-1] != for_zone):
                 continue
         #     MPC configuration should be separate, but can determine defaults based on whether heat/cool are electric
         #     thermostat_data["heat_availability"].append(self._get_value(tstat, self.HPF.isHeatAvailable))
