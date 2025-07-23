@@ -272,38 +272,6 @@ wheels = [
 ]
 
 [[package]]
-name = "creating-brick-model"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "buildingmotif" },
-    { name = "grafanalib" },
-    { name = "ipykernel" },
-    { name = "oxrdflib" },
-    { name = "pandas", version = "2.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "pandas", version = "2.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-    { name = "pip" },
-    { name = "pyoxigraph" },
-    { name = "pyshacl" },
-    { name = "rdflib" },
-    { name = "requests" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "buildingmotif", specifier = ">=0.3.0" },
-    { name = "grafanalib", specifier = ">=0.7.1" },
-    { name = "ipykernel", specifier = ">=6.29.5" },
-    { name = "oxrdflib", specifier = ">=0.4.0" },
-    { name = "pandas", specifier = ">=2.0.3" },
-    { name = "pip", specifier = ">=25.0" },
-    { name = "pyoxigraph", specifier = ">=0.4.11" },
-    { name = "pyshacl", specifier = ">=0.26.0" },
-    { name = "rdflib", specifier = ">=7.1.3" },
-    { name = "requests", specifier = ">=2.32.4" },
-]
-
-[[package]]
 name = "debugpy"
 version = "1.8.12"
 source = { registry = "https://pypi.org/simple" }
@@ -1964,6 +1932,38 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/08/cd/3a1b35eb9da27ffbb981cfffd32a01c7655c4431ccb278cb3064f8887462/rpds_py-0.22.3-pp39-pypy39_pp73-musllinux_1_2_i686.whl", hash = "sha256:2de29005e11637e7a2361fa151f780ff8eb2543a0da1413bb951e9f14b699ef3", size = 584412 },
     { url = "https://files.pythonhosted.org/packages/87/91/31d1c5aeb1606f71188259e0ba6ed6f5c21a3c72f58b51db6a8bd0aa2b5d/rpds_py-0.22.3-pp39-pypy39_pp73-musllinux_1_2_x86_64.whl", hash = "sha256:666ecce376999bf619756a24ce15bb14c5bfaf04bf00abc7e663ce17c3f34fe7", size = 553446 },
     { url = "https://files.pythonhosted.org/packages/e7/ad/03b5ccd1ab492c9dece85b3bf1c96453ab8c47983936fae6880f688f60b3/rpds_py-0.22.3-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:5246b14ca64a8675e0a7161f7af68fe3e910e6b90542b4bfb5439ba752191df6", size = 233013 },
+]
+
+[[package]]
+name = "semantic-mpc-interface"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "buildingmotif" },
+    { name = "grafanalib" },
+    { name = "ipykernel" },
+    { name = "oxrdflib" },
+    { name = "pandas", version = "2.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "pandas", version = "2.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "pip" },
+    { name = "pyoxigraph" },
+    { name = "pyshacl" },
+    { name = "rdflib" },
+    { name = "requests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "buildingmotif", specifier = ">=0.3.0" },
+    { name = "grafanalib", specifier = ">=0.7.1" },
+    { name = "ipykernel", specifier = ">=6.29.5" },
+    { name = "oxrdflib", specifier = ">=0.4.0" },
+    { name = "pandas", specifier = ">=2.0.3" },
+    { name = "pip", specifier = ">=25.0" },
+    { name = "pyoxigraph", specifier = ">=0.4.11" },
+    { name = "pyshacl", specifier = ">=0.26.0" },
+    { name = "rdflib", specifier = ">=7.1.3" },
+    { name = "requests", specifier = ">=2.32.4" },
 ]
 
 [[package]]
