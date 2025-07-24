@@ -173,7 +173,7 @@ class SurveyReader:
         # Add HVAC units
         hvac_units = self._load_hvac()
         for hvac in hvac_units:
-            if hvac in list(self.config['hvacs_feed_zones'].keys()):
+            if hvac['hvac_id'] in list(self.config['hvacs_feed_zones'].keys()):
                 # TODO: may want to get zone_id from config - a little weird having two sources for this. 
                 builder.add_hvac(
                     hvac_id=hvac['hvac_id'],
@@ -183,7 +183,7 @@ class SurveyReader:
                     cooling_cop=float(hvac['cooling_cop']),
                     heating_cop=float(hvac['heating_cop'])
                 )
-            if hvac in list(self.config["hvacs_feed_hvacs"].keys()):
+            if hvac['hvac_id'] in list(self.config["hvacs_feed_hvacs"].keys()):
                 feeds_hvacs = self.config['hvacs_feed_hvacs'][hvac]
                 builder.add_hvac(
                     hvac_id=hvac['hvac_id'],

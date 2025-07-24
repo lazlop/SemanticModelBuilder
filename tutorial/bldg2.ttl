@@ -29,6 +29,102 @@ bldg:hpflex_demo.noaastation hpflex:hasNOAAStation "" .
 bldg:hpflex_demo.timezone qudt:hasUnit unit:Timezone ;
     brick:value "US/Pacific" .
 
+bldg:hvac_1 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac_1_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac_1_cooling_COP ;
+    brick:feeds bldg:zone_1 ;
+    brick:heatingCapacity bldg:hvac_1_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac_1_heating_COP .
+
+bldg:hvac_1_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.5e+00 .
+
+bldg:hvac_1_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value -7.5e+00 .
+
+bldg:hvac_1_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.94e+00 .
+
+bldg:hvac_1_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 1e+01 .
+
+bldg:hvac_2 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac_2_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac_2_cooling_COP ;
+    brick:feeds bldg:zone_2 ;
+    brick:heatingCapacity bldg:hvac_2_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac_2_heating_COP .
+
+bldg:hvac_2_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.5e+00 .
+
+bldg:hvac_2_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value -7.5e+00 .
+
+bldg:hvac_2_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.94e+00 .
+
+bldg:hvac_2_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 1e+01 .
+
+bldg:hvac_3 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac_3_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac_3_cooling_COP ;
+    brick:feeds bldg:zone_3 ;
+    brick:heatingCapacity bldg:hvac_3_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac_3_heating_COP .
+
+bldg:hvac_3_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.5e+00 .
+
+bldg:hvac_3_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value -7.5e+00 .
+
+bldg:hvac_3_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.94e+00 .
+
+bldg:hvac_3_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 1e+01 .
+
+bldg:hvac_4 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac_4_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac_4_cooling_COP ;
+    brick:feeds bldg:zone_4 ;
+    brick:heatingCapacity bldg:hvac_4_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac_4_heating_COP .
+
+bldg:hvac_4_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.5e+00 .
+
+bldg:hvac_4_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value -7.5e+00 .
+
+bldg:hvac_4_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.94e+00 .
+
+bldg:hvac_4_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 1e+01 .
+
 bldg:space_1_1 a brick:Space ;
     brick:area bldg:space_1_1_area ;
     brick:isPartOf bldg:zone_1 .
@@ -237,26 +333,6 @@ bldg:window_4_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
     qudt:hasUnit unit:Degree ;
     brick:value 9e+01 .
 
-bldg:zone_1 a brick:HVAC_Zone ;
-    brick:hasPart bldg:space_1_1,
-        bldg:window_1_1 ;
-    brick:isLocationOf bldg:tstat_zone_1 .
-
-bldg:zone_2 a brick:HVAC_Zone ;
-    brick:hasPart bldg:space_2_1,
-        bldg:window_2_1 ;
-    brick:isLocationOf bldg:tstat_zone_2 .
-
-bldg:zone_3 a brick:HVAC_Zone ;
-    brick:hasPart bldg:space_3_1,
-        bldg:window_3_1 ;
-    brick:isLocationOf bldg:tstat_zone_3 .
-
-bldg:zone_4 a brick:HVAC_Zone ;
-    brick:hasPart bldg:space_4_1,
-        bldg:window_4_1 ;
-    brick:isLocationOf bldg:tstat_zone_4 .
-
 bldg:tstat_zone_1 a brick:Thermostat ;
     brick:hasLocation bldg:zone_1 ;
     brick:hasPoint bldg:tstat_zone_1_active,
@@ -288,4 +364,28 @@ bldg:tstat_zone_4 a brick:Thermostat ;
         bldg:tstat_zone_4_tolerance ;
     brick:operationalStageCount bldg:tstat_zone_4_stage_count ;
     brick:resolution bldg:tstat_zone_4_resolution .
+
+bldg:zone_1 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space_1_1,
+        bldg:window_1_1 ;
+    brick:isFedBy bldg:hvac_1 ;
+    brick:isLocationOf bldg:tstat_zone_1 .
+
+bldg:zone_2 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space_2_1,
+        bldg:window_2_1 ;
+    brick:isFedBy bldg:hvac_2 ;
+    brick:isLocationOf bldg:tstat_zone_2 .
+
+bldg:zone_3 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space_3_1,
+        bldg:window_3_1 ;
+    brick:isFedBy bldg:hvac_3 ;
+    brick:isLocationOf bldg:tstat_zone_3 .
+
+bldg:zone_4 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space_4_1,
+        bldg:window_4_1 ;
+    brick:isFedBy bldg:hvac_4 ;
+    brick:isLocationOf bldg:tstat_zone_4 .
 

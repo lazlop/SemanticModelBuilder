@@ -353,17 +353,17 @@ class BuildingMetadataLoader:
             thermostat_data["cooling_cop"].append(zone_result["cooling_cop"].toPython())
             thermostat_data["heating_cop"].append(zone_result["heating_cop"].toPython())
 
-            # Determine setpoint type
-            double_setpoint = self.g.query(sparql_queries["ask-dual-sp"][self.ontology] % tstat).askAnswer
+            # # Determine setpoint type
+            # double_setpoint = self.g.query(sparql_queries["ask-dual-sp"][self.ontology] % tstat).askAnswer
 
-            single_setpoint = self.g.query(sparql_queries['ask-single-sp'][self.ontology] % tstat).askAnswer
+            # single_setpoint = self.g.query(sparql_queries['ask-single-sp'][self.ontology] % tstat).askAnswer
 
-            if double_setpoint:
-                thermostat_data["setpoint_type"].append("double")
-            elif single_setpoint:
-                thermostat_data["setpoint_type"].append("single")
-            else:
-                raise Exception(f"Setpoint configuration unrecognized for thermostat {tstat}")
+            # if double_setpoint:
+            #     thermostat_data["setpoint_type"].append("double")
+            # elif single_setpoint:
+            #     thermostat_data["setpoint_type"].append("single")
+            # else:
+            #     raise Exception(f"Setpoint configuration unrecognized for thermostat {tstat}")
 
             # Determine heating fuel type
             electric_heat = self.g.query(sparql_queries['ask-electric-heat'][self.ontology] % tstat).askAnswer
