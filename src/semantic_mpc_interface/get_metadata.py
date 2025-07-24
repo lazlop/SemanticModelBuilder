@@ -1,19 +1,22 @@
-from rdflib import Graph, Namespace, Literal
 import os
-from typing import Dict, Any, Union, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+from rdflib import Graph, Literal, Namespace
+
+from .namespaces import *
 from .unit_conversion import convert_units
-from .namespaces import * 
 
 UNIT_CONVERSIONS = {
-            UNIT["DEG_F"]: UNIT["DEG_C"],
-            UNIT["FT"]: UNIT["M"],
-            UNIT["FT2"]: UNIT["M2"],
-            UNIT["FT3"]: UNIT["M3"],
-            UNIT["PSI"]: UNIT["PA"]
-        }
+    UNIT["DEG_F"]: UNIT["DEG_C"],
+    UNIT["FT"]: UNIT["M"],
+    UNIT["FT2"]: UNIT["M2"],
+    UNIT["FT3"]: UNIT["M3"],
+    UNIT["PSI"]: UNIT["PA"],
+}
 # Should probably have something like  .namespaces.bind_namespaces to put prefixes in all the queries
 sparql_queries = {
-    "convert_to_si": {"brick": """
+    "convert_to_si": {
+        "brick": """
         SELECT ?s ?v ?u ?isDelta
         WHERE {
             ?s brick:value ?v ;
@@ -28,9 +31,10 @@ sparql_queries = {
             qudt:hasUnit ?u .
             OPTIONAL { ?s qudt:isDeltaQuantity ?isDelta } .
         }
-        """
+        """,
     },
-    "site_info": {"brick": """""",
+    "site_info": {
+        "brick": """""",
         "s223": """SELECT DISTINCT ?tz ?latitude ?longitude ?NOAAstation ?project_id ?site_id
         WHERE {
             ?site_id s223:hasProperty ?tzprop, ?latprop, ?longprop, ?noaprop, ?project_idprop, ?site_idprop .
@@ -44,9 +48,10 @@ sparql_queries = {
                 a hpfs:noaastation .
             ?site_id a hpfs:site .
             BIND(?site_id as ?project_id).
-        }"""
+        }""",
     },
-    "get_tstats": {"brick": """
+    "get_tstats": {
+        "brick": """
                 SELECT DISTINCT ?tstat ?zone 
                     WHERE {
                             ?tstat a brick:Thermostat ;
@@ -59,9 +64,10 @@ sparql_queries = {
                             ?tstat a hpfs:tstat-static-properties ;
                                     hpfs:has-location ?zone .          
                                     
-        }"""
+        }""",
     },
-    "get_tstat_data": {"brick": """
+    "get_tstat_data": {
+        "brick": """
                 SELECT DISTINCT ?deadband_value ?tolerance_value ?active_value
                         ?stage_count ?resolution ?control_group WHERE {
                 <%s> brick:hasPoint ?deadband, ?tolerance, ?active;
@@ -89,9 +95,10 @@ sparql_queries = {
                 ?resolution_prop a hpfs:tstat-resolution ;
                     s223:hasValue ?resolution.
                 BIND("DEPRECATED" as ?control_group)
-                }"""
+                }""",
     },
-        "get_unit_data": {"brick": """
+    "get_unit_data": {
+        "brick": """
                 SELECT DISTINCT ?floor_area ?window_area ?azimuth ?tilt 
                         ?zone ?hvac ?cooling_capacity ?heating_capacity ?cooling_cop ?heating_cop  WHERE {
                 <%s> brick:hasLocation ?zone .
@@ -110,7 +117,7 @@ sparql_queries = {
                     brick:coolingCoefficientOfPerformance/brick:value ?cooling_cop .
 
             }""",
-            "s223": """
+        "s223": """
                 SELECT DISTINCT  ?floor_area ?window_area ?azimuth ?tilt 
                          ?zone ?hvac ?cooling_capacity ?heating_capacity ?cooling_cop ?heating_cop   WHERE {
                 <%s> hpfs:has-location ?zone .
@@ -138,49 +145,54 @@ sparql_queries = {
                 ?h_cop_prop a hpfs:heating-COP ;
                     s223:hasValue ?heating_cop .
 
-            }"""
-        },
-        # Need to double check change to ask dual sp
-        # <%s> (brick:isPartOf?|brick:feeds?|brick:hasLocation/brick:isFedBy)/brick:hasPoint ?hsp, ?csp . to ?p
-        'ask-dual-sp':{'brick':"""
+            }""",
+    },
+    # Need to double check change to ask dual sp
+    # <%s> (brick:isPartOf?|brick:feeds?|brick:hasLocation/brick:isFedBy)/brick:hasPoint ?hsp, ?csp . to ?p
+    "ask-dual-sp": {
+        "brick": """
                 ASK {
                 <%s> (brick:isPartOf?|brick:feeds?|brick:hasLocation/brick:isFedBy?)/brick:hasPoint ?hsp, ?csp .
                 ?hsp a brick:Heating_Temperature_Setpoint .
                 ?csp a brick:Cooling_Temperature_Setpoint .
             }""",
-                    's223':"""ASK {
+        "s223": """ASK {
                 <%s> hpfs:has-location?/s223:hasProperty ?hsp, ?csp .
                 ?hsp s223:hasAspect s223:Role-Heating, s223:Aspect-Setpoint .
                 ?csp s223:hasAspect s223:Role-Cooling, s223:Aspect-Setpoint .
-            }"""
-       },
-       "ask-single-sp":{'brick':"""
+            }""",
+    },
+    "ask-single-sp": {
+        "brick": """
                 ASK {
                 <%s> (brick:isPartOf?|brick:feeds?|brick:hasLocation/brick:isFedBy)/brick:hasPoint ?sp, ?db .
                 ?sp a brick:Temperature_Setpoint .
                 ?db a brick:Temperature_Deadband_Setpoint . 
             }""",
-            "s223":"""
+        "s223": """
                 ASK {
                 <%s> hpfs:has-location?/s223:hasProperty ?hsp, ?csp .
                 ?hsp s223:hasAspect s223:Role-Heating, s223:Role-Cooling, s223:Aspect-Setpoint .
-            }"""
-        },
-        # PREFIX needed for qudt for this query but no others for some reason
-        "get-tstat-units":{"brick": """
+            }""",
+    },
+    # PREFIX needed for qudt for this query but no others for some reason
+    "get-tstat-units": {
+        "brick": """
                 SELECT DISTINCT ?unit WHERE {
                 <%s> brick:isPartOf?/brick:hasLocation?/brick:isFedBy?/brick:hasPoint ?temp_sensor .
                 ?temp_sensor qudt:hasUnit ?unit ;
                     a brick:Zone_Air_Temperature_Sensor .
                 }""",
-                    "s223":"""
+        "s223": """
                 PREFIX qudt: <http://qudt.org/schema/qudt/>
                 SELECT DISTINCT ?unit WHERE {
                 <%s> s223:hasProperty ?temp_prop .
                 ?temp_prop qudt:hasQuantityKind quantitykind:Temperature ;
                     qudt:hasUnit ?unit .
-                }""" },
-        "ask-electric-heat":{"brick":"""
+                }""",
+    },
+    "ask-electric-heat": {
+        "brick": """
                 ASK {
                 <%s> brick:hasLocation/brick:isFedBy*/a/rdfs:isSubclassOf* ?system .
                 {
@@ -189,15 +201,15 @@ sparql_queries = {
                      ?system a brick:Packaged_Heat_Pump . 
                 } 
             }""",
-            "s223":f"""
+        "s223": f"""
                 PREFIX qudt: <http://qudt.org/schema/qudt/>
                 ASK {{
                 <%s> hpfs:has-location/^s223:connectsTo ?unit .
                 ?unit a/rdfs:subClassOf* s223:HeatPump .
-            }}"""
-        }
-    
+            }}""",
+    },
 }
+
 
 class BuildingMetadataLoader:
     # Could do all alignment through templates by redefining mapping brick and s223 to hpf namespace, but this seems onerous
@@ -216,39 +228,44 @@ class BuildingMetadataLoader:
         self.ontology = ontology
 
         # Only one query so far requires loading the ontology to use subClassOf in 223:
-        if ontology == 's223':
-            self.g.parse("https://open223.info/223p.ttl", format = 'ttl')
+        if ontology == "s223":
+            self.g.parse("https://open223.info/223p.ttl", format="ttl")
 
     def convert_model_to_si(self):
         """
         Convert all quantities in a Brick model to SI units
-        
+
         Args:
             g: The RDF graph containing the Brick model
-            
+
         Returns:
             Graph: The modified graph with SI units
-        """        
+        """
         query = sparql_queries["convert_to_si"][self.ontology]
-        
+
         for row_dict in self.g.query(query).bindings:
             # will throw error if not all things are present
-            subject, value, unit = row_dict['s'], row_dict['v'], row_dict['u']
-            isDelta = row_dict.get('isDelta', False)
-        
+            subject, value, unit = row_dict["s"], row_dict["v"], row_dict["u"]
+            isDelta = row_dict.get("isDelta", False)
+
             if unit in UNIT_CONVERSIONS:
-                print('changing value of ', subject, 'from', unit, 'to', UNIT_CONVERSIONS[unit])
+                print(
+                    "changing value of ",
+                    subject,
+                    "from",
+                    unit,
+                    "to",
+                    UNIT_CONVERSIONS[unit],
+                )
                 new_unit = UNIT_CONVERSIONS[unit]
                 new_value = convert_units(value, unit, new_unit, isDelta)
 
-                if self.ontology == 'brick':
+                if self.ontology == "brick":
                     self.g.set((subject, BRICK.value, Literal(new_value)))
                     self.g.set((subject, QUDT.hasUnit, new_unit))
                 else:
                     self.g.set((subject, S223.hasValue, Literal(new_value)))
                     self.g.set((subject, QUDT.hasUnit, new_unit))
-
-
 
     def _get_value(self, subject, predicate) -> Any:
         """Helper method to get a value from the RDF graph."""
@@ -257,19 +274,19 @@ class BuildingMetadataLoader:
 
     def get_site_info(self) -> Dict:
         """Fetch site-level metadata."""
-        if self.ontology == 'brick':
-            return{
-            "tz": self._get_value(self.site, BRICK.timezone),
-            "latitude": self._get_value(self.site, BRICK.latitude),
-            "longitude": self._get_value(self.site, BRICK.longitude),
-            "NOAAstation": self._get_value(self.site, BRICK.hasNOAAStation),
-            # project_id and site_id are currently the same
-            "project_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
-            "site_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
-        }
+        if self.ontology == "brick":
+            return {
+                "tz": self._get_value(self.site, BRICK.timezone),
+                "latitude": self._get_value(self.site, BRICK.latitude),
+                "longitude": self._get_value(self.site, BRICK.longitude),
+                "NOAAstation": self._get_value(self.site, BRICK.hasNOAAStation),
+                # project_id and site_id are currently the same
+                "project_id": next(self.g.triples((None, RDF.type, BRICK.Site)))[0],
+                "site_id": next(self.g.triples((None, RDF.type, BRICK.Site)))[0],
+            }
         else:
             results = self.g.query(sparql_queries["site_info"][self.ontology])
-            return {str(k): v.toPython() for k, v in results.bindings[0].items()} 
+            return {str(k): v.toPython() for k, v in results.bindings[0].items()}
 
     # May want to break this out into separate queries to make debugging a bit easier
     def get_thermostat_data(self, for_zone: Optional[str] = None) -> Dict:
@@ -303,81 +320,125 @@ class BuildingMetadataLoader:
             "resolution": [],
             "temperature_unit": [],
         }
-        
-        results = self.g.query(sparql_queries['get_tstats'][self.ontology])
-        
-        tstats_zones = [(r['tstat'], r['zone']) for r in results]
-        
+
+        results = self.g.query(sparql_queries["get_tstats"][self.ontology])
+
+        tstats_zones = [(r["tstat"], r["zone"]) for r in results]
+
         # TODO: Add error messages for when zone is or isn't present
         for tstat, zone in tstats_zones:
-        # Method for filtering depends on if URIs should be used elsewere, can just use id, and not namespace if that is more suitable
+            # Method for filtering depends on if URIs should be used elsewere, can just use id, and not namespace if that is more suitable
             if (for_zone is not None) & (self.g.compute_qname(zone)[-1] != for_zone):
                 continue
-        #     MPC configuration should be separate, but can determine defaults based on whether heat/cool are electric
-        #     thermostat_data["heat_availability"].append(self._get_value(tstat, self.HPF.isHeatAvailable))
-        #     thermostat_data["cool_availability"].append(self._get_value(tstat, self.HPF.isCoolAvailable))
-        # TODO: check which of the returned data points should be URIs (may be none)
-        # brick:resolution/brick:value ?resolution .
+            #     MPC configuration should be separate, but can determine defaults based on whether heat/cool are electric
+            #     thermostat_data["heat_availability"].append(self._get_value(tstat, self.HPF.isHeatAvailable))
+            #     thermostat_data["cool_availability"].append(self._get_value(tstat, self.HPF.isCoolAvailable))
+            # TODO: check which of the returned data points should be URIs (may be none)
+            # brick:resolution/brick:value ?resolution .
             ## brick:resolution/brick:value ?resolution .
             # Query thermostat-specific data
-            results = self.g.query(sparql_queries['get_tstat_data'][self.ontology] % tstat)
+            results = self.g.query(
+                sparql_queries["get_tstat_data"][self.ontology] % tstat
+            )
 
             if len(results) != 1:
-                raise Exception(f"Expected 1 result for each variable, got {len(results)}")
+                raise Exception(
+                    f"Expected 1 result for each variable, got {len(results)}"
+                )
 
             result = results.bindings[0]
-            thermostat_data["heat_tolerance"].append(-1.0 * result["tolerance_value"].toPython())
-            thermostat_data["cool_tolerance"].append(1.0 * result["tolerance_value"].toPython())
-            thermostat_data["setpoint_deadband"].append(result["deadband_value"].toPython())
+            thermostat_data["heat_tolerance"].append(
+                -1.0 * result["tolerance_value"].toPython()
+            )
+            thermostat_data["cool_tolerance"].append(
+                1.0 * result["tolerance_value"].toPython()
+            )
+            thermostat_data["setpoint_deadband"].append(
+                result["deadband_value"].toPython()
+            )
             thermostat_data["active"].append(result["active_value"].toPython())
             thermostat_data["control_group"].append(result["control_group"].toPython())
             stage_count = result["stage_count"].toPython()
-            thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
+            thermostat_data["control_type_list"].append(
+                "binary" if stage_count == 1 else "stage"
+            )
             thermostat_data["resolution"].append(result["resolution"].toPython())
 
             # Query zone-specific data
-            zone_results = self.g.query(sparql_queries['get_unit_data'][self.ontology] % tstat)
+            zone_results = self.g.query(
+                sparql_queries["get_unit_data"][self.ontology] % tstat
+            )
 
             if len(zone_results) != 1:
-                raise Exception(f"Expected 1 result for each variable, got {len(zone_results)}")
+                raise Exception(
+                    f"Expected 1 result for each variable, got {len(zone_results)}"
+                )
 
             zone_result = zone_results.bindings[0]
-            thermostat_data["floor_area_list"].append(zone_result["floor_area"].toPython())
-            thermostat_data["window_area_list"].append(zone_result["window_area"].toPython())
+            thermostat_data["floor_area_list"].append(
+                zone_result["floor_area"].toPython()
+            )
+            thermostat_data["window_area_list"].append(
+                zone_result["window_area"].toPython()
+            )
             thermostat_data["azimuth_list"].append(zone_result["azimuth"].toPython())
             thermostat_data["tilt_list"].append(zone_result["tilt"].toPython())
-            thermostat_data["zone_ids"].append(zone_result["zone"].toPython().split("#")[-1])
-            thermostat_data["hvacs"].append(zone_result["hvac"].toPython().split("#")[-1])
-            thermostat_data["cooling_capacity"].append(zone_result["cooling_capacity"].toPython())
-            thermostat_data["heating_capacity"].append(zone_result["heating_capacity"].toPython())
+            thermostat_data["zone_ids"].append(
+                zone_result["zone"].toPython().split("#")[-1]
+            )
+            thermostat_data["hvacs"].append(
+                zone_result["hvac"].toPython().split("#")[-1]
+            )
+            thermostat_data["cooling_capacity"].append(
+                zone_result["cooling_capacity"].toPython()
+            )
+            thermostat_data["heating_capacity"].append(
+                zone_result["heating_capacity"].toPython()
+            )
             thermostat_data["cooling_cop"].append(zone_result["cooling_cop"].toPython())
             thermostat_data["heating_cop"].append(zone_result["heating_cop"].toPython())
 
             # Determine setpoint type
-            double_setpoint = self.g.query(sparql_queries["ask-dual-sp"][self.ontology] % tstat).askAnswer
+            double_setpoint = self.g.query(
+                sparql_queries["ask-dual-sp"][self.ontology] % tstat
+            ).askAnswer
 
-            single_setpoint = self.g.query(sparql_queries['ask-single-sp'][self.ontology] % tstat).askAnswer
+            single_setpoint = self.g.query(
+                sparql_queries["ask-single-sp"][self.ontology] % tstat
+            ).askAnswer
 
             if double_setpoint:
                 thermostat_data["setpoint_type"].append("double")
             elif single_setpoint:
                 thermostat_data["setpoint_type"].append("single")
             else:
-                raise Exception(f"Setpoint configuration unrecognized for thermostat {tstat}")
+                raise Exception(
+                    f"Setpoint configuration unrecognized for thermostat {tstat}"
+                )
 
             # Determine heating fuel type
-            electric_heat = self.g.query(sparql_queries['ask-electric-heat'][self.ontology] % tstat).askAnswer
+            electric_heat = self.g.query(
+                sparql_queries["ask-electric-heat"][self.ontology] % tstat
+            ).askAnswer
 
-            thermostat_data["fuel_heat_list"].append("electricity" if electric_heat else "gas")
+            thermostat_data["fuel_heat_list"].append(
+                "electricity" if electric_heat else "gas"
+            )
             thermostat_data["fuel_cool_list"].append("electricity")
-            thermostat_data['heat_availability'].append(True if electric_heat else False)
-            thermostat_data['cool_availability'].append(True)
+            thermostat_data["heat_availability"].append(
+                True if electric_heat else False
+            )
+            thermostat_data["cool_availability"].append(True)
 
-            # determining temperature unit 
-            unit_results = self.g.query(sparql_queries['get-tstat-units'][self.ontology] % tstat)
+            # determining temperature unit
+            unit_results = self.g.query(
+                sparql_queries["get-tstat-units"][self.ontology] % tstat
+            )
             if len(unit_results) > 1:
-                raise Exception("Multiple unit results, expected 1 unit, got %d" % len(unit_results))
-            thermostat_data['temperature_unit'].append(unit_results.bindings[0]['unit'])
+                raise Exception(
+                    "Multiple unit results, expected 1 unit, got %d" % len(unit_results)
+                )
+            thermostat_data["temperature_unit"].append(unit_results.bindings[0]["unit"])
 
         return thermostat_data
 

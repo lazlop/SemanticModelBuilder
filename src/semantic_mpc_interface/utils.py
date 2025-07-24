@@ -1,11 +1,17 @@
-from .namespaces import * 
-from rdflib import Graph, URIRef, Literal
-import pandas as pd
 from typing import Optional
+
+import pandas as pd
+from rdflib import Graph, Literal, URIRef
+
+from .namespaces import *
 
 
 def get_prefixes(g: Graph):
-    return "\n".join(f"PREFIX {prefix}: <{namespace}>" for prefix, namespace in g.namespace_manager.namespaces())
+    return "\n".join(
+        f"PREFIX {prefix}: <{namespace}>"
+        for prefix, namespace in g.namespace_manager.namespaces()
+    )
+
 
 def convert_to_prefixed(uri, g: Graph):
     try:
@@ -15,14 +21,23 @@ def convert_to_prefixed(uri, g: Graph):
         print(e)
         return uri
 
+
 def query_to_df(query, g: Graph):
     results = g.query(query)
     formatted_results = [
-        [convert_to_prefixed(value, g) if isinstance(value, (str, bytes)) and value.startswith("http") else str(value) for value in row]
+        [
+            (
+                convert_to_prefixed(value, g)
+                if isinstance(value, (str, bytes)) and value.startswith("http")
+                else str(value)
+            )
+            for value in row
+        ]
         for row in results
     ]
     df = pd.DataFrame(formatted_results, columns=[str(var) for var in results.vars])
     return df
+
 
 def add_brick_inverse_relations(g):
     # Dictionary of relationships and their inverses
@@ -48,7 +63,7 @@ def add_brick_inverse_relations(g):
         BRICK.regulates: BRICK.isRegulatedBy,
         BRICK.isRegulatedBy: BRICK.regulates,
         BRICK.hasSubject: BRICK.isSubjectOf,
-        BRICK.isSubjectOf: BRICK.hasSubject
+        BRICK.isSubjectOf: BRICK.hasSubject,
     }
     # For each relationship in the graph, add its inverse
     for s, p, o in g:
@@ -69,13 +84,15 @@ def get_unique_uri(graph, uri):
         count += 1
     return new_uri
 
+
 def get_uri_name(graph, uri):
     if isinstance(uri, URIRef):
         return graph.compute_qname(uri)[-1]
     else:
         return uri
 
-def create_uri_name_from_uris(graph,ns, uri_lst, suffix: Optional[str] = ""):
+
+def create_uri_name_from_uris(graph, ns, uri_lst, suffix: Optional[str] = ""):
     # append uri names in namespace and check uniqueness against graph
     # URI list may not be all uris
     node_names = []
