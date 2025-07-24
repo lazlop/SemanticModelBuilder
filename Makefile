@@ -7,10 +7,10 @@ install:  ## Install the package
 	pip install -e .
 
 install-dev:  ## Install the package with development dependencies
-	pip install -e .[dev,docs,jupyter]
+	pip install -e .[dev,docs]
 
-test:  ## Run tests
-	pytest
+test:  ## Run tests  --log-cli-level=CRITICAL
+	pytest  --show-capture=no --disable-warnings -v --tb=short
 
 test-cov:  ## Run tests with coverage
 	pytest --cov=src/semantic_mpc_interface --cov-report=html --cov-report=term-missing

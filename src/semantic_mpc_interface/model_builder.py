@@ -258,7 +258,7 @@ class ModelBuilder:
         template = self.templates.get_template_by_name(point_template)
 
         # probably don't want a generic point with user defined type - should all be templated.
-        if template == "point":
+        if template.name == "point":
             point_dict.update({"point_type": self.ontology_ns[point_type]})
 
         ref_template = self.templates.get_template_by_name(

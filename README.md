@@ -26,10 +26,18 @@ The Semantic MPC Interface provides a unified API for working with semantic buil
 
 ### Basic Installation
 
+Eventually when this is pip installable 
 ```bash
 pip install semantic-mpc-interface
 ```
-
+For now 
+```
+uv pip install git+https://github.com/lazlop/SemanticModelBuilder.git
+```
+```
+To install the dev branch using uv
+uv pip install git+https://github.com/lazlop/SemanticModelBuilder.git@develop
+```
 ### With Optional Dependencies
 
 ```bash
