@@ -1,13 +1,14 @@
 # %%
 from buildingmotif.namespaces import (
-    QUDT,
-    RDF,
-    RDFS,
-    SH,
-    XSD,
-    A,
-    Namespace,
     bind_prefixes,
+    A,
+    XSD,
+    QUDT,
+    RDFS,
+    A,
+    SH,
+    Namespace,
+    RDF,
 )
 
 HPF = Namespace(f"urn:hpflex#")
@@ -69,11 +70,43 @@ def bind_prefixes(graph):
     graph.bind("hpflex", HPF)
     graph.bind("hpfs", HPFS)
     graph.bind("s223", S223)
-    graph.bind("ref", REF)
 
+
+namespace_dict = {
+    "xsd": XSD,
+    "rdf": RDF,
+    "owl": OWL,
+    "rdfs": RDFS,
+    "skos": SKOS,
+    "sh": SH,
+    "quantitykind": QK,
+    "qudt": QUDT,
+    "unit": UNIT,
+    "brick": BRICK,
+    "tag": TAG,
+    "bsh": BSH,
+    "P": PARAM,
+    "constraint": CONSTRAINT,
+    "bmotif": BM,
+    "hpflex": HPF,
+    "hpfs": HPFS,
+    "s223": S223,
+    "ex1": "http://data.ashrae.org/standard223/data/scb-vrf#",
+}
+
+prefix_dict = {value: key for key, value in namespace_dict.items()}
 
 def get_prefixes(g):
     return "\n".join(
         f"PREFIX {prefix}: <{namespace}>"
         for prefix, namespace in g.namespace_manager.namespaces()
     )
+
+
+def convert_to_prefixed(uri, g):
+    try:
+        prefix, uri_ref, local_name = g.compute_qname(uri)
+        return f"{prefix}:{local_name}"
+    except Exception as e:
+        print(e)
+        return uri

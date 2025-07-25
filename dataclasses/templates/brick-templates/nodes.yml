@@ -1,0 +1,93 @@
+# Brick templates for nodes
+# Updated to match S223 templates structure
+hvac-zone:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    p:name a brick:HVAC_Zone .
+  optional: [has-space,space,has-window, window]
+  dependencies:
+    - template: has-space
+      args: {"name":"name", "target":"space_name"}
+    - template: space
+      args: {"name":"space_name"}
+    - template: has-window
+      args: {'name': 'name', 'target':'window_name'}
+    - template: window
+      args: {'name': 'window_name'}
+
+has-space:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:hasPart p:target.
+  
+has-window:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:hasPart p:target .
+space:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    p:name a brick:Space ;
+        brick:area p:area_name .
+  dependencies:
+    - template: area
+      args: {"name": "area_name", "value": "area_value", "unit":"area_unit"}
+window:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    p:name a brick:Window ;
+        brick:area p:area_name ;
+        brick:azimuth p:azimuth_name ;
+        brick:tilt p:tilt_name .
+  dependencies:
+    - template: area
+      args: {"name": "area_name", "value": "area_value", "unit":"area_unit"}
+    - template: azimuth
+      args: {"name": "azimuth_name", "value": "azimuth_value"}
+    - template: tilt
+      args: {"name": "tilt_name", "value": "tilt_value"}
+# treating units as consistent for now
+area:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name brick:value p:value ;
+        qudt:hasUnit p:unit ;
+        qudt:hasQuantityKind quantitykind:Area .
+tilt:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name brick:value p:value ;
+        qudt:hasUnit unit:Degree ;
+        qudt:hasQuantityKind quantitykind:Tilt .
+azimuth:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name brick:value p:value ;
+        qudt:hasUnit unit:Degree ;
+        qudt:hasQuantityKind quantitykind:Azimuth . 

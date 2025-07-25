@@ -1,0 +1,111 @@
+has-point:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name s223:hasProperty p:target.
+
+has-reference:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name s223:hasExternalReference p:target.
+
+
+# weird because domain spaces and physical spaces in s223 are weird
+has-space:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:DomainSpace .
+    p:target a s223:PhysicalSpace .
+    p:name-physical-space s223:encloses p:name .
+    p:name-physical-space s223:contains p:target .
+
+has-location:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name s223:hasPhysicalLocation p:target.
+
+# For window should also add light
+has-window:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+
+    p:name a s223:DomainSpace .
+    p:target a s223:Window .
+  dependencies:
+    - template: air-bidirectional-connects-to
+      args: {"name": "name", "target": "target"}
+
+air-connects-to:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name s223:cnx p:outlet_cp .
+    p:target s223:cnx p:inlet_cp .
+    p:outlet_cp s223:cnx p:connection .
+    p:connection s223:cnx p:inlet_cp .
+    p:name s223:connectsTo p:target .
+  dependencies:
+    - template: air-outlet-connectionpoint
+      args: {"name": "outlet_cp"}
+    - template: air-inlet-connectionpoint
+      args: {"name": "inlet_cp"}
+    - template: connection
+      args: {"name": "connection"}
+
+# because of how SPARQL works, below template can not be turned into SPARQL for perfect inference
+# air-bidirectional-connects-to will be made between name and target and name and connection
+air-bidirectional-connects-to:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name s223:cnx p:name_cp .
+    p:target s223:cnx p:target_cp .
+    p:name_cp s223:cnx p:connection .
+    p:connection s223:cnx p:target_cp .
+    p:name s223:connectsTo p:target .
+  dependencies:
+    - template: air-bidirectional-connectionpoint
+      args: {"name": "name_cp"}
+    - template: air-bidirectional-connectionpoint
+      args: {"name": "target_cp"}
+    - template: connection
+      args: {"name": "connection"}
