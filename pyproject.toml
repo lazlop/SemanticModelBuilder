@@ -18,11 +18,3 @@ dependencies = [
 ]
 [tool.setuptools]
 packages = ["BrickModelInterface"]
-
-# Ensure non-Python resources are included inside the wheel so they are
-# accessible via ``importlib.resources`` at runtime.
-[tool.setuptools.package-data]
-"BrickModelInterface" = [
-    "qudt/*.csv",
-    "qudt/*.ttl",
-]
