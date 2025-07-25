@@ -13,17 +13,6 @@ model = Model.create(HPF)
 # %%
 tmp = Library.load(directory='dataclasses/templates/brick-templates')
 
-# %%
-zone = tmp.get_template_by_name('hvac-zone')
-
-# %%
-zone_in = zone.inline_dependencies()
-
-# %%
-print(zone_in.all_parameters)
-
-# %%
-print(zone_in.body.serialize(format = 'ttl'))
 
 # %%
 def get_var_name(graph, node):
@@ -52,20 +41,7 @@ def get_query(graph):
      query = f"""{prefixes}\nSELECT DISTINCT * WHERE {{ {where} }}"""
      return query
 
-# %%
-query = get_query(zone_in.body)
-
-# %%
-print(query)
-
-# %%
-g = Graph()
-g.parse('tutorial/bldg2.ttl')
-
-# %%
-df = query_to_df(query, g)
-
-# %%
+# AI generated from here - would like to generate these classes direct from templates
 class Value:
     def __init__(self, value, unit, name=None):
         self.value = float(value)
@@ -160,42 +136,52 @@ def dataframe_to_objects(df):
     
     return list(zones.values())
 
-# Convert dataframe to objects
-zones = dataframe_to_objects(df)
+def get_objects(graph):
+    zone = tmp.get_template_by_name('hvac-zone')
+    zone_in = zone.inline_dependencies()
+    query = get_query(zone_in.body)
+    df = query_to_df(query, graph)
+    zones = dataframe_to_objects(df)
+    return zones
+if __name__ == "__main__":
+    g = Graph()
+    g.parse('tutorial/bldg2.ttl')
+    # Convert dataframe to objects
+    zones = get_objects(g)
 
-# %%
-# Display the created objects
-for zone in zones:
-    print(f"\n{zone}")
-    for space in zone.spaces:
-        print(f"  {space}")
-    for window in zone.windows:
-        print(f"  {window}")
+    # %%
+    # Display the created objects
+    for zone in zones:
+        print(f"\n{zone}")
+        for space in zone.spaces:
+            print(f"  {space}")
+        for window in zone.windows:
+            print(f"  {window}")
 
-# %%
-# Example: Access specific data from the objects
-print("\nExample data access:")
-if zones:
-    first_zone = zones[0]
-    print(f"First zone name: {first_zone.name}")
-    
-    if first_zone.spaces:
-        first_space = first_zone.spaces[0]
-        print(f"First space area: {first_space.area.value} {first_space.area.unit}")
-    
-    if first_zone.windows:
-        first_window = first_zone.windows[0]
-        print(f"First window area: {first_window.area.value} {first_window.area.unit}")
-        print(f"First window azimuth: {first_window.azimuth.value} {first_window.azimuth.unit}")
-        print(f"First window tilt: {first_window.tilt.value} {first_window.tilt.unit}")
+    # %%
+    # Example: Access specific data from the objects
+    print("\nExample data access:")
+    if zones:
+        first_zone = zones[0]
+        print(f"First zone name: {first_zone.name}")
+        
+        if first_zone.spaces:
+            first_space = first_zone.spaces[0]
+            print(f"First space area: {first_space.area.value} {first_space.area.unit}")
+        
+        if first_zone.windows:
+            first_window = first_zone.windows[0]
+            print(f"First window area: {first_window.area.value} {first_window.area.unit}")
+            print(f"First window azimuth: {first_window.azimuth.value} {first_window.azimuth.unit}")
+            print(f"First window tilt: {first_window.tilt.value} {first_window.tilt.unit}")
 
-# %%
-# Verification: Check that we have the expected number of objects
-print(f"\nVerification:")
-print(f"Total zones created: {len(zones)}")
-total_spaces = sum(len(zone.spaces) for zone in zones)
-total_windows = sum(len(zone.windows) for zone in zones)
-print(f"Total spaces: {total_spaces}")
-print(f"Total windows: {total_windows}")
+    # %%
+    # Verification: Check that we have the expected number of objects
+    print(f"\nVerification:")
+    print(f"Total zones created: {len(zones)}")
+    total_spaces = sum(len(zone.spaces) for zone in zones)
+    total_windows = sum(len(zone.windows) for zone in zones)
+    print(f"Total spaces: {total_spaces}")
+    print(f"Total windows: {total_windows}")
 
-# %%
+    # %%
