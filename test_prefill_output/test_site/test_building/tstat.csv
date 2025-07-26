@@ -1,1 +1,4 @@
 name,setpoint_deadband-unit,resolution-value,tolerance,tolerance-value,setpoint_deadband,tolerance-unit,active,stage_count-value,resolution-unit,active-value,stage_count,setpoint_deadband-value,resolution
+tstat_zone_1,DEG_F,,,,,DEG_F,,,DEG_F,,,,
+tstat_zone_2,DEG_F,,,,,DEG_F,,,DEG_F,,,,
+tstat_zone_3,DEG_F,,,,,DEG_F,,,DEG_F,,,,
