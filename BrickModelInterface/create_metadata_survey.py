@@ -93,14 +93,14 @@ class SurveyGenerator:
     def _create_site_info_file(self):
         """Create site information CSV file"""
         site_info = {
-            "headers": ["site_id", "timezone", "latitude", "longitude", "noaa_station"],
+            "headers": ["site_id", "timezone", "latitude", "longitude", "noaa_station","building_id"],
             "file": "site_info.csv"
         }
         
         with open(self.base_dir / site_info["file"], 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(site_info["headers"])
-            writer.writerow([self.site_id, "", "", "", ""])  # Empty row for user input
+            writer.writerow([self.site_id, "", "", "", "", self.building_id])  # Empty row for user input
 
 
     def _create_space_files(self, zones_contain_spaces):

@@ -315,17 +315,38 @@ class BuildingMetadataLoader:
         value = self.g.value(subject, predicate)
         return value.toPython() if value else None
 
+    def _get_property_value(self, subject, predicate) -> Any:
+        """Helper method to get a property value by following the property URI to its value."""
+        property_node = self.g.value(subject, predicate)
+        if property_node:
+            # Try to get the brick:value first
+            value = self.g.value(property_node, BRICK.value)
+            if value:
+                return value.toPython()
+            # For building_id, check if the property node has a brick:buildingID value
+            if predicate == BRICK.buildingID:
+                building_id_value = self.g.value(property_node, BRICK.buildingID)
+                if building_id_value:
+                    return building_id_value.toPython()
+            # For NOAA station, check if the property node has a hpflex:hasNOAAStation value
+            if predicate == BRICK.hasNOAAStation:
+                noaa_value = self.g.value(property_node, self.HPF.hasNOAAStation)
+                if noaa_value:
+                    return noaa_value.toPython()
+        return None
+
     def get_site_info(self) -> Dict:
         """Fetch site-level metadata."""
         if self.ontology == 'brick':
             return{
-            "tz": self._get_value(self.site, BRICK.timezone),
-            "latitude": self._get_value(self.site, BRICK.latitude),
-            "longitude": self._get_value(self.site, BRICK.longitude),
-            "NOAAstation": self._get_value(self.site, BRICK.hasNOAAStation),
+            "tz": self._get_property_value(self.site, BRICK.timezone),
+            "latitude": self._get_property_value(self.site, BRICK.latitude),
+            "longitude": self._get_property_value(self.site, BRICK.longitude),
+            "NOAAstation": self._get_property_value(self.site, BRICK.hasNOAAStation),
             # project_id and site_id are currently the same
             "project_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
             "site_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
+            "building_id": self._get_property_value(self.site, BRICK.buildingID),
         }
         else:
             results = self.g.query(sparql_queries["site_info"][self.ontology])
