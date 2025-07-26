@@ -1,0 +1,189 @@
+# Brick templates for nodes
+# Updated to match S223 templates structure
+hvac-zone:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    p:name a brick:HVAC_Zone .
+  optional: [has-space,space,has-window,window]
+  dependencies:
+    - template: has-space
+      args: {"name":"name", "target":"space_name"}
+    - template: space
+      args: {"name":"space_name"}
+    - template: has-window
+      args: {'name': 'name', 'target':'window_name'}
+    - template: window
+      args: {'name': 'window_name'}
+space:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    p:name a brick:Space ;
+        brick:area p:area_name .
+  dependencies:
+    - template: area
+      args: {"name": "area_name", "value": "area_value", "unit":"area_unit"}
+window:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    p:name a brick:Window ;
+        brick:area p:area_name ;
+        brick:azimuth p:azimuth_name ;
+        brick:tilt p:tilt_name .
+  dependencies:
+    - template: area
+      args: {"name": "area_name", "value": "area_value", "unit":"area_unit"}
+    - template: azimuth
+      args: {"name": "azimuth_name", "value": "azimuth_value"}
+    - template: tilt
+      args: {"name": "tilt_name", "value": "tilt_value"}
+hp-rtu:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    p:name a brick:RTU, brick:Packaged_Heat_Pump ;
+      brick:coolingCapacity p:cooling_capacity_name ;
+      brick:heatingCapacity p:heating_capacity_name ;
+      brick:heatingCoefficientOfPerformance p:heating_COP_name ;
+      brick:coolingCoefficientOfPerformance p:cooling_COP_name ;
+      .
+  dependencies:
+    - template: cooling-capacity
+      args: {"name": "cooling_capacity_name", "value": "cooling_capacity_value"}
+    - template: heating-capacity
+      args: {"name": "heating_capacity_name", "value": "heating_capacity_value"}
+    - template: cooling-COP
+      args: {"name": "cooling_COP_name", "value": "cooling_COP_value"}
+    - template: heating-COP
+      args: {"name": "heating_COP_name", "value": "heating_COP_value"}
+tstat:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a brick:Thermostat ;
+      brick:operationalStageCount p:stage_count ;
+      brick:hasPoint p:setpoint_deadband ;
+      brick:hasPoint p:tolerance ;
+      brick:hasPoint p:active ;
+      brick:resolution p:resolution ;
+      .
+  dependencies:
+    - template: tstat-stage_count
+      args: {"name": "stage_count"}
+    - template: tstat-deadband
+      args: {"name": "setpoint_deadband"}
+    - template: tstat-tolerance
+      args: {"name": "tolerance"}
+    - template: tstat-active
+      args: {"name": "active"}
+    - template: tstat-resolution
+      args: {"name": "resolution"}
+
+# Adding thermostat with heating/cooling/occupancy settings to match S223 template
+tstat-heating-cooling-occupancy:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    p:name a brick:Thermostat ;
+      brick:hasPoint p:occ-heating-setpoint ;
+      brick:hasPoint p:occ-cooling-setpoint ;
+      brick:hasPoint p:unocc-heating-setpoint ;
+      brick:hasPoint p:unocc-cooling-setpoint ;
+      brick:hasPoint p:active-heating-stages ;
+      brick:hasPoint p:active-cooling-stages ;
+      brick:hasPoint p:temperature ;
+      .
+  dependencies:
+    - template: occ-heating-setpoint
+      args: {"name": "occ-heating-setpoint"}
+    - template: occ-cooling-setpoint
+      args: {"name": "occ-cooling-setpoint"}
+    - template: unocc-heating-setpoint
+      args: {"name": "unocc-heating-setpoint"}
+    - template: unocc-cooling-setpoint
+      args: {"name": "unocc-cooling-setpoint"}
+    - template: tstat
+      args: {"name": "name"}
+    - template: temperature
+      args: {"name": "temperature"}  
+    - template: active-heating-stages
+      args: {"name": "active-heating-stages"}
+    - template: active-cooling-stages
+      args: {"name": "active-cooling-stages"}
+
+site:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a brick:Site ;
+      brick:timezone p:timezone ;
+      brick:latitude p:latitude ;
+      brick:longitude p:longitude ;
+      brick:hasNOAAStation p:noaastation ;
+      .
+  dependencies:
+    - template: timezone
+      args: {"name": "timezone_name", "value": "timezone_value"}
+    - template: latitude
+      args: {"name": "latitude_name", "value": "latitude_value"}
+    - template: longitude
+      args: {"name": "longitude_name", "value": "longitude_value"}
+    - template: noaastation
+      args: {"name": "noaastation_name", "value": "noaastation_value"}
+
+# Adding connection point templates to match S223
+air-bidirectional-connectionpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a brick:Connection_Point ;
+      brick:hasMedium brick:Air ;
+    .
+
+air-outlet-connectionpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a brick:Connection_Point, brick:Outlet ;
+      brick:hasMedium brick:Air ;
+    .
+
+air-inlet-connectionpoint:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a brick:Connection_Point, brick:Inlet ;
+      brick:hasMedium brick:Air ;
+    .
+
+connection:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a brick:Connection .
