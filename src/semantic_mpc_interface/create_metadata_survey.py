@@ -40,34 +40,37 @@ def validate_dict(input_dict):
 
 
 class SurveyGenerator:
-    def __init__(self, site_id, building_id, output_dir, system_of_units="IP", ontology = 'brick', hvac_type = 'hp-rtu', template_list = ["space", "hp-rtu", "tstat", "window"], overwrite = False):
-        # TODO: is there any default for windows added?
-        # hvac_type currently unused, but may be used later for creation of the brick model
-        # SYSTEM of units can either be IP or SI, and default units will be filled out for all values
+    """
+    General survey generator for creating CSV files from templates.
+    This class handles the basic template loading and CSV generation functionality.
+    """
+    def __init__(self, site_id, building_id, output_dir, ontology='brick', template_dict=None, overwrite=False):
+        """
+        Initialize the general survey generator.
+        
+        Args:
+            site_id (str): Site identifier
+            building_id (str): Building identifier
+            output_dir (str): Output directory path
+            ontology (str): Ontology type ('brick' or 's223')
+            template_dict (list): List of template names to generate CSVs for
+            overwrite (bool): Whether to overwrite existing directories
+        """
         self.bm = BuildingMOTIF("sqlite://")
         self.site_id = site_id
         self.building_id = building_id
         self.base_dir = None
-        self.hvac_type = hvac_type
-        self.system_of_units = system_of_units
-        self.template_list = template_list
-        if system_of_units == "IP":
-            self.default_area_unit = "FT2"
-            self.default_temperature_unit = "DEG_F"
-        else:
-            self.default_area_unit = "M2"
-            self.default_temperature_unit = "DEG_C"
         self.ontology = ontology
+        self.template_dict = template_dict or {}
         self._load_templates()
         self.base_dir = Path(output_dir) / self.site_id / self.building_id
         self._create_directory_structure(output_dir, overwrite)
         self.template_csvs = {}
-        for name in template_list:
-            template = self.templates.get_template_by_name(name)
-            file = self._create_csv(template)
-            self.template_csvs[name] = file
+        for file_name, template_name in self.template_dict.items():
+            template = self.templates.get_template_by_name(template_name)
+            file = self._create_csv(file_name, template)
+            self.template_csvs[file_name] = file
 
-    
     def _load_templates(self) -> None:
         """Load ontology-specific templates."""
         template_dir = str(
@@ -87,40 +90,8 @@ class SurveyGenerator:
             print(f"Failed to load templates from {template_dir}: {e}")
             raise
 
-    def easy_config(self, zone_space_window_list):
-        """Creates generic SMCB configuration with one HVAC unit per zone, filling in zone and space names and assuming one tstat per zone and one hvac per zone
-        zone_space_window_list: list
-            List with an entry per zone, in each entry is a touple with a list of the amount of spaces and windows
-            e.g. 1 zone, with 2 spaces and 3 windows is [(2,3)]
-        """
-        self.hvacs_feed_hvacs = {}
-        self.hvacs_feed_zones = {}
-        self.zones_contain_spaces = {}
-        self.zones_contain_windows = {}
-        for zone_num, zone_contents in enumerate(zone_space_window_list):
-            zone_name = f"zone_{zone_num + 1}"
-            self.hvacs_feed_zones[f"hvac_{zone_num + 1}"] = [zone_name]
-            self.zones_contain_spaces[zone_name] = []
-            self.zones_contain_windows[zone_name] = []
-            (amt_spaces, amt_windows) = zone_contents
-            for space_num in range(amt_spaces):
-                space_name = f"space_{zone_num + 1}_{space_num + 1}"
-                self.zones_contain_spaces[zone_name].append(space_name)
-            for window_num in range(amt_windows):
-                window_name = f"window_{zone_num + 1}_{window_num + 1}"
-                self.zones_contain_windows[zone_name].append(window_name)
-
-        # TODO: fill in the topology of the building and output file
-        self._building_structure(
-            self.hvacs_feed_hvacs,
-            self.hvacs_feed_zones,
-            self.zones_contain_spaces,
-            self.zones_contain_windows,
-            # output_path,
-        )
-
-    def _create_directory_structure(self, base_path, overwrite = False):
-        """Create the directory structure for the Brick model"""
+    def _create_directory_structure(self, base_path, overwrite=False):
+        """Create the directory structure for the survey"""
         self.base_dir = Path(base_path) / self.site_id / self.building_id
 
         # Check if main directory exists and is not empty
@@ -131,29 +102,148 @@ class SurveyGenerator:
 
         # Create main directory and parent directories if they don't exist
         self.base_dir.mkdir(parents=True, exist_ok=True)
-        # No more subdirs
 
-    def _create_csv(self, template):
-        """Create site information CSV file"""
+    def _create_csv(self, file_name, template):
+        """Create CSV file from template"""
         params = template.all_parameters
         template = template.inline_dependencies()
         mapping = {}
         for param in params:
             if '_name' in param:
-                template = template.evaluate({param:Literal('na')})
+                template = template.evaluate({param: Literal('na')})
             if '_value' in param:
-                mapping[param] = param.split['_'][-1]
-        file = str(self.base_dir / template.name) + ".csv"
+                mapping[param] = param.split('_')[:-1]
+        file = str(self.base_dir / file_name) + ".csv"
         template.generate_csv(file)
         self._edit_cols(file, mapping)
         return file 
 
-    def _edit_cols(self, file, mapping, first_col = 'name'):
+    def _edit_cols(self, file, mapping, first_col='name'):
+        """Edit column names in CSV file"""
         df = pd.read_csv(file)
         new_cols = [mapping.get(first_col, first_col)] + [mapping.get(col, col) for col in df.columns if col != first_col]
         print(new_cols)
         df = df[new_cols]
-        df.to_csv(file, index = False)
+        df.to_csv(file, index=False)
+
+    def _create_point_list(self):
+        """Create csv-file to which point list should be added"""
+        headers = ["point_of", "point_type", "point_name", "quantitykind", "unit"]
+        with open(self.base_dir / f"point_list.csv", "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+
+
+class BuildingStructureGenerator(SurveyGenerator):
+    """
+    Specialized generator for building structures with HVAC, zones, spaces, and windows.
+    This class extends SurveyGenerator with specific functionality for building systems.
+    """
+    # TODO: update to use template_dict
+    def __init__(self, site_id, building_id, output_dir, system_of_units="IP", ontology='brick', 
+                 template_dict={"space":"space", "hvac":"hp-rtu", "tstat":"tstat", "window":"window"}, overwrite=False):
+        """
+        Initialize the building structure generator.
+        
+        Args:
+            site_id (str): Site identifier
+            building_id (str): Building identifier
+            output_dir (str): Output directory path
+            system_of_units (str): Unit system ('IP' or 'SI')
+            ontology (str): Ontology type ('brick' or 's223')
+            hvac_type (str): HVAC system type
+            template_dict (list): List of template names (defaults to building-specific templates)
+            overwrite (bool): Whether to overwrite existing directories
+        """
+        self.hvac_type = template_dict['hvac']
+        self.system_of_units = system_of_units
+        
+        # Set default units based on system
+        if system_of_units == "IP":
+            self.default_area_unit = "FT2"
+            self.default_temperature_unit = "DEG_F"
+        else:
+            self.default_area_unit = "M2"
+            self.default_temperature_unit = "DEG_C"
+        
+        # Initialize parent class
+        super().__init__(site_id, building_id, output_dir, ontology, template_dict, overwrite)
+
+    def easy_config(self, zone_space_window_list):
+        """Creates generic building configuration with one HVAC unit per zone
+        
+        Args:
+            zone_space_window_list: list
+                List with an entry per zone, in each entry is a tuple with the amount of spaces and windows
+                e.g. 1 zone, with 2 spaces and 3 windows is [(2,3)]
+        """
+        self.hvacs_feed_hvacs = {}
+        self.hvacs_feed_zones = {}
+        self.zones_contain_spaces = {}
+        self.zones_contain_windows = {}
+        
+        for zone_num, zone_contents in enumerate(zone_space_window_list):
+            zone_name = f"zone_{zone_num + 1}"
+            self.hvacs_feed_zones[f"hvac_{zone_num + 1}"] = [zone_name]
+            self.zones_contain_spaces[zone_name] = []
+            self.zones_contain_windows[zone_name] = []
+            (amt_spaces, amt_windows) = zone_contents
+            
+            for space_num in range(amt_spaces):
+                space_name = f"space_{zone_num + 1}_{space_num + 1}"
+                self.zones_contain_spaces[zone_name].append(space_name)
+            
+            for window_num in range(amt_windows):
+                window_name = f"window_{zone_num + 1}_{window_num + 1}"
+                self.zones_contain_windows[zone_name].append(window_name)
+
+        self._building_structure(
+            self.hvacs_feed_hvacs,
+            self.hvacs_feed_zones,
+            self.zones_contain_spaces,
+            self.zones_contain_windows,
+        )
+
+    def _building_structure(self, hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows):
+        """Generate the complete building structure and prefill CSVs
+        
+        Args:
+            hvacs_feed_hvacs: dict
+                Dictionary that describes which HVAC systems feed which HVAC systems.
+                e.g. {ahu_1: [vav_1, vav_2, vav_3]}
+            hvacs_feed_zones: dict
+                Dictionary that describes which HVAC systems feed which zones.
+                e.g. {vav_1: [zone_1], vav_2: [zone_2, zone_3]}
+            zones_contain_spaces: dict
+                Dictionary describing which zones contain which spaces.
+                e.g. {zone_1: [space_1, space_2, space_3]}
+            zones_contain_windows: dict
+                Dictionary describing which zones contain which windows.
+                e.g. {zone_1: [window1, window2]}
+        """
+        # Data validation
+        validate_dict(hvacs_feed_hvacs)
+        validate_dict(hvacs_feed_zones)
+        validate_dict(zones_contain_spaces)
+        validate_dict(zones_contain_windows)
+
+        self._create_point_list()
+
+        # Save configuration
+        config = {
+            "site_id": self.site_id,
+            "hvac_type": self.hvac_type,
+            "hvacs_feed_hvacs": hvacs_feed_hvacs,
+            "hvacs_feed_zones": hvacs_feed_zones,
+            "zones_contain_spaces": zones_contain_spaces,
+            "zones_contain_windows": zones_contain_windows,
+        }
+        print(config)
+        with open(self.base_dir / "config.json", "w") as f:
+            json.dump(config, f, indent=4)
+        
+        # Prefill CSV files with data from config
+        self._prefill_csv_defaults(config)
 
     def _prefill_csv_defaults(self, config):
         """
@@ -171,7 +261,7 @@ class SurveyGenerator:
             self._prefill_window_csv(config['zones_contain_windows'])
         
         # Prefill HVAC CSV
-        if 'hp-rtu' in self.template_csvs and 'hvacs_feed_zones' in config:
+        if 'hvac' in self.template_csvs and 'hvacs_feed_zones' in config:
             self._prefill_hvac_csv(config['hvacs_feed_zones'])
         
         # Prefill thermostat CSV (one per zone)
@@ -181,7 +271,6 @@ class SurveyGenerator:
     def _prefill_space_csv(self, zones_contain_spaces):
         """Prefill space CSV with space names and default values"""
         space_file = self.template_csvs['space']
-        df = pd.read_csv(space_file)
         
         # Clear existing data and create new rows
         new_rows = []
@@ -200,7 +289,6 @@ class SurveyGenerator:
     def _prefill_window_csv(self, zones_contain_windows):
         """Prefill window CSV with window names and default values"""
         window_file = self.template_csvs['window']
-        df = pd.read_csv(window_file)
         
         # Clear existing data and create new rows
         new_rows = []
@@ -220,8 +308,7 @@ class SurveyGenerator:
 
     def _prefill_hvac_csv(self, hvacs_feed_zones):
         """Prefill HVAC CSV with HVAC unit names and default values"""
-        hvac_file = self.template_csvs['hp-rtu']
-        df = pd.read_csv(hvac_file)
+        hvac_file = self.template_csvs['hvac']
         
         # Clear existing data and create new rows
         new_rows = []
@@ -241,7 +328,6 @@ class SurveyGenerator:
     def _prefill_tstat_csv(self, hvacs_feed_zones):
         """Prefill thermostat CSV with thermostat names (one per zone) and default values"""
         tstat_file = self.template_csvs['tstat']
-        df = pd.read_csv(tstat_file)
         
         # Clear existing data and create new rows
         new_rows = []
@@ -269,67 +355,6 @@ class SurveyGenerator:
         new_df = pd.DataFrame(new_rows)
         new_df.to_csv(tstat_file, index=False)
 
-    def _create_point_list(self):
-        """Create csv-file to which point list should be added"""
-        # TODO: Note that point_type can be
-        headers = ["point_of", "point_type", "point_name", "quantitykind", "unit"]
-        with open(self.base_dir / f"point_list.csv", "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(headers)
-
-    def _building_structure(
-        self,
-        hvacs_feed_hvacs,
-        hvacs_feed_zones,
-        zones_contain_spaces,
-        zones_contain_windows,
-        # output_path,
-    ):
-        """Generate the complete template structure
-
-        hvacs_feed_hvacs: dict
-            Dictionary that describes which HVAC systems feed which HVAC systems.
-            e.g. {ahu_1: [vav_1, vav_2, vav_3]}
-
-        hvacs_feed_zones: dict
-            Dictionary that describes which HVAC systems feed which zones.
-            e.g. {vav_1: [zone_1], vav_2: [zone_2, zone_3]}
-
-        zones_contain_spaces: dict
-            Dictonary describing which zones contain which spaces.
-            e.g. {zone_1: [space_1, space_2, space_3]}
-
-        zones_contain_windows: dict
-            Dictionary describing which zones contain which windows.
-            e.g. {zone_1: [window1, window2]}
-
-        Currently, dictionaries are not handled recursively.
-        """
-        # a little data validation
-        validate_dict(hvacs_feed_hvacs)
-        validate_dict(hvacs_feed_zones)
-        validate_dict(zones_contain_spaces)
-        validate_dict(zones_contain_windows)
-
-        # self._create_directory_structure(output_path)
-        self._create_point_list()
-
-        # Save configuration
-        config = {
-            "site_id": self.site_id,
-            "hvac_type": self.hvac_type,
-            "hvacs_feed_hvacs": hvacs_feed_hvacs,
-            "hvacs_feed_zones": hvacs_feed_zones,
-            "zones_contain_spaces": zones_contain_spaces,
-            "zones_contain_windows": zones_contain_windows,
-        }
-        print(config)
-        with open(self.base_dir / "config.json", "w") as f:
-            json.dump(config, f, indent=4)
-        
-        # Prefill CSV files with data from config
-        self._prefill_csv_defaults(config)
-
     def prefill_from_config(self, config_path=None):
         """
         Prefill CSV files from an existing configuration file or the current config.
@@ -355,7 +380,3 @@ class SurveyGenerator:
             print(f"Error parsing config file: {e}")
         except Exception as e:
             print(f"Error prefilling CSVs: {e}")
-
-    def _defaults(self):
-        # TODO: Any default informatino to fill?
-        pass
