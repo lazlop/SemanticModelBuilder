@@ -94,26 +94,10 @@ sparql_queries = {
                 }"""
     },
         "get_unit_data": {"brick": """
-                SELECT DISTINCT ?floor_area ?floor_area_unit ?window_area ?window_area_unit ?azimuth ?azimuth_unit ?tilt ?tilt_unit 
-                ?zone ?hvac ?cooling_capacity ?cooling_capacity_unit ?heating_capacity ?heating_capacity_unit ?cooling_cop ?heating_cop  WHERE {
+                SELECT DISTINCT ?zone ?hvac ?cooling_capacity ?cooling_capacity_unit ?heating_capacity ?heating_capacity_unit ?cooling_cop ?heating_cop  WHERE {
                 <%s> brick:hasLocation ?zone .
                 ?zone a brick:HVAC_Zone ;
                     brick:isFedBy ?hvac .
-                ?zone brick:hasPart ?room, ?window .
-                ?room a brick:Space ;
-                    brick:area ?room_area .
-                ?room_area brick:value ?floor_area ;
-                    qudt:hasUnit ?floor_area_unit .
-                ?window a brick:Window ;
-                    brick:area ?window_area_prop ;
-                    brick:azimuth ?window_azimuth_prop ;
-                    brick:tilt ?window_tilt_prop .
-                ?window_area_prop brick:value ?window_area ;
-                    qudt:hasUnit ?window_area_unit .
-                ?window_azimuth_prop brick:value ?azimuth ;
-                    qudt:hasUnit ?azimuth_unit .
-                ?window_tilt_prop brick:value ?tilt ;
-                    qudt:hasUnit ?tilt_unit .
                 ?hvac brick:coolingCapacity ?cooling_capacity_prop; 
                     brick:heatingCapacity ?heating_capacity_prop.
                 ?cooling_capacity_prop brick:value ?cooling_capacity;
@@ -125,28 +109,11 @@ sparql_queries = {
                 }
             """,
             "s223": """
-                SELECT DISTINCT ?floor_area ?floor_area_unit ?window_area ?window_area_unit ?azimuth ?azimuth_unit ?tilt ?tilt_unit 
-                         ?zone ?hvac ?cooling_capacity ?cooling_capacity_unit ?heating_capacity ?heating_capacity_unit ?cooling_cop ?heating_cop   WHERE {
+                SELECT DISTINCT ?zone ?hvac ?cooling_capacity ?cooling_capacity_unit ?heating_capacity ?heating_capacity_unit ?cooling_cop ?heating_cop   WHERE {
                 <%s> hpfs:has-location ?zone .
                 ?zone a s223:DomainSpace .
                 ?hvac s223:connectsTo ?zone ;
                     s223:hasProperty ?c_cap_prop, ?h_cap_prop, ?c_cop_prop, ?h_cop_prop.
-                ?zone hpfs:has-window ?window .
-                ?zone hpfs:has-space ?space .
-                ?space s223:hasProperty ?area .
-                ?area a hpfs:area; 
-                    s223:hasValue ?floor_area ;
-                    qudt:hasUnit ?floor_area_unit .
-                ?window s223:hasProperty ?warea, ?tilt_prop, ?azimuth_prop .
-                ?warea a hpfs:area ;
-                    s223:hasValue ?window_area ;
-                    qudt:hasUnit ?window_area_unit .
-                ?tilt_prop a hpfs:tilt ;
-                    s223:hasValue ?tilt ;
-                    qudt:hasUnit ?tilt_unit .
-                ?azimuth_prop a hpfs:azimuth ;
-                    s223:hasValue ?azimuth ;
-                    qudt:hasUnit ?azimuth_unit .
                 ?c_cap_prop a hpfs:cooling-capacity ;
                     s223:hasValue ?cooling_capacity ;
                     qudt:hasUnit ?cooling_capacity_unit .
@@ -216,6 +183,78 @@ sparql_queries = {
                 <%s> hpfs:has-location/^s223:connectsTo ?unit .
                 ?unit a/rdfs:subClassOf* s223:HeatPump .
             }}"""
+        },
+        "get_floor_area_data": {"brick": """
+                SELECT ?zone (SUM(?areaValue) AS ?floor_area) (SAMPLE(?areaUnit) AS ?floor_area_unit)
+                WHERE {
+                <%s> brick:hasLocation ?zone .
+                ?space a brick:Space ;
+                        brick:isPartOf ?zone ;
+                        brick:area ?area .
+                ?area qudt:hasQuantityKind quantitykind:Area ;
+                        qudt:hasUnit ?areaUnit ;
+                        brick:value ?areaValue .
+                }
+                GROUP BY ?zone
+                """,
+            "s223": """
+                SELECT ?zone (SUM(?areaValue) AS ?floor_area) (SAMPLE(?areaUnit) AS ?floor_area_unit)
+                WHERE {
+                <%s> hpfs:has-location ?zone .
+                ?zone hpfs:has-space ?space .
+                ?space s223:hasProperty ?area .
+                ?area a hpfs:area; 
+                    s223:hasValue ?areaValue ;
+                    qudt:hasUnit ?areaUnit .
+                }
+                GROUP BY ?zone
+                """
+        },
+        "get_window_data": {"brick": """
+                SELECT ?window ?window_area_value ?window_area_unit ?window_tilt_value ?window_azimuth_value
+                WHERE {
+                <%s> brick:hasLocation ?zone .
+                ?zone a brick:HVAC_Zone .
+                ?window a brick:Window ;
+                        brick:isPartOf ?zone ;
+                        brick:area ?window_area ;
+                        brick:tilt ?window_tilt ;
+                        brick:azimuth ?window_azimuth .
+                        
+                ?window_area qudt:hasQuantityKind quantitykind:Area ;
+                            qudt:hasUnit ?window_area_unit ;
+                            brick:value ?window_area_value .
+                        
+                ?window_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+                            qudt:hasUnit unit:Degree ;
+                            brick:value ?window_tilt_value .
+                        
+                ?window_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+                                qudt:hasUnit unit:Degree ;
+                                brick:value ?window_azimuth_value .
+                }
+                ORDER BY DESC(?window_area_value)
+                LIMIT 1
+                """,
+            "s223": """
+                SELECT ?window ?window_area_value ?window_area_unit ?window_tilt_value ?window_azimuth_value
+                WHERE {
+                <%s> hpfs:has-location ?zone .
+                ?zone hpfs:has-window ?window .
+                ?window s223:hasProperty ?warea, ?tilt_prop, ?azimuth_prop .
+                ?warea a hpfs:area ;
+                    s223:hasValue ?window_area_value ;
+                    qudt:hasUnit ?window_area_unit .
+                ?tilt_prop a hpfs:tilt ;
+                    s223:hasValue ?window_tilt_value ;
+                    qudt:hasUnit unit:Degree .
+                ?azimuth_prop a hpfs:azimuth ;
+                    s223:hasValue ?window_azimuth_value ;
+                    qudt:hasUnit unit:Degree .
+                }
+                ORDER BY DESC(?window_area_value)
+                LIMIT 1
+                """
         }
     
 }
@@ -364,7 +403,7 @@ class BuildingMetadataLoader:
             thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
             thermostat_data["resolution"].append(result["resolution"].toPython())
 
-            # Query zone-specific data
+            # Query zone-specific data (HVAC capacity and COP)
             zone_results = self.g.query(sparql_queries['get_unit_data'][self.ontology] % tstat)
 
             if len(zone_results) != 1:
@@ -372,18 +411,34 @@ class BuildingMetadataLoader:
 
             zone_result = zone_results.bindings[0]
             
+            # Query floor area data (sum of all spaces in zone)
+            floor_area_results = self.g.query(sparql_queries['get_floor_area_data'][self.ontology] % tstat)
+            
+            if len(floor_area_results) != 1:
+                raise Exception(f"Expected 1 result for floor area, got {len(floor_area_results)}")
+            
+            floor_area_result = floor_area_results.bindings[0]
+            
             # Convert floor area units
-            floor_area_value = zone_result["floor_area"].toPython()
-            floor_area_unit = zone_result["floor_area_unit"]
+            floor_area_value = floor_area_result["floor_area"].toPython()
+            floor_area_unit = floor_area_result["floor_area_unit"]
             if floor_area_unit in UNIT_CONVERSIONS:
                 floor_area_value = convert_units(floor_area_value, floor_area_unit, UNIT_CONVERSIONS[floor_area_unit], False)
                 floor_area_unit = UNIT_CONVERSIONS[floor_area_unit].toPython().split("/")[-1]
             else:
                 floor_area_unit = floor_area_unit.toPython().split("/")[-1]
             
+            # Query window data (largest window by area)
+            window_results = self.g.query(sparql_queries['get_window_data'][self.ontology] % tstat)
+            
+            if len(window_results) != 1:
+                raise Exception(f"Expected 1 result for window data, got {len(window_results)}")
+            
+            window_result = window_results.bindings[0]
+            
             # Convert window area units
-            window_area_value = zone_result["window_area"].toPython()
-            window_area_unit = zone_result["window_area_unit"]
+            window_area_value = window_result["window_area_value"].toPython()
+            window_area_unit = window_result["window_area_unit"]
             if window_area_unit in UNIT_CONVERSIONS:
                 window_area_value = convert_units(window_area_value, window_area_unit, UNIT_CONVERSIONS[window_area_unit], False)
                 window_area_unit = UNIT_CONVERSIONS[window_area_unit].toPython().split("/")[-1]
@@ -391,22 +446,14 @@ class BuildingMetadataLoader:
                 window_area_unit = window_area_unit.toPython().split("/")[-1]
             
             # Convert azimuth units
-            azimuth_value = zone_result["azimuth"].toPython()
-            azimuth_unit = zone_result["azimuth_unit"]
-            if azimuth_unit in UNIT_CONVERSIONS:
-                azimuth_value = convert_units(azimuth_value, azimuth_unit, UNIT_CONVERSIONS[azimuth_unit], False)
-                azimuth_unit = UNIT_CONVERSIONS[azimuth_unit].toPython().split("/")[-1]
-            else:
-                azimuth_unit = azimuth_unit.toPython().split("/")[-1]
+            azimuth_value = window_result["window_azimuth_value"].toPython()
+            # Azimuth and tilt are already in degrees, no conversion needed
+            azimuth_unit = "DEGREE"
             
             # Convert tilt units
-            tilt_value = zone_result["tilt"].toPython()
-            tilt_unit = zone_result["tilt_unit"]
-            if tilt_unit in UNIT_CONVERSIONS:
-                tilt_value = convert_units(tilt_value, tilt_unit, UNIT_CONVERSIONS[tilt_unit], False)
-                tilt_unit = UNIT_CONVERSIONS[tilt_unit].toPython().split("/")[-1]
-            else:
-                tilt_unit = tilt_unit.toPython().split("/")[-1]
+            tilt_value = window_result["window_tilt_value"].toPython()
+            # Azimuth and tilt are already in degrees, no conversion needed
+            tilt_unit = "DEGREE"
             
             # Convert cooling capacity units
             cooling_capacity_value = zone_result["cooling_capacity"].toPython()
@@ -480,3 +527,4 @@ class BuildingMetadataLoader:
         thermostat_data = self.get_thermostat_data()
 
         return {**site_info, **thermostat_data}
+    
