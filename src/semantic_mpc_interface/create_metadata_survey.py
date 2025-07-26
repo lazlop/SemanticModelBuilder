@@ -129,17 +129,7 @@ class SurveyGenerator:
 
         # Create main directory and parent directories if they don't exist
         self.base_dir.mkdir(parents=True, exist_ok=True)
-
-        # # Create subdirectories
-        # subdirs = self.template_list
-        # for subdir in subdirs:
-        #     subdir_path = self.base_dir / subdir
-        #     if overwrite == False:
-        #         if subdir_path.exists() and any(subdir_path.iterdir()):
-        #             raise FileExistsError(
-        #                 f"Subdirectory '{subdir_path}' already exists and is not empty. Please use a different path or clear the directory."
-        #             )
-        #     subdir_path.mkdir(parents=True, exist_ok=True)
+        # No more subdirs
 
     def _create_csv(self, template):
         """Create site information CSV file"""
