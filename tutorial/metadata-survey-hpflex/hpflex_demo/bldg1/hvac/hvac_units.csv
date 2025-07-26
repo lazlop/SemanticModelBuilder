@@ -1,4 +1,4 @@
 hvac_id,zone_id,cooling_capacity,heating_capacity,cooling_cop,heating_cop
-hvac_1,zone_1,-7.5,10,2.5,2.94
-hvac_2,zone_2,-7.5,10,2.5,2.94
-hvac_3,zone_3,-7.5,10,2.5,2.94
+hvac1,bldg1_zone1,-7.5,10,2.5,2.94
+hvac2,bldg1_zone2,-7.5,10,2.5,2.94
+hvac3,bldg1_zone3,-7.5,10,2.5,2.94

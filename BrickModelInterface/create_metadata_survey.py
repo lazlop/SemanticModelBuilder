@@ -55,16 +55,16 @@ class SurveyGenerator:
         self.zones_contain_spaces = {}
         self.zones_contain_windows = {}
         for zone_num, zone_contents in enumerate(zone_space_window_list):
-            zone_name = f"zone_{zone_num + 1}"
-            self.hvacs_feed_zones[f'hvac_{zone_num + 1}'] = [zone_name]
+            zone_name = f"{self.building_id}_zone{zone_num + 1}"
+            self.hvacs_feed_zones[f'hvac{zone_num + 1}'] = [zone_name]
             self.zones_contain_spaces[zone_name] = []
             self.zones_contain_windows[zone_name] = []
             (amt_spaces, amt_windows) = zone_contents
             for space_num in range(amt_spaces):
-                space_name = f"space_{zone_num + 1}_{space_num + 1}"
+                space_name = f"space{zone_num + 1}_{space_num + 1}"
                 self.zones_contain_spaces[zone_name].append(space_name)
             for window_num in range(amt_windows):
-                window_name = f"window_{zone_num + 1}_{window_num + 1}"
+                window_name = f"window{zone_num + 1}_{window_num + 1}"
                 self.zones_contain_windows[zone_name].append(window_name)
         
         # TODO: fill in the topology of the building and output file
