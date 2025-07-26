@@ -10,7 +10,7 @@ from pathlib import Path
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from semantic_mpc_interface.create_metadata_survey import SurveyGenerator, BuildingStructureGenerator
+from semantic_mpc_interface.create_metadata_survey import SurveyGenerator, HPFlexSurvey
 
 def test_general_survey_generator():
     """Test the general SurveyGenerator class"""
@@ -32,8 +32,8 @@ def test_general_survey_generator():
     return generator
 
 def test_building_structure_generator():
-    """Test the specialized BuildingStructureGenerator class"""
-    print("\n=== Testing BuildingStructureGenerator ===")
+    """Test the specialized HPFlexSurvey class"""
+    print("\n=== Testing HPFlexSurvey ===")
     
     # Configuration from the user's request
     config = {
@@ -58,7 +58,7 @@ def test_building_structure_generator():
     }
     
     # Create building structure generator
-    generator = BuildingStructureGenerator(
+    generator = HPFlexSurvey(
         site_id=config['site_id'],
         building_id="test_building",
         output_dir="building_structure_output",
@@ -85,7 +85,7 @@ def test_easy_config():
     """Test the easy_config method"""
     print("\n=== Testing Easy Config Method ===")
     
-    generator = BuildingStructureGenerator(
+    generator = HPFlexSurvey(
         site_id="easy_config_site",
         building_id="test_building",
         output_dir="easy_config_output",
@@ -128,7 +128,7 @@ def main():
     # Test 1: General SurveyGenerator
     general_generator = test_general_survey_generator()
     
-    # Test 2: BuildingStructureGenerator with manual config
+    # Test 2: HPFlexSurvey with manual config
     building_generator = test_building_structure_generator()
     
     # Test 3: Easy config method
@@ -141,7 +141,7 @@ def main():
     print("\n" + "="*60)
     print("SUMMARY OF REFACTORING:")
     print("• SurveyGenerator: General class for any template-based CSV generation")
-    print("• BuildingStructureGenerator: Specialized for building systems (HVAC, zones, spaces, windows)")
+    print("• HPFlexSurvey: Specialized for building systems (HVAC, zones, spaces, windows)")
     print("• System-specific defaults (units, HVAC types) moved to specialized class")
     print("• Prefilling functionality isolated to building-specific class")
     print("• Both classes maintain clean separation of concerns")

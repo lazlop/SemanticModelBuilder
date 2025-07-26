@@ -134,7 +134,7 @@ class SurveyGenerator:
             writer.writerow(headers)
 
 
-class BuildingStructureGenerator(SurveyGenerator):
+class HPFlexSurvey(SurveyGenerator):
     """
     Specialized generator for building structures with HVAC, zones, spaces, and windows.
     This class extends SurveyGenerator with specific functionality for building systems.
@@ -272,87 +272,98 @@ class BuildingStructureGenerator(SurveyGenerator):
         """Prefill space CSV with space names and default values"""
         space_file = self.template_csvs['space']
         
-        # Clear existing data and create new rows
+        # Read existing CSV to get column structure
+        existing_df = pd.read_csv(space_file)
+        columns = existing_df.columns.tolist()
+        
+        # Create new rows with only the values we want to prefill
         new_rows = []
         for zone_name, spaces in zones_contain_spaces.items():
             for space_name in spaces:
-                new_rows.append({
-                    'name': space_name,
-                    'area_unit': self.default_area_unit,
-                    'area_value': ''  # Leave empty for user to fill
-                })
+                # Start with empty row
+                row = {col: '' for col in columns}
+                # Only set the values we want to prefill
+                row['name'] = space_name
+                if 'area_unit' in columns:
+                    row['area_unit'] = self.default_area_unit
+                new_rows.append(row)
         
         # Create new dataframe with prefilled data
-        new_df = pd.DataFrame(new_rows)
+        new_df = pd.DataFrame(new_rows, columns=columns)
         new_df.to_csv(space_file, index=False)
 
     def _prefill_window_csv(self, zones_contain_windows):
         """Prefill window CSV with window names and default values"""
         window_file = self.template_csvs['window']
         
-        # Clear existing data and create new rows
+        # Read existing CSV to get column structure
+        existing_df = pd.read_csv(window_file)
+        columns = existing_df.columns.tolist()
+        
+        # Create new rows with only the values we want to prefill
         new_rows = []
         for zone_name, windows in zones_contain_windows.items():
             for window_name in windows:
-                new_rows.append({
-                    'name': window_name,
-                    'tilt_value': '',  # Leave empty for user to fill
-                    'area_unit': self.default_area_unit,
-                    'area_value': '',  # Leave empty for user to fill
-                    'azimuth_value': ''  # Leave empty for user to fill
-                })
+                # Start with empty row
+                row = {col: '' for col in columns}
+                # Only set the values we want to prefill
+                row['name'] = window_name
+                if 'area_unit' in columns:
+                    row['area_unit'] = self.default_area_unit
+                new_rows.append(row)
         
         # Create new dataframe with prefilled data
-        new_df = pd.DataFrame(new_rows)
+        new_df = pd.DataFrame(new_rows, columns=columns)
         new_df.to_csv(window_file, index=False)
 
     def _prefill_hvac_csv(self, hvacs_feed_zones):
         """Prefill HVAC CSV with HVAC unit names and default values"""
         hvac_file = self.template_csvs['hvac']
         
-        # Clear existing data and create new rows
+        # Read existing CSV to get column structure
+        existing_df = pd.read_csv(hvac_file)
+        columns = existing_df.columns.tolist()
+        
+        # Create new rows with only the values we want to prefill
         new_rows = []
         for hvac_name in hvacs_feed_zones.keys():
-            new_rows.append({
-                'name': hvac_name,
-                'heating_COP_value': '',  # Leave empty for user to fill
-                'heating_capacity_value': '',  # Leave empty for user to fill
-                'cooling_COP_value': '',  # Leave empty for user to fill
-                'cooling_capacity_value': ''  # Leave empty for user to fill
-            })
+            # Start with empty row
+            row = {col: '' for col in columns}
+            # Only set the values we want to prefill
+            row['name'] = hvac_name
+            new_rows.append(row)
         
         # Create new dataframe with prefilled data
-        new_df = pd.DataFrame(new_rows)
+        new_df = pd.DataFrame(new_rows, columns=columns)
         new_df.to_csv(hvac_file, index=False)
 
     def _prefill_tstat_csv(self, hvacs_feed_zones):
         """Prefill thermostat CSV with thermostat names (one per zone) and default values"""
         tstat_file = self.template_csvs['tstat']
         
-        # Clear existing data and create new rows
+        # Read existing CSV to get column structure
+        existing_df = pd.read_csv(tstat_file)
+        columns = existing_df.columns.tolist()
+        
+        # Create new rows with only the values we want to prefill
         new_rows = []
         for hvac_name, zones in hvacs_feed_zones.items():
             for zone_name in zones:
-                tstat_name = f"tstat_{zone_name}"
-                new_rows.append({
-                    'name': tstat_name,
-                    'setpoint_deadband-unit': self.default_temperature_unit,
-                    'resolution-value': '',
-                    'tolerance': '',
-                    'tolerance-value': '',
-                    'setpoint_deadband': '',
-                    'tolerance-unit': self.default_temperature_unit,
-                    'active': '',
-                    'stage_count-value': '',
-                    'resolution-unit': self.default_temperature_unit,
-                    'active-value': '',
-                    'stage_count': '',
-                    'setpoint_deadband-value': '',
-                    'resolution': ''
-                })
+                # Start with empty row
+                row = {col: '' for col in columns}
+                # Only set the values we want to prefill
+                row['name'] = f"tstat_{zone_name}"
+                # Set temperature unit columns if they exist
+                if 'setpoint_deadband-unit' in columns:
+                    row['setpoint_deadband-unit'] = self.default_temperature_unit
+                if 'tolerance-unit' in columns:
+                    row['tolerance-unit'] = self.default_temperature_unit
+                if 'resolution-unit' in columns:
+                    row['resolution-unit'] = self.default_temperature_unit
+                new_rows.append(row)
         
         # Create new dataframe with prefilled data
-        new_df = pd.DataFrame(new_rows)
+        new_df = pd.DataFrame(new_rows, columns=columns)
         new_df.to_csv(tstat_file, index=False)
 
     def prefill_from_config(self, config_path=None):

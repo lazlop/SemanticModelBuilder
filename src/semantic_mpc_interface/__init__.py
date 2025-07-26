@@ -1,5 +1,5 @@
 from .brick_to_grafana import BrickToGrafana
-from .create_metadata_survey import SurveyGenerator, BuildingStructureGenerator
+from .create_metadata_survey import SurveyGenerator, HPFlexSurvey
 from .generate_shacl import SHACLHandler
 from .get_metadata import BuildingMetadataLoader
 from .model_builder import ModelBuilder
@@ -16,7 +16,7 @@ __all__ = [
     # Core classes
     "ModelBuilder",
     "SurveyGenerator",
-    "BuildingStructureGenerator",
+    "HPFlexSurvey",
     "SurveyReader",
     "MetadataProcessor",
     "SHACLHandler",
