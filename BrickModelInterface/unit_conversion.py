@@ -2,11 +2,24 @@
 # May want to cache the conversion factors we actually use, then reach out to qudt if we need to
 # So many qudt units, querying is pretty slow.
 from rdflib import Graph, Namespace, Literal, URIRef
-from importlib.resources import files
-from.namespaces import * 
+from importlib.resources import files, as_file
+from .namespaces import *
 import csv
 
-qudt_dir = files('BrickModelInterface').joinpath('qudt')
+# Helper --------------------------------------------------------------------
+# When a Python package is installed from a wheel it is often imported from a
+# zip-file.  In that case the resources (csv / ttl) are not present on the file
+# system and cannot be accessed with a normal `open(path)`.  The helper below
+# returns a "Traversable" object pointing at the requested resource so we can
+# either 1) open it directly (for text files) or 2) ask importlib.resources to
+# give us a temporary on-disk copy via `as_file` (needed for libraries like
+# rdflib that expect a real path).
+
+
+def _resource_path(*parts):
+    """Return a Traversable object for a resource shipped with the package."""
+
+    return files('BrickModelInterface').joinpath(*parts)
 
 
 def _get_known_conversion_factor(unit):
@@ -15,7 +28,9 @@ def _get_known_conversion_factor(unit):
     else:
         from_unit_uri = UNIT[unit]
 
-    with open(qudt_dir / 'known_units.csv', mode='r', encoding='utf-8') as file:
+    csv_path = _resource_path('qudt', 'known_units.csv')
+    # ``csv_path`` is a Traversable – we can open it directly.
+    with csv_path.open('r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
             if row['unit'] == str(from_unit_uri):
@@ -40,7 +55,12 @@ def _get_conversion_factor(unit, save_to_known_units = True):
     g = Graph()
     # Comment out for querying online qudt
     # g.parse("https://qudt.org/2.1/vocab/unit.ttl", format="turtle")
-    g.parse(qudt_dir / 'qudt_units.ttl', format='turtle')
+
+    ttl_path = _resource_path('qudt', 'qudt_units.ttl')
+    # rdflib requires a real file path, so we materialise the resource on disk
+    # temporarily when running from a zipped wheel.
+    with as_file(ttl_path) as ttl_fs_path:
+        g.parse(ttl_fs_path, format='turtle')
     
     query = f"""
     PREFIX qudt: <http://qudt.org/schema/qudt/>
@@ -64,9 +84,17 @@ def _get_conversion_factor(unit, save_to_known_units = True):
 
     if save_to_known_units:
         print(f"Saving conversion factor for {unit} to known units file")
-        with open(qudt_dir / 'known_units.csv', mode='a', encoding='utf-8', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([str(from_unit_uri), conversion_factor, offset])
+        csv_path = _resource_path('qudt', 'known_units.csv')
+        # If the package is zipped we cannot append to the internal csv – in
+        # that case we silently skip the write. Users can regenerate the csv
+        # later if they have a writable install.
+        try:
+            with csv_path.open('a', encoding='utf-8', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([str(from_unit_uri), conversion_factor, offset])
+        except (OSError, RuntimeError):
+            # Resource is likely inside a zipfile (read-only). Ignore.
+            pass
     return conversion_factor, offset
 
 

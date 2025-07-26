@@ -18,3 +18,11 @@ dependencies = [
 ]
 [tool.setuptools]
 packages = ["BrickModelInterface"]
+[tool.setuptools.package-data]
+"BrickModelInterface" = [
+    "brick-templates/*.yml",
+    "s223-templates/*.yml",
+    "shacl-requirements/*.ttl",
+    "qudt/*.csv",
+    "qudt/*.ttl",
+]
