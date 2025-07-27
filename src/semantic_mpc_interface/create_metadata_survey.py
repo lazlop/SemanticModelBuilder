@@ -151,46 +151,55 @@ class SurveyGenerator:
 
     def _read_csv(self):
         for filename, template in self.template_dict.items():
-            def fill_variatic_params(name, csv):
-                # Get variatic parameters for the hvac type
-                new_columns_data = {}
-                df = pd.read_csv(StringIO(csv.dump()))
-                for idx, row in df.iterrows():
-                    for param_key, param_template in self.variatic_params.items():
-                        # Find all placeholders in angle brackets
+            def fill_variatic_params(filename, variatic_params):
+                df = pd.read_csv(filename)
+                
+                # For each variatic parameter key, create a new column
+                for param_key, param_template in variatic_params.items():
+                    # The param_key becomes the column name
+                    column_name = param_key
+                    
+                    # Initialize the new column with empty values
+                    new_column_values = []
+                    
+                    # For each row in the dataframe
+                    for idx, row in df.iterrows():
+                        # Find all placeholders in angle brackets in the template
                         placeholders = re.findall(r'<([^>]+)>', param_template)
                         
                         # Replace placeholders with actual values from the row
-                        expanded_template = param_template
+                        expanded_value = param_template
+                        all_placeholders_filled = True
+                        
                         for placeholder in placeholders:
                             if placeholder in df.columns:
                                 # Get the value from the current row for this placeholder
                                 placeholder_value = row[placeholder]
-                                if pd.notna(placeholder_value):
-                                    expanded_template = expanded_template.replace(f'<{placeholder}>', str(placeholder_value))
+                                if pd.notna(placeholder_value) and str(placeholder_value).strip():
+                                    expanded_value = expanded_value.replace(f'<{placeholder}>', str(placeholder_value))
                                 else:
-                                    # If the value is NaN, skip this row for this template
-                                    expanded_template = None
+                                    # If the value is NaN or empty, we can't fill this template
+                                    all_placeholders_filled = False
                                     break
+                            else:
+                                # Placeholder column doesn't exist
+                                all_placeholders_filled = False
+                                break
                         
-                        # Only create column if template was successfully expanded
-                        if expanded_template and expanded_template != param_template:
-                            # Initialize the column if it doesn't exist
-                            if expanded_template not in new_columns_data:
-                                new_columns_data[expanded_template] = [None] * len(df)
-                            
-                            # Set empty string as placeholder value (you can modify this as needed)
-                            new_columns_data[expanded_template][idx] = ""
-                
-                # Add new columns to the dataframe
-                for col_name, col_values in new_columns_data.items():
-                    df[col_name] = col_values
+                        # Only set the value if all placeholders were successfully filled
+                        if all_placeholders_filled and expanded_value != param_template:
+                            new_column_values.append(expanded_value)
+                        else:
+                            new_column_values.append("")
+                    
+                    # Add the new column to the dataframe
+                    df[column_name] = new_column_values
                 
                 print(f"Expanded CSV shape: {df.shape}")
-                print(f"New columns added: {list(new_columns_data.keys())}")
+                print(f"New columns added: {list(variatic_params.keys())}")
                 
                 csv_string = df.to_csv(index=False)
-                csv.load(csv_string)
+                return csv_string
 
             def mapper(col, map = self.param_mapping[template.name]):
                 return map.get(col,col)
@@ -208,7 +217,8 @@ class SurveyGenerator:
                     graph.remove(triple)
 
             file = str(self.base_dir / filename) + ".csv"
-            csv_in = CSVIngress(file)
+            csv_string = fill_variatic_params(file, self.variatic_params[template.name])
+            csv_in = CSVIngress(data = csv_string)
             ingress = TemplateIngress(template, mapper, csv_in)
             #NOTE: Ingress puts everything into the given namespace, will have to change unit namespaces manually 
             graph = ingress.graph(self.building_ns)
@@ -561,216 +571,3 @@ class HPFlexSurvey(SurveyGenerator):
             print(f"Error parsing config file: {e}")
         except Exception as e:
             print(f"Error prefilling CSVs: {e}")
-
-
-def prefill_csv_survey(survey_directory):
-    """
-    Simple function to prefill all CSV files in a survey directory based on existing config.json
-    
-    Args:
-        survey_directory (str): Path to the directory containing CSV files and config.json
-                               (e.g., 'test_site/test_build')
-    
-    Example:
-        prefill_csv_survey('test_site/test_build')
-    """
-    import json
-    from pathlib import Path
-    import pandas as pd
-    
-    survey_path = Path(survey_directory)
-    config_path = survey_path / "config.json"
-    
-    # Check if directory and config exist
-    if not survey_path.exists():
-        print(f"Directory not found: {survey_directory}")
-        return
-    
-    if not config_path.exists():
-        print(f"Config file not found: {config_path}")
-        return
-    
-    try:
-        # Load configuration
-        with open(config_path, 'r') as f:
-            config = json.load(f)
-        
-        print(f"Loading config from: {config_path}")
-        
-        # Get site_id from config for unit defaults
-        site_id = config.get('site_id', 'default_site')
-        
-        # Set default units (assuming IP units like in the example)
-        default_area_unit = "FT2"
-        default_temperature_unit = "DEG_F"
-        
-        # Create template_csvs mapping by finding CSV files in directory
-        template_csvs = {}
-        for csv_file in survey_path.glob("*.csv"):
-            template_name = csv_file.stem  # filename without extension
-            template_csvs[template_name] = str(csv_file)
-        
-        print(f"Found CSV files: {list(template_csvs.keys())}")
-        
-        # Prefill each CSV file based on config
-        if 'space' in template_csvs and 'zones_contain_spaces' in config:
-            _prefill_space_csv_simple(template_csvs['space'], config['zones_contain_spaces'], default_area_unit)
-        
-        if 'window' in template_csvs and 'zones_contain_windows' in config:
-            _prefill_window_csv_simple(template_csvs['window'], config['zones_contain_windows'], default_area_unit)
-        
-        if 'hvac' in template_csvs and 'hvacs_feed_zones' in config:
-            _prefill_hvac_csv_simple(template_csvs['hvac'], config['hvacs_feed_zones'])
-        
-        if 'tstat' in template_csvs and 'hvacs_feed_zones' in config:
-            _prefill_tstat_csv_simple(template_csvs['tstat'], config['hvacs_feed_zones'], default_temperature_unit)
-        
-        if 'zone' in template_csvs and all(key in config for key in ['zones_contain_spaces', 'zones_contain_windows', 'hvacs_feed_zones']):
-            _prefill_zone_csv_simple(template_csvs['zone'], config)
-        
-        print("CSV files have been prefilled successfully!")
-        
-    except FileNotFoundError:
-        print(f"Config file not found: {config_path}")
-    except json.JSONDecodeError as e:
-        print(f"Error parsing config file: {e}")
-    except Exception as e:
-        print(f"Error prefilling CSVs: {e}")
-
-
-def _prefill_space_csv_simple(space_file, zones_contain_spaces, default_area_unit):
-    """Helper function to prefill space CSV"""
-    existing_df = pd.read_csv(space_file)
-    columns = existing_df.columns.tolist()
-    
-    new_rows = []
-    for zone_name, spaces in zones_contain_spaces.items():
-        for space_name in spaces:
-            row = {col: '' for col in columns}
-            row['name'] = space_name
-            if 'area-unit' in columns:
-                row['area-unit'] = default_area_unit
-            new_rows.append(row)
-    
-    new_df = pd.DataFrame(new_rows, columns=columns)
-    new_df.to_csv(space_file, index=False)
-    print(f"Prefilled {space_file} with {len(new_rows)} spaces")
-
-
-def _prefill_window_csv_simple(window_file, zones_contain_windows, default_area_unit):
-    """Helper function to prefill window CSV"""
-    existing_df = pd.read_csv(window_file)
-    columns = existing_df.columns.tolist()
-    
-    new_rows = []
-    for zone_name, windows in zones_contain_windows.items():
-        for window_name in windows:
-            row = {col: '' for col in columns}
-            row['name'] = window_name
-            if 'area-unit' in columns:
-                row['area-unit'] = default_area_unit
-            new_rows.append(row)
-    
-    new_df = pd.DataFrame(new_rows, columns=columns)
-    new_df.to_csv(window_file, index=False)
-    print(f"Prefilled {window_file} with {len(new_rows)} windows")
-
-
-def _prefill_hvac_csv_simple(hvac_file, hvacs_feed_zones):
-    """Helper function to prefill HVAC CSV"""
-    existing_df = pd.read_csv(hvac_file)
-    columns = existing_df.columns.tolist()
-    
-    new_rows = []
-    for hvac_name in hvacs_feed_zones.keys():
-        row = {col: '' for col in columns}
-        row['name'] = hvac_name
-        new_rows.append(row)
-    
-    new_df = pd.DataFrame(new_rows, columns=columns)
-    new_df.to_csv(hvac_file, index=False)
-    print(f"Prefilled {hvac_file} with {len(new_rows)} HVAC units")
-
-
-def _prefill_tstat_csv_simple(tstat_file, hvacs_feed_zones, default_temperature_unit):
-    """Helper function to prefill thermostat CSV"""
-    existing_df = pd.read_csv(tstat_file)
-    columns = existing_df.columns.tolist()
-    
-    new_rows = []
-    for hvac_name, zones in hvacs_feed_zones.items():
-        for zone_name in zones:
-            row = {col: '' for col in columns}
-            row['name'] = f"tstat_{zone_name}"
-            # Set temperature unit columns if they exist
-            if 'setpoint_deadband-unit' in columns:
-                row['setpoint_deadband-unit'] = default_temperature_unit
-            if 'tolerance-unit' in columns:
-                row['tolerance-unit'] = default_temperature_unit
-            if 'resolution-unit' in columns:
-                row['resolution-unit'] = default_temperature_unit
-            new_rows.append(row)
-    
-    new_df = pd.DataFrame(new_rows, columns=columns)
-    new_df.to_csv(tstat_file, index=False)
-    print(f"Prefilled {tstat_file} with {len(new_rows)} thermostats")
-
-# Adding temporarily for testing
-def _prefill_zone_csv_simple(zone_file, config):
-    """Helper function to prefill zone CSV"""
-    existing_df = pd.read_csv(zone_file)
-    columns = existing_df.columns.tolist()
-    
-    new_rows = []
-    extra_rows = []
-    
-    for zone_name, spaces in config["zones_contain_spaces"].items():
-        # Start with empty row
-        row = {col: '' for col in columns}
-
-        if 'tstat-name' in columns:
-            row['tstat-name'] = f"tstat_{zone_name}"
-
-        # Find HVAC for this zone
-        hvacs = config['hvacs_feed_zones']
-        for hvac_name, hvac_zone_names in hvacs.items():
-            if zone_name in hvac_zone_names:
-                if 'hvac-name' in columns:
-                    row['hvac-name'] = hvac_name
-
-        if 'name' in columns:
-            row['name'] = zone_name
-
-        # Add first space to main row, additional spaces as extra rows
-        for i, space_name in enumerate(spaces):
-            if i > 0:
-                extra_row = {col: '' for col in columns}
-                extra_row['name'] = zone_name
-                if 'space-name' in columns:
-                    extra_row['space-name'] = space_name
-                extra_rows.append(extra_row)
-            else:
-                if 'space-name' in columns:
-                    row['space-name'] = space_name
-
-        # Add windows
-        windows = config['zones_contain_windows'].get(zone_name, [])
-        for j, window_name in enumerate(windows):
-            if j > 0:  # Additional windows as extra rows
-                extra_row = {col: '' for col in columns}
-                extra_row['name'] = zone_name
-                if 'window-name' in columns:
-                    extra_row['window-name'] = window_name
-                extra_rows.append(extra_row)
-            else:  # First window in main row
-                if 'window-name' in columns:
-                    row['window-name'] = window_name
-
-        new_rows.append(row)
-    
-    # Combine main rows and extra rows
-    all_rows = new_rows + extra_rows
-    
-    new_df = pd.DataFrame(all_rows, columns=columns)
-    new_df.to_csv(zone_file, index=False)
-    print(f"Prefilled {zone_file} with {len(all_rows)} zone entries")

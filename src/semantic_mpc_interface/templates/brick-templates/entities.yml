@@ -78,20 +78,20 @@ tstat:
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name a brick:Thermostat ;
       brick:operationalStageCount p:stage_count-name ;
-      brick:hasPoint p:setpoint_deadband ;
-      brick:hasPoint p:tolerance ;
-      brick:hasPoint p:active ;
+      brick:hasPoint p:setpoint_deadband-name ;
+      brick:hasPoint p:tolerance-name ;
+      brick:hasPoint p:active-name ;
       brick:resolution p:resolution-name ;
       .
   dependencies:
     - template: tstat-stage_count
       args: {"name": "stage_count-name"}
     - template: tstat-deadband
-      args: {"name": "setpoint_deadband"}
+      args: {"name": "setpoint_deadband-name"}
     - template: tstat-tolerance
-      args: {"name": "tolerance"}
+      args: {"name": "tolerance-name"}
     - template: tstat-active
-      args: {"name": "active"}
+      args: {"name": "active-name"}
     - template: tstat-resolution
       args: {"name": "resolution-name"}
 
