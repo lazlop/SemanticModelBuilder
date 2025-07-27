@@ -44,7 +44,7 @@ class SurveyGenerator:
     General survey generator for creating CSV files from templates.
     This class handles the basic template loading and CSV generation functionality.
     """
-    def __init__(self, site_id, building_id, output_dir, ontology='brick', template_dict=None, overwrite=False):
+    def __init__(self, site_id, building_id, output_dir, ontology='brick', template_map=None, overwrite=False):
         """
         Initialize the general survey generator.
         
@@ -61,16 +61,11 @@ class SurveyGenerator:
         self.building_id = building_id
         self.base_dir = None
         self.ontology = ontology
-        self.template_dict = template_dict or {}
+        self.template_map = template_map or {}
         self._load_templates()
         self.base_dir = Path(output_dir) / self.site_id / self.building_id
         self._create_directory_structure(output_dir, overwrite)
-        self.template_csvs = {}
-        self.param_mapping, self.empty_params = self._simplify_parameters(template_dict)
-        for file_name, template_name in self.template_dict.items():
-            template = self.templates.get_template_by_name(template_name)
-            file = self._create_csv(file_name, template)
-            self.template_csvs[file_name] = file
+        self._create_survey(template_map)
 
     def _load_templates(self) -> None:
         """Load ontology-specific templates."""
@@ -104,23 +99,41 @@ class SurveyGenerator:
         # Create main directory and parent directories if they don't exist
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
+    # TODO: Should maybe change the template dict and iterate through dependencies recursively.
     # TODO: look into how to prefill the template to better generalize and connect with the survey reader.
     # can create binidngs based on building structure and if _name maps a value or _name maps to a relation
-    # TODO: consider if inlining dependencies is right.
+    # TODO: consider if inlining dependencies is right. Might be better to go through dependencies and create separate surveys for optional depedencies
+    # alternatively, could use dict to make sure csvs aren't redundent. Could remove dependencies if for all dependencies in the dictionary
+    # Will go with removing dependencies
+    # TODO: Make a bug report, when there are optional dependencies, the csv puts the optionals into the csv as columns
+    # Removing columns for now
+    def _create_survey(self, template_map):
+        self.template_csvs = {}
+        template_dict = {}
+        for file_name, template_name in template_map.items():
+            template = self.templates.get_template_by_name(template_name)
+            for dependency in template.get_dependencies():
+                if dependency.template.name in self.template_map.values():
+                    print('removing dependency: ', dependency.template.name)
+                    template.remove_dependency(dependency.template)
+            template_dict[file_name] = template
+        self.param_mapping, self.empty_params = self._simplify_parameters(template_dict)
+        for file_name, template in template_dict.items():
+            file = self._create_csv(file_name, template)
+            self.template_csvs[file_name] = file
+
     def _simplify_parameters(self, template_dict):
         # describe changes to template parameters made before generating the csv
         param_mapping = {}
         empty_params = {}
-        for name, template_name in template_dict.items():
-            template = self.templates.get_template_by_name(template_name).inline_dependencies()
-            params = template.all_parameters
+        for name, template in template_dict.items():
             template = template.inline_dependencies()
-            print(params)
+            params = template.all_parameters
             values = {param.rsplit('_',1)[0]:param for param in params if '_value' in param}
             value_names = [param for param in params if param.replace('_name','_value') == values]
             entities = [param for param in params if ('_name' in param) and (param not in value_names)]
-            empty_params[template_name] = entities + value_names
-            param_mapping[template_name] = values
+            empty_params[template.name] = entities + value_names
+            param_mapping[template.name] = values
         return param_mapping, empty_params
 
     def _create_csv(self, file_name, template):
@@ -200,7 +213,7 @@ class HPFlexSurvey(SurveyGenerator):
     """
     # TODO: update to use template_dict
     def __init__(self, site_id, building_id, output_dir, system_of_units="IP", ontology='brick', 
-                 template_dict={"space":"space", "hvac":"hp-rtu", "tstat":"tstat", "window":"window"}, overwrite=False):
+                 template_dict={'zone':'hvac-zone',"space":"space", "hvac":"hp-rtu", "tstat":"tstat", "window":"window"}, overwrite=False):
         """
         Initialize the building structure generator.
         

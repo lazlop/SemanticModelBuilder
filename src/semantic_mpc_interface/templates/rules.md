@@ -7,3 +7,6 @@ use _ to separate things within a template.
 map name to the name of the template_name. 
 
 We build upon these conventions to simplify use of surveys, code to assemble templates, etc. 
+
+For survey generation, optional parameters will get their own surveys since their cardinality is unkown (maybe)
+

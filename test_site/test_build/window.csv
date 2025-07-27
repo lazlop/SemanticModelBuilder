@@ -1,8 +1,8 @@
-name,area_unit,area,azimuth,tilt
-window_1_1,FT2,,,
-window_1_2,FT2,,,
-window_2_1,FT2,,,
-window_2_2,FT2,,,
-window_3_1,FT2,,,
-window_3_2,FT2,,,
-window_3_3,FT2,,,
+name,tilt_value,azimuth_value,area_value,area_unit
+window_1_1,,,,FT2
+window_1_2,,,,FT2
+window_2_1,,,,FT2
+window_2_2,,,,FT2
+window_3_1,,,,FT2
+window_3_2,,,,FT2
+window_3_3,,,,FT2

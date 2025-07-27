@@ -22,7 +22,7 @@ def test_general_survey_generator():
         building_id="test_building",
         output_dir="general_survey_output",
         ontology='brick',
-        template_dict={"space":"space", "window":"window"},  # Only specific templates
+        template_map={"space":"space", "window":"window"},  # Only specific templates
         overwrite=True
     )
     

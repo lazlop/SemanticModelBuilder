@@ -2,37 +2,43 @@
     "site_id": "test_site",
     "hvac_type": "hp-rtu",
     "empty_params": {
+        "hvac-zone": [
+            "space_name",
+            "tstat_name",
+            "window_name"
+        ],
         "space": [
             "area_name"
         ],
         "hp-rtu": [
-            "heating_COP_name",
+            "cooling_COP_name",
             "heating_capacity_name",
-            "cooling_capacity_name",
-            "cooling_COP_name"
+            "heating_COP_name",
+            "cooling_capacity_name"
         ],
         "tstat": [],
         "window": [
             "azimuth_name",
-            "area_name",
-            "tilt_name"
+            "tilt_name",
+            "area_name"
         ]
     },
     "param_mapping": {
+        "hvac-zone": {},
         "space": {
-            "area_value": "area"
+            "area": "area_value"
         },
         "hp-rtu": {
-            "cooling_COP_value": "cooling_COP",
-            "cooling_capacity_value": "cooling_capacity",
-            "heating_COP_value": "heating_COP",
-            "heating_capacity_value": "heating_capacity"
+            "cooling_capacity": "cooling_capacity_value",
+            "heating_COP": "heating_COP_value",
+            "heating_capacity": "heating_capacity_value",
+            "cooling_COP": "cooling_COP_value"
         },
         "tstat": {},
         "window": {
-            "area_value": "area",
-            "azimuth_value": "azimuth",
-            "tilt_value": "tilt"
+            "tilt": "tilt_value",
+            "azimuth": "azimuth_value",
+            "area": "area_value"
         }
     },
     "hvacs_feed_hvacs": {},

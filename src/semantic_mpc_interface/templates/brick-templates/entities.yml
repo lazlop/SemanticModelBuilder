@@ -5,7 +5,7 @@ hvac-zone:
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     p:name a brick:HVAC_Zone .
-  optional: [has-space,space,has-window,window]
+  optional: [has-space,space,has-window,window,has-location,tstat]
   dependencies:
     - template: has-space
       args: {"name":"name", "target":"space_name"}
@@ -15,6 +15,11 @@ hvac-zone:
       args: {'name': 'name', 'target':'window_name'}
     - template: window
       args: {'name': 'window_name'}
+    - template: has-location
+      args: {'name': 'tstat_name', 'target':"name"}
+    - template: tstat
+      args: {'name': 'tstat_name'}
+
 space:
   body: >
     @prefix p: <urn:___param___#> .
