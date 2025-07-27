@@ -1,14 +1,17 @@
 # TODO: Provide SI or IP Units when survey is generated to set defaults for units
-import csv
+# import csv
 import pandas as pd
 import json
 import os
+import re 
+from io import StringIO
 from pathlib import Path
 from importlib.resources import files
 from typing import Literal as PyLiteral
 
 from buildingmotif import BuildingMOTIF
 from buildingmotif.dataclasses import Library, Model
+from buildingmotif.ingresses import CSVIngress, TemplateIngress
 from rdflib import Graph, Literal, Namespace, URIRef
 from .namespaces import * 
 
@@ -58,6 +61,9 @@ class SurveyGenerator:
         """
         self.bm = BuildingMOTIF("sqlite://")
         self.site_id = site_id
+        self.building_ns = Namespace(f"urn:hpflex/{self.site_id}#")
+        self.model = Model.create(self.building_ns)
+        self.graph = self.model.graph
         self.building_id = building_id
         self.base_dir = None
         self.ontology = ontology
@@ -109,23 +115,23 @@ class SurveyGenerator:
     # Removing columns for now
     def _create_survey(self, template_map):
         self.template_csvs = {}
-        template_dict = {}
+        self.template_dict = {}
         for file_name, template_name in template_map.items():
             template = self.templates.get_template_by_name(template_name)
             for dependency in template.get_dependencies():
                 if dependency.template.name in self.template_map.values():
                     print('removing dependency: ', dependency.template.name)
                     template.remove_dependency(dependency.template)
-            template_dict[file_name] = template
-        self.param_mapping, self.empty_params = self._simplify_parameters(template_dict)
-        for file_name, template in template_dict.items():
+            self.template_dict[file_name] = template
+        self.param_mapping, self.variatic_params = self._simplify_parameters(self.template_dict)
+        for file_name, template in self.template_dict.items():
             file = self._create_csv(file_name, template)
             self.template_csvs[file_name] = file
 
     def _simplify_parameters(self, template_dict):
         # describe changes to template parameters made before generating the csv
         param_mapping = {}
-        empty_params = {}
+        variatic_params = {}
         # Temporary bug fix
         remove_optionals = {}
         for name, template in template_dict.items():
@@ -135,13 +141,80 @@ class SurveyGenerator:
             values = {param.rsplit('-',2)[0]:param for param in params if '-value' in param}
             print('values:', values.values())
             # have to change since value just appended to name now
-            value_names = [param for param in params if (param.endswith('-name')) and (param + '-value' in values.values())]
+            value_names = {param: f"<name>-{param}" for param in params if (param.endswith('-name')) and (param + '-value' in values.values())}
             print('values names:', value_names)
-            entities = [param for param in params if ('-name' in param) and (param not in value_names)]
-            # empty_params[template.name] = entities + value_names
-            empty_params[template.name] = value_names
+            # entities = [param for param in params if ('-name' in param) and (param not in value_names)]
+            # variatic_params[template.name] = entities + value_names
+            variatic_params[template.name] = value_names
             param_mapping[template.name] = values
-        return param_mapping, empty_params
+        return param_mapping, variatic_params
+
+    def _read_csv(self):
+        for filename, template in self.template_dict.items():
+            def fill_variatic_params(name, csv):
+                # Get variatic parameters for the hvac type
+                new_columns_data = {}
+                df = pd.read_csv(StringIO(csv.dump()))
+                for idx, row in df.iterrows():
+                    for param_key, param_template in self.variatic_params.items():
+                        # Find all placeholders in angle brackets
+                        placeholders = re.findall(r'<([^>]+)>', param_template)
+                        
+                        # Replace placeholders with actual values from the row
+                        expanded_template = param_template
+                        for placeholder in placeholders:
+                            if placeholder in df.columns:
+                                # Get the value from the current row for this placeholder
+                                placeholder_value = row[placeholder]
+                                if pd.notna(placeholder_value):
+                                    expanded_template = expanded_template.replace(f'<{placeholder}>', str(placeholder_value))
+                                else:
+                                    # If the value is NaN, skip this row for this template
+                                    expanded_template = None
+                                    break
+                        
+                        # Only create column if template was successfully expanded
+                        if expanded_template and expanded_template != param_template:
+                            # Initialize the column if it doesn't exist
+                            if expanded_template not in new_columns_data:
+                                new_columns_data[expanded_template] = [None] * len(df)
+                            
+                            # Set empty string as placeholder value (you can modify this as needed)
+                            new_columns_data[expanded_template][idx] = ""
+                
+                # Add new columns to the dataframe
+                for col_name, col_values in new_columns_data.items():
+                    df[col_name] = col_values
+                
+                print(f"Expanded CSV shape: {df.shape}")
+                print(f"New columns added: {list(new_columns_data.keys())}")
+                
+                csv_string = df.to_csv(index=False)
+                csv.load(csv_string)
+
+            def mapper(col, map = self.param_mapping[template.name]):
+                return map.get(col,col)
+            
+            def change_unit_ns(graph):
+                add = []
+                remove = []
+                for s,o in graph.subject_objects(QUDT.hasUnit):
+                    if str(o).startswith(str(self.building_ns)):
+                        remove.append((s, QUDT.hasUnit, o))
+                        add.append((s, QUDT.hasUnit, URIRef(str(o).replace(str(self.building_ns),str(QUDT)))))
+                for triple in add:
+                    graph.add(triple)
+                for triple in remove:
+                    graph.remove(triple)
+
+            file = str(self.base_dir / filename) + ".csv"
+            csv_in = CSVIngress(file)
+            ingress = TemplateIngress(template, mapper, csv_in)
+            #NOTE: Ingress puts everything into the given namespace, will have to change unit namespaces manually 
+            graph = ingress.graph(self.building_ns)
+            change_unit_ns(graph)
+            self.graph += graph
+
 
     def _create_csv(self, file_name, template):
         """Create CSV file from template"""
@@ -149,7 +222,7 @@ class SurveyGenerator:
         file = str(self.base_dir / file_name) + ".csv"
         template.generate_csv(file)
         mapping = self.param_mapping[template.name]
-        remove_params = self.empty_params[template.name]
+        remove_params = self.variatic_params[template.name]
         self._edit_cols(file, mapping, remove_params)
         return file 
 
@@ -269,7 +342,7 @@ class HPFlexSurvey(SurveyGenerator):
         config = {
             "site_id": self.site_id,
             "hvac_type": self.hvac_type,
-            "empty_params": self.empty_params,
+            "variatic_params": self.variatic_params,
             "param_mapping": self.param_mapping,
             "hvacs_feed_hvacs": hvacs_feed_hvacs,
             "hvacs_feed_zones": hvacs_feed_zones,
@@ -488,3 +561,216 @@ class HPFlexSurvey(SurveyGenerator):
             print(f"Error parsing config file: {e}")
         except Exception as e:
             print(f"Error prefilling CSVs: {e}")
+
+
+def prefill_csv_survey(survey_directory):
+    """
+    Simple function to prefill all CSV files in a survey directory based on existing config.json
+    
+    Args:
+        survey_directory (str): Path to the directory containing CSV files and config.json
+                               (e.g., 'test_site/test_build')
+    
+    Example:
+        prefill_csv_survey('test_site/test_build')
+    """
+    import json
+    from pathlib import Path
+    import pandas as pd
+    
+    survey_path = Path(survey_directory)
+    config_path = survey_path / "config.json"
+    
+    # Check if directory and config exist
+    if not survey_path.exists():
+        print(f"Directory not found: {survey_directory}")
+        return
+    
+    if not config_path.exists():
+        print(f"Config file not found: {config_path}")
+        return
+    
+    try:
+        # Load configuration
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        
+        print(f"Loading config from: {config_path}")
+        
+        # Get site_id from config for unit defaults
+        site_id = config.get('site_id', 'default_site')
+        
+        # Set default units (assuming IP units like in the example)
+        default_area_unit = "FT2"
+        default_temperature_unit = "DEG_F"
+        
+        # Create template_csvs mapping by finding CSV files in directory
+        template_csvs = {}
+        for csv_file in survey_path.glob("*.csv"):
+            template_name = csv_file.stem  # filename without extension
+            template_csvs[template_name] = str(csv_file)
+        
+        print(f"Found CSV files: {list(template_csvs.keys())}")
+        
+        # Prefill each CSV file based on config
+        if 'space' in template_csvs and 'zones_contain_spaces' in config:
+            _prefill_space_csv_simple(template_csvs['space'], config['zones_contain_spaces'], default_area_unit)
+        
+        if 'window' in template_csvs and 'zones_contain_windows' in config:
+            _prefill_window_csv_simple(template_csvs['window'], config['zones_contain_windows'], default_area_unit)
+        
+        if 'hvac' in template_csvs and 'hvacs_feed_zones' in config:
+            _prefill_hvac_csv_simple(template_csvs['hvac'], config['hvacs_feed_zones'])
+        
+        if 'tstat' in template_csvs and 'hvacs_feed_zones' in config:
+            _prefill_tstat_csv_simple(template_csvs['tstat'], config['hvacs_feed_zones'], default_temperature_unit)
+        
+        if 'zone' in template_csvs and all(key in config for key in ['zones_contain_spaces', 'zones_contain_windows', 'hvacs_feed_zones']):
+            _prefill_zone_csv_simple(template_csvs['zone'], config)
+        
+        print("CSV files have been prefilled successfully!")
+        
+    except FileNotFoundError:
+        print(f"Config file not found: {config_path}")
+    except json.JSONDecodeError as e:
+        print(f"Error parsing config file: {e}")
+    except Exception as e:
+        print(f"Error prefilling CSVs: {e}")
+
+
+def _prefill_space_csv_simple(space_file, zones_contain_spaces, default_area_unit):
+    """Helper function to prefill space CSV"""
+    existing_df = pd.read_csv(space_file)
+    columns = existing_df.columns.tolist()
+    
+    new_rows = []
+    for zone_name, spaces in zones_contain_spaces.items():
+        for space_name in spaces:
+            row = {col: '' for col in columns}
+            row['name'] = space_name
+            if 'area-unit' in columns:
+                row['area-unit'] = default_area_unit
+            new_rows.append(row)
+    
+    new_df = pd.DataFrame(new_rows, columns=columns)
+    new_df.to_csv(space_file, index=False)
+    print(f"Prefilled {space_file} with {len(new_rows)} spaces")
+
+
+def _prefill_window_csv_simple(window_file, zones_contain_windows, default_area_unit):
+    """Helper function to prefill window CSV"""
+    existing_df = pd.read_csv(window_file)
+    columns = existing_df.columns.tolist()
+    
+    new_rows = []
+    for zone_name, windows in zones_contain_windows.items():
+        for window_name in windows:
+            row = {col: '' for col in columns}
+            row['name'] = window_name
+            if 'area-unit' in columns:
+                row['area-unit'] = default_area_unit
+            new_rows.append(row)
+    
+    new_df = pd.DataFrame(new_rows, columns=columns)
+    new_df.to_csv(window_file, index=False)
+    print(f"Prefilled {window_file} with {len(new_rows)} windows")
+
+
+def _prefill_hvac_csv_simple(hvac_file, hvacs_feed_zones):
+    """Helper function to prefill HVAC CSV"""
+    existing_df = pd.read_csv(hvac_file)
+    columns = existing_df.columns.tolist()
+    
+    new_rows = []
+    for hvac_name in hvacs_feed_zones.keys():
+        row = {col: '' for col in columns}
+        row['name'] = hvac_name
+        new_rows.append(row)
+    
+    new_df = pd.DataFrame(new_rows, columns=columns)
+    new_df.to_csv(hvac_file, index=False)
+    print(f"Prefilled {hvac_file} with {len(new_rows)} HVAC units")
+
+
+def _prefill_tstat_csv_simple(tstat_file, hvacs_feed_zones, default_temperature_unit):
+    """Helper function to prefill thermostat CSV"""
+    existing_df = pd.read_csv(tstat_file)
+    columns = existing_df.columns.tolist()
+    
+    new_rows = []
+    for hvac_name, zones in hvacs_feed_zones.items():
+        for zone_name in zones:
+            row = {col: '' for col in columns}
+            row['name'] = f"tstat_{zone_name}"
+            # Set temperature unit columns if they exist
+            if 'setpoint_deadband-unit' in columns:
+                row['setpoint_deadband-unit'] = default_temperature_unit
+            if 'tolerance-unit' in columns:
+                row['tolerance-unit'] = default_temperature_unit
+            if 'resolution-unit' in columns:
+                row['resolution-unit'] = default_temperature_unit
+            new_rows.append(row)
+    
+    new_df = pd.DataFrame(new_rows, columns=columns)
+    new_df.to_csv(tstat_file, index=False)
+    print(f"Prefilled {tstat_file} with {len(new_rows)} thermostats")
+
+# Adding temporarily for testing
+def _prefill_zone_csv_simple(zone_file, config):
+    """Helper function to prefill zone CSV"""
+    existing_df = pd.read_csv(zone_file)
+    columns = existing_df.columns.tolist()
+    
+    new_rows = []
+    extra_rows = []
+    
+    for zone_name, spaces in config["zones_contain_spaces"].items():
+        # Start with empty row
+        row = {col: '' for col in columns}
+
+        if 'tstat-name' in columns:
+            row['tstat-name'] = f"tstat_{zone_name}"
+
+        # Find HVAC for this zone
+        hvacs = config['hvacs_feed_zones']
+        for hvac_name, hvac_zone_names in hvacs.items():
+            if zone_name in hvac_zone_names:
+                if 'hvac-name' in columns:
+                    row['hvac-name'] = hvac_name
+
+        if 'name' in columns:
+            row['name'] = zone_name
+
+        # Add first space to main row, additional spaces as extra rows
+        for i, space_name in enumerate(spaces):
+            if i > 0:
+                extra_row = {col: '' for col in columns}
+                extra_row['name'] = zone_name
+                if 'space-name' in columns:
+                    extra_row['space-name'] = space_name
+                extra_rows.append(extra_row)
+            else:
+                if 'space-name' in columns:
+                    row['space-name'] = space_name
+
+        # Add windows
+        windows = config['zones_contain_windows'].get(zone_name, [])
+        for j, window_name in enumerate(windows):
+            if j > 0:  # Additional windows as extra rows
+                extra_row = {col: '' for col in columns}
+                extra_row['name'] = zone_name
+                if 'window-name' in columns:
+                    extra_row['window-name'] = window_name
+                extra_rows.append(extra_row)
+            else:  # First window in main row
+                if 'window-name' in columns:
+                    row['window-name'] = window_name
+
+        new_rows.append(row)
+    
+    # Combine main rows and extra rows
+    all_rows = new_rows + extra_rows
+    
+    new_df = pd.DataFrame(all_rows, columns=columns)
+    new_df.to_csv(zone_file, index=False)
+    print(f"Prefilled {zone_file} with {len(all_rows)} zone entries")

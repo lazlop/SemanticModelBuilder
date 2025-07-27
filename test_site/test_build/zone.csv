@@ -1,7 +1,9 @@
-name,space-name,hvac-name,window-name,tstat-name
-zone_1,space_1_1,hvac_1,,tstat_zone_1
-zone_2,space_2_1,hvac_2,window_2_2,tstat_zone_2
-zone_3,space_3_1,hvac_3,window_3_3,tstat_zone_3
+name,space-name,window-name,hvac-name,tstat-name
+zone_1,space_1_1,window_1_1,hvac_1,tstat_zone_1
+zone_2,space_2_1,window_2_1,hvac_2,tstat_zone_2
+zone_3,space_3_1,window_3_1,hvac_3,tstat_zone_3
 zone_1,space_1_2,,,
-zone_1,,,window_1_1,
-zone_1,,,window_1_2,
+zone_1,,window_1_2,,
+zone_2,,window_2_2,,
+zone_3,,window_3_2,,
+zone_3,,window_3_3,,
