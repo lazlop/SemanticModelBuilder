@@ -1,4 +1,5 @@
 # TODO: Provide SI or IP Units when survey is generated to set defaults for units
+# TODO: Distinction and roles of building and site ids still not super well defined. 
 # import csv
 import pandas as pd
 import json
@@ -64,6 +65,7 @@ class SurveyGenerator:
         self.building_ns = Namespace(f"urn:hpflex/{self.site_id}#")
         self.model = Model.create(self.building_ns)
         self.graph = self.model.graph
+        self.graph.bind('bldg', self.building_ns)
         self.building_id = building_id
         self.base_dir = None
         self.ontology = ontology
@@ -149,7 +151,7 @@ class SurveyGenerator:
             param_mapping[template.name] = values
         return param_mapping, variatic_params
 
-    def _read_csv(self):
+    def _read_csv(self, serialize = True):
         for filename, template in self.template_dict.items():
             def fill_variatic_params(filename, variatic_params):
                 df = pd.read_csv(filename)
@@ -224,6 +226,7 @@ class SurveyGenerator:
             graph = ingress.graph(self.building_ns)
             change_unit_ns(graph)
             self.graph += graph
+        self.graph.serialize(self.base_dir / f'{self.building_id}.ttl')
 
 
     def _create_csv(self, file_name, template):

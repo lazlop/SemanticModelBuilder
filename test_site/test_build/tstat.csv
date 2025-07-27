@@ -1,4 +1,4 @@
-name,resolution-name-unit,setpoint_deadband-name-unit,setpoint_deadband,stage_count,resolution,tolerance,tolerance-name-unit,active
+name,tolerance-name-unit,setpoint_deadband-name-unit,setpoint_deadband,resolution-name-unit,active,stage_count,tolerance,resolution
 tstat_zone_1,,,,,,,,
 tstat_zone_2,,,,,,,,
 tstat_zone_3,,,,,,,,
