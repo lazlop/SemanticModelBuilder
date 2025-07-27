@@ -1,4 +1,4 @@
-name,cooling_capacity,heating_capacity,heating_COP,cooling_COP
-hvac_1,,,,
-hvac_2,,,,
-hvac_3,,,,
+name,heating_COP,cooling_COP,cooling_capacity,heating_capacity
+hvac_1,heating_COP_1,cooling_COP_1,cooling_capacity_1,heating_capacity_1
+hvac_2,heating_COP_2,cooling_COP_2,cooling_capacity_2,heating_capacity_2
+hvac_3,heating_COP_3,cooling_COP_3,cooling_capacity_3,heating_capacity_3

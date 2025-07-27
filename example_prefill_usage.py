@@ -70,6 +70,9 @@ def _fill_all_empty_columns(template_csvs):
     """
     
     for template_name, csv_file in template_csvs.items():
+        # skipping zone
+        if template_name == 'zone':
+            continue
         try:
             # Read the CSV file
             df = pd.read_csv(csv_file)
@@ -124,7 +127,6 @@ def main():
     print('GENERATING SURVEY')
     s = HPFlexSurvey('test_site','test_build','.', overwrite=True); s.easy_config(zone_space_window_list=[(2,2),(1,2),(1,3)])
     # Example 1: Prefill the test survey
-    return
     print("=== Prefilling test_site/test_build survey ===")
     prefill_csv_survey('test_site/test_build')
     print("\n=== Done! Now loading csv===")

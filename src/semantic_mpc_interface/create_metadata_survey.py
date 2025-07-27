@@ -1,6 +1,6 @@
 # TODO: Provide SI or IP Units when survey is generated to set defaults for units
 # TODO: Distinction and roles of building and site ids still not super well defined. 
-# import csv
+import csv
 import pandas as pd
 import json
 import os
@@ -124,7 +124,7 @@ class SurveyGenerator:
                 if dependency.template.name in self.template_map.values():
                     print('removing dependency: ', dependency.template.name)
                     template.remove_dependency(dependency.template)
-            self.template_dict[file_name] = template
+            self.template_dict[file_name] = template.inline_dependencies()
         self.param_mapping, self.variatic_params = self._simplify_parameters(self.template_dict)
         for file_name, template in self.template_dict.items():
             file = self._create_csv(file_name, template)
@@ -137,7 +137,7 @@ class SurveyGenerator:
         # Temporary bug fix
         remove_optionals = {}
         for name, template in template_dict.items():
-            template = template.inline_dependencies()
+            template = template
             params = template.all_parameters
             # Getting the stuff before -name-value (could change to 1 if I just want to get rid of -value)
             values = {param.rsplit('-',2)[0]:param for param in params if '-value' in param}
@@ -231,7 +231,7 @@ class SurveyGenerator:
 
     def _create_csv(self, file_name, template):
         """Create CSV file from template"""
-        template = template.inline_dependencies()
+        template = template
         file = str(self.base_dir / file_name) + ".csv"
         template.generate_csv(file)
         mapping = self.param_mapping[template.name]
@@ -367,6 +367,7 @@ class HPFlexSurvey(SurveyGenerator):
             json.dump(config, f, indent=4)
         return config
 
+    # TODO: prefill should use mapper to generalize better
     def _prefill_csv_defaults(self, config):
         """
         Prefill CSV files with data based on the configuration.
@@ -491,8 +492,8 @@ class HPFlexSurvey(SurveyGenerator):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = window_name
-                if 'area-unit' in columns:
-                    row['area-unit'] = self.default_area_unit
+                if 'area-name-unit' in columns:
+                    row['area-name-unit'] = self.default_area_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -537,12 +538,12 @@ class HPFlexSurvey(SurveyGenerator):
                 # Only set the values we want to prefill
                 row['name'] = f"tstat_{zone_name}"
                 # Set temperature unit columns if they exist
-                if 'setpoint_deadband-unit' in columns:
-                    row['setpoint_deadband-unit'] = self.default_temperature_unit
-                if 'tolerance-unit' in columns:
-                    row['tolerance-unit'] = self.default_temperature_unit
-                if 'resolution-unit' in columns:
-                    row['resolution-unit'] = self.default_temperature_unit
+                if 'setpoint_deadband-name-unit' in columns:
+                    row['setpoint_deadband-name-unit'] = self.default_temperature_unit
+                if 'tolerance-name-unit' in columns:
+                    row['tolerance-name-unit'] = self.default_temperature_unit
+                if 'resolution-name-unit' in columns:
+                    row['resolution-name-unit'] = self.default_temperature_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
