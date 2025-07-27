@@ -10,3 +10,6 @@ We build upon these conventions to simplify use of surveys, code to assemble tem
 
 For survey generation, optional parameters will get their own surveys since their cardinality is unkown (maybe)
 
+I thought optional referred to dependencies... I see now that it is args. 
+
+Maybe change from _ to -. This is because when things are inlined a - is used, which means some points use - value. For now, I can just cover both. 

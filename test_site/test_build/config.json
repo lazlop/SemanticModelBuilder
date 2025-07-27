@@ -2,25 +2,21 @@
     "site_id": "test_site",
     "hvac_type": "hp-rtu",
     "empty_params": {
-        "hvac-zone": [
-            "space_name",
-            "tstat_name",
-            "window_name"
-        ],
+        "hvac-zone": [],
         "space": [
             "area_name"
         ],
         "hp-rtu": [
             "cooling_COP_name",
             "heating_capacity_name",
-            "heating_COP_name",
-            "cooling_capacity_name"
+            "cooling_capacity_name",
+            "heating_COP_name"
         ],
         "tstat": [],
         "window": [
             "azimuth_name",
-            "tilt_name",
-            "area_name"
+            "area_name",
+            "tilt_name"
         ]
     },
     "param_mapping": {
@@ -29,9 +25,9 @@
             "area": "area_value"
         },
         "hp-rtu": {
+            "heating_capacity": "heating_capacity_value",
             "cooling_capacity": "cooling_capacity_value",
             "heating_COP": "heating_COP_value",
-            "heating_capacity": "heating_capacity_value",
             "cooling_COP": "cooling_COP_value"
         },
         "tstat": {},

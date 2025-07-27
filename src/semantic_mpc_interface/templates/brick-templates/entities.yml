@@ -5,7 +5,8 @@ hvac-zone:
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     p:name a brick:HVAC_Zone .
-  optional: [has-space,space,has-window,window,has-location,tstat]
+  # optional: [has-space,space,has-window,window,has-location,tstat]
+  optional: [space_name,window_name,tstat_name]
   dependencies:
     - template: has-space
       args: {"name":"name", "target":"space_name"}
@@ -72,7 +73,7 @@ tstat:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name a brick:Thermostat ;
-      brick:operationalStageCount p:stage_count ;
+      brick:operationalStageCount p:stage_count_name ;
       brick:hasPoint p:setpoint_deadband ;
       brick:hasPoint p:tolerance ;
       brick:hasPoint p:active ;
@@ -80,7 +81,7 @@ tstat:
       .
   dependencies:
     - template: tstat-stage_count
-      args: {"name": "stage_count"}
+      args: {"name": "stage_count_name"}
     - template: tstat-deadband
       args: {"name": "setpoint_deadband"}
     - template: tstat-tolerance
@@ -88,7 +89,7 @@ tstat:
     - template: tstat-active
       args: {"name": "active"}
     - template: tstat-resolution
-      args: {"name": "resolution"}
+      args: {"name": "resolution_name"}
 
 # Adding thermostat with heating/cooling/occupancy settings to match S223 template
 tstat-heating-cooling-occupancy:

@@ -126,13 +126,17 @@ class SurveyGenerator:
         # describe changes to template parameters made before generating the csv
         param_mapping = {}
         empty_params = {}
+        # Temporary bug fix
+        remove_optionals = {}
         for name, template in template_dict.items():
             template = template.inline_dependencies()
             params = template.all_parameters
             values = {param.rsplit('_',1)[0]:param for param in params if '_value' in param}
-            value_names = [param for param in params if param.replace('_name','_value') == values]
+            print('values', values.values())
+            value_names = [param for param in params if ('_name' in param) and (param.replace('_name','_value') in values.values())]
             entities = [param for param in params if ('_name' in param) and (param not in value_names)]
-            empty_params[template.name] = entities + value_names
+            # empty_params[template.name] = entities + value_names
+            empty_params[template.name] = value_names
             param_mapping[template.name] = values
         return param_mapping, empty_params
 
