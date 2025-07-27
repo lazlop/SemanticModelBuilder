@@ -8,15 +8,15 @@ import tempfile
 
 import pytest
 
-from semantic_mpc_interface import BuildingMetadataLoader, SurveyGenerator, SurveyReader
+from semantic_mpc_interface import BuildingMetadataLoader, Survey, SurveyReader
 
 
-class TestSurveyGenerator:
-    """Test cases for SurveyGenerator."""
+class TestSurvey:
+    """Test cases for Survey."""
 
     def test_init_with_parameters(self):
         """Test initialization with parameters."""
-        generator = SurveyGenerator(
+        generator = Survey(
             site_id='test-site',
             building_id='test-building',
             hvac_type='hp-rtu'
@@ -27,7 +27,7 @@ class TestSurveyGenerator:
 
     def test_easy_config(self):
         """Test easy config generation."""
-        generator = SurveyGenerator(
+        generator = Survey(
             site_id='test-site',
             building_id='test-building',
             hvac_type='hp-rtu'
@@ -46,7 +46,7 @@ class TestSurveyGenerator:
 
     def test_generate_template(self):
         """Test custom template generation."""
-        generator = SurveyGenerator(
+        generator = Survey(
             site_id='test-site',
             building_id='test-building',
             hvac_type='vrf'

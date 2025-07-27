@@ -10,7 +10,7 @@ from pathlib import Path
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from semantic_mpc_interface.create_metadata_survey import SurveyGenerator
+from semantic_mpc_interface.survey import Survey
 
 def test_prefill_functionality():
     """Test the CSV prefilling functionality with the provided config"""
@@ -40,9 +40,9 @@ def test_prefill_functionality():
     # Create output directory
     output_dir = "test_prefill_output"
     
-    # Initialize SurveyGenerator
-    print("Creating SurveyGenerator...")
-    generator = SurveyGenerator(
+    # Initialize Survey
+    print("Creating Survey...")
+    generator = Survey(
         site_id=config['site_id'],
         building_id="test_building",
         output_dir=output_dir,

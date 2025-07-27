@@ -9,7 +9,7 @@ from pathlib import Path
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from semantic_mpc_interface.create_metadata_survey import SurveyGenerator
+from semantic_mpc_interface.survey import Survey
 
 def example_usage():
     """Example of how to use the CSV prefilling functionality"""
@@ -20,7 +20,7 @@ def example_usage():
     print("1. Using easy_config method (automatically prefills CSVs):")
     print("-" * 50)
     
-    generator1 = SurveyGenerator(
+    generator1 = Survey(
         site_id="example_site",
         building_id="building_1",
         output_dir="example_output",
@@ -42,7 +42,7 @@ def example_usage():
     print("2. Manual configuration and prefilling:")
     print("-" * 50)
     
-    generator2 = SurveyGenerator(
+    generator2 = Survey(
         site_id="manual_site",
         building_id="building_2", 
         output_dir="manual_output",
@@ -85,7 +85,7 @@ def example_usage():
     print("-" * 50)
     
     # Use the config from the first example
-    generator3 = SurveyGenerator(
+    generator3 = Survey(
         site_id="example_site",
         building_id="building_1",
         output_dir="example_output",

@@ -1,10 +1,8 @@
 from .brick_to_grafana import BrickToGrafana
-from .create_metadata_survey import SurveyGenerator, HPFlexSurvey
+from .survey import Survey, HPFlexSurvey
 from .generate_shacl import SHACLHandler
 from .get_metadata import BuildingMetadataLoader
-from .model_builder import ModelBuilder
 from .parse_points import add_points
-from .read_metadata_survey import SurveyReader
 from .unit_conversion import *
 from .utils import *
 
@@ -15,9 +13,8 @@ __email__ = "LPaul@lbl.gov"
 __all__ = [
     # Core classes
     "ModelBuilder",
-    "SurveyGenerator",
+    "Survey",
     "HPFlexSurvey",
-    "SurveyReader",
     "MetadataProcessor",
     "SHACLHandler",
     "BrickToGrafana",

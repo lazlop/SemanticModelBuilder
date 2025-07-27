@@ -43,7 +43,7 @@ def validate_dict(input_dict):
     return True
 
 
-class SurveyGenerator:
+class Survey:
     """
     General survey generator for creating CSV files from templates.
     This class handles the basic template loading and CSV generation functionality.
@@ -75,6 +75,8 @@ class SurveyGenerator:
         self.base_dir = Path(output_dir) / self.site_id / self.building_id
         self._create_directory_structure(output_dir, overwrite)
         self._create_survey(template_map)
+        # TODO: Still have to update point list
+        self._create_point_list()
 
     def _load_templates(self) -> None:
         """Load ontology-specific templates."""
@@ -263,10 +265,10 @@ class SurveyGenerator:
             writer = csv.writer(f)
             writer.writerow(headers)
 
-class HPFlexSurvey(SurveyGenerator):
+class HPFlexSurvey(Survey):
     """
     Specialized generator for building structures with HVAC, zones, spaces, and windows.
-    This class extends SurveyGenerator with specific functionality for building systems.
+    This class extends Survey with specific functionality for building systems.
     """
     # TODO: update to use template_dict
     def __init__(self, site_id, building_id, output_dir, system_of_units="IP", ontology='brick', 

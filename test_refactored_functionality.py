@@ -10,14 +10,14 @@ from pathlib import Path
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from semantic_mpc_interface.create_metadata_survey import SurveyGenerator, HPFlexSurvey
+from semantic_mpc_interface.survey import Survey, HPFlexSurvey
 
 def test_general_survey_generator():
-    """Test the general SurveyGenerator class"""
-    print("=== Testing General SurveyGenerator ===")
+    """Test the general Survey class"""
+    print("=== Testing General Survey ===")
     
     # Create a general survey with custom templates
-    generator = SurveyGenerator(
+    generator = Survey(
         site_id="general_site",
         building_id="test_building",
         output_dir="general_survey_output",
@@ -125,7 +125,7 @@ def main():
     print("Testing Refactored CSV Prefilling Functionality")
     print("=" * 60)
     
-    # Test 1: General SurveyGenerator
+    # Test 1: General Survey
     general_generator = test_general_survey_generator()
     
     # Test 2: HPFlexSurvey with manual config
@@ -140,7 +140,7 @@ def main():
     
     print("\n" + "="*60)
     print("SUMMARY OF REFACTORING:")
-    print("• SurveyGenerator: General class for any template-based CSV generation")
+    print("• Survey: General class for any template-based CSV generation")
     print("• HPFlexSurvey: Specialized for building systems (HVAC, zones, spaces, windows)")
     print("• System-specific defaults (units, HVAC types) moved to specialized class")
     print("• Prefilling functionality isolated to building-specific class")

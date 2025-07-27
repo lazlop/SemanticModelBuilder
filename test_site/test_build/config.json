@@ -7,22 +7,22 @@
             "area-name": "<name>-area-name"
         },
         "hp-rtu": {
-            "heating_COP-name": "<name>-heating_COP-name",
             "cooling_COP-name": "<name>-cooling_COP-name",
-            "cooling_capacity-name": "<name>-cooling_capacity-name",
-            "heating_capacity-name": "<name>-heating_capacity-name"
+            "heating_COP-name": "<name>-heating_COP-name",
+            "heating_capacity-name": "<name>-heating_capacity-name",
+            "cooling_capacity-name": "<name>-cooling_capacity-name"
         },
         "tstat": {
-            "setpoint_deadband-name": "<name>-setpoint_deadband-name",
-            "stage_count-name": "<name>-stage_count-name",
             "tolerance-name": "<name>-tolerance-name",
-            "resolution-name": "<name>-resolution-name",
-            "active-name": "<name>-active-name"
+            "stage_count-name": "<name>-stage_count-name",
+            "active-name": "<name>-active-name",
+            "setpoint_deadband-name": "<name>-setpoint_deadband-name",
+            "resolution-name": "<name>-resolution-name"
         },
         "window": {
             "area-name": "<name>-area-name",
-            "azimuth-name": "<name>-azimuth-name",
-            "tilt-name": "<name>-tilt-name"
+            "tilt-name": "<name>-tilt-name",
+            "azimuth-name": "<name>-azimuth-name"
         }
     },
     "param_mapping": {
@@ -32,21 +32,21 @@
         },
         "hp-rtu": {
             "cooling_capacity": "cooling_capacity-name-value",
-            "heating_capacity": "heating_capacity-name-value",
             "heating_COP": "heating_COP-name-value",
-            "cooling_COP": "cooling_COP-name-value"
+            "cooling_COP": "cooling_COP-name-value",
+            "heating_capacity": "heating_capacity-name-value"
         },
         "tstat": {
             "active": "active-name-value",
-            "resolution": "resolution-name-value",
             "tolerance": "tolerance-name-value",
+            "stage_count": "stage_count-name-value",
             "setpoint_deadband": "setpoint_deadband-name-value",
-            "stage_count": "stage_count-name-value"
+            "resolution": "resolution-name-value"
         },
         "window": {
+            "area": "area-name-value",
             "tilt": "tilt-name-value",
-            "azimuth": "azimuth-name-value",
-            "area": "area-name-value"
+            "azimuth": "azimuth-name-value"
         }
     },
     "hvacs_feed_hvacs": {},
