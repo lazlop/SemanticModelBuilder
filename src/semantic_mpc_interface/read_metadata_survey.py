@@ -3,7 +3,10 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Union
 
-from .model_builder import ModelBuilder
+from buildingmotif import BuildingMOTIF
+from buildingmotif.dataclasses import Library, Model
+from rdflib import Graph, Literal, Namespace, URIRef
+from buildingmotif.ingresses import CSVIngress, TemplateIngress
 
 
 class SurveyReader:
@@ -79,6 +82,10 @@ class SurveyReader:
             )
 
         return True
+
+    # Config can optionally come from mapping and directly from template to better generalize
+    def _load_csv(self, filename):
+        csv = CSVIngress(filename)
 
     def _load_site_info(self) -> Dict[str, str]:
         """Load site information from site_info.csv"""

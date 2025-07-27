@@ -66,6 +66,7 @@ class SurveyGenerator:
         self.base_dir = Path(output_dir) / self.site_id / self.building_id
         self._create_directory_structure(output_dir, overwrite)
         self.template_csvs = {}
+        self.param_mapping, self.empty_params = self._simplify_parameters(template_dict)
         for file_name, template_name in self.template_dict.items():
             template = self.templates.get_template_by_name(template_name)
             file = self._create_csv(file_name, template)
@@ -103,27 +104,41 @@ class SurveyGenerator:
         # Create main directory and parent directories if they don't exist
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
+    # TODO: look into how to prefill the template to better generalize and connect with the survey reader.
+    # can create binidngs based on building structure and if _name maps a value or _name maps to a relation
+    # TODO: consider if inlining dependencies is right.
+    def _simplify_parameters(self, template_dict):
+        # describe changes to template parameters made before generating the csv
+        param_mapping = {}
+        empty_params = {}
+        for name, template_name in template_dict.items():
+            template = self.templates.get_template_by_name(template_name).inline_dependencies()
+            params = template.all_parameters
+            template = template.inline_dependencies()
+            print(params)
+            values = {param.rsplit('_',1)[0]:param for param in params if '_value' in param}
+            value_names = [param for param in params if param.replace('_name','_value') == values]
+            entities = [param for param in params if ('_name' in param) and (param not in value_names)]
+            empty_params[template_name] = entities + value_names
+            param_mapping[template_name] = values
+        return param_mapping, empty_params
+
     def _create_csv(self, file_name, template):
         """Create CSV file from template"""
-        params = template.all_parameters
         template = template.inline_dependencies()
-        mapping = {}
-        for param in params:
-            if '_name' in param:
-                template = template.evaluate({param: Literal('na')})
-            if '_value' in param:
-                mapping[param] = param.split('_')[:-1]
         file = str(self.base_dir / file_name) + ".csv"
         template.generate_csv(file)
-        self._edit_cols(file, mapping)
+        mapping = self.param_mapping[template.name]
+        remove_params = self.empty_params[template.name]
+        self._edit_cols(file, mapping, remove_params)
         return file 
 
-    def _edit_cols(self, file, mapping, first_col='name'):
+    def _edit_cols(self, file, mapping, remove_params, first_col='name'):
         """Edit column names in CSV file"""
         df = pd.read_csv(file)
         new_cols = [mapping.get(first_col, first_col)] + [mapping.get(col, col) for col in df.columns if col != first_col]
-        print(new_cols)
-        df = df[new_cols]
+        new_cols = [col for col in new_cols if col not in remove_params]
+        df = pd.DataFrame(columns = new_cols)
         df.to_csv(file, index=False)
 
     def _create_point_list(self):
@@ -132,7 +147,51 @@ class SurveyGenerator:
         with open(self.base_dir / f"point_list.csv", "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(headers)
+    
+    # This is still a little custom - but maybe ok if we want to further constrain survey-based modeling
+    # TODO: Further generalize way to create structure
+    def _building_structure(self, hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows):
+        """Generate the complete building structure and prefill CSVs
+        
+        Args:
+            hvacs_feed_hvacs: dict
+                Dictionary that describes which HVAC systems feed which HVAC systems.
+                e.g. {ahu_1: [vav_1, vav_2, vav_3]}
+            hvacs_feed_zones: dict
+                Dictionary that describes which HVAC systems feed which zones.
+                e.g. {vav_1: [zone_1], vav_2: [zone_2, zone_3]}
+            zones_contain_spaces: dict
+                Dictionary describing which zones contain which spaces.
+                e.g. {zone_1: [space_1, space_2, space_3]}
+            zones_contain_windows: dict
+                Dictionary describing which zones contain which windows.
+                e.g. {zone_1: [window1, window2]}
+        """
+        # Data validation
+        validate_dict(hvacs_feed_hvacs)
+        validate_dict(hvacs_feed_zones)
+        validate_dict(zones_contain_spaces)
+        validate_dict(zones_contain_windows)
 
+        # Save configuration
+        config = {
+            "site_id": self.site_id,
+            "hvac_type": self.hvac_type,
+            "empty_params": self.empty_params,
+            "param_mapping": self.param_mapping,
+            "hvacs_feed_hvacs": hvacs_feed_hvacs,
+            "hvacs_feed_zones": hvacs_feed_zones,
+            "zones_contain_spaces": zones_contain_spaces,
+            "zones_contain_windows": zones_contain_windows,
+        }
+        print(config)
+        with open(self.base_dir / "config.json", "w") as f:
+            json.dump(config, f, indent=4)
+        return config
+    
+    # TODO: generate bindings based on structure
+    # def _generate_bindings(self, config):
+    #     for template in self.
 
 class HPFlexSurvey(SurveyGenerator):
     """
@@ -197,53 +256,19 @@ class HPFlexSurvey(SurveyGenerator):
                 window_name = f"window_{zone_num + 1}_{window_num + 1}"
                 self.zones_contain_windows[zone_name].append(window_name)
 
-        self._building_structure(
+        config = self._building_structure(
             self.hvacs_feed_hvacs,
             self.hvacs_feed_zones,
             self.zones_contain_spaces,
             self.zones_contain_windows,
         )
-
-    def _building_structure(self, hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows):
-        """Generate the complete building structure and prefill CSVs
-        
-        Args:
-            hvacs_feed_hvacs: dict
-                Dictionary that describes which HVAC systems feed which HVAC systems.
-                e.g. {ahu_1: [vav_1, vav_2, vav_3]}
-            hvacs_feed_zones: dict
-                Dictionary that describes which HVAC systems feed which zones.
-                e.g. {vav_1: [zone_1], vav_2: [zone_2, zone_3]}
-            zones_contain_spaces: dict
-                Dictionary describing which zones contain which spaces.
-                e.g. {zone_1: [space_1, space_2, space_3]}
-            zones_contain_windows: dict
-                Dictionary describing which zones contain which windows.
-                e.g. {zone_1: [window1, window2]}
-        """
-        # Data validation
-        validate_dict(hvacs_feed_hvacs)
-        validate_dict(hvacs_feed_zones)
-        validate_dict(zones_contain_spaces)
-        validate_dict(zones_contain_windows)
-
-        self._create_point_list()
-
-        # Save configuration
-        config = {
-            "site_id": self.site_id,
-            "hvac_type": self.hvac_type,
-            "hvacs_feed_hvacs": hvacs_feed_hvacs,
-            "hvacs_feed_zones": hvacs_feed_zones,
-            "zones_contain_spaces": zones_contain_spaces,
-            "zones_contain_windows": zones_contain_windows,
-        }
-        print(config)
-        with open(self.base_dir / "config.json", "w") as f:
-            json.dump(config, f, indent=4)
         
         # Prefill CSV files with data from config
         self._prefill_csv_defaults(config)
+
+    def _building_structure(self, hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows):
+        config = super()._building_structure(hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows)
+        return config
 
     def _prefill_csv_defaults(self, config):
         """

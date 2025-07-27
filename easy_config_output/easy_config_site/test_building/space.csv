@@ -1,5 +1,5 @@
-name,area_unit,area_value
-space_1_1,M2,
-space_1_2,M2,
-space_2_1,M2,
-space_3_1,M2,
+name,area_value,area_unit
+space_1_1,,M2
+space_1_2,,M2
+space_2_1,,M2
+space_3_1,,M2

@@ -1,6 +1,40 @@
 {
     "site_id": "test_site",
     "hvac_type": "hp-rtu",
+    "empty_params": {
+        "space": [
+            "area_name"
+        ],
+        "hp-rtu": [
+            "heating_COP_name",
+            "heating_capacity_name",
+            "cooling_capacity_name",
+            "cooling_COP_name"
+        ],
+        "tstat": [],
+        "window": [
+            "azimuth_name",
+            "area_name",
+            "tilt_name"
+        ]
+    },
+    "param_mapping": {
+        "space": {
+            "area_value": "area"
+        },
+        "hp-rtu": {
+            "cooling_COP_value": "cooling_COP",
+            "cooling_capacity_value": "cooling_capacity",
+            "heating_COP_value": "heating_COP",
+            "heating_capacity_value": "heating_capacity"
+        },
+        "tstat": {},
+        "window": {
+            "area_value": "area",
+            "azimuth_value": "azimuth",
+            "tilt_value": "tilt"
+        }
+    },
     "hvacs_feed_hvacs": {},
     "hvacs_feed_zones": {
         "hvac_1": [
