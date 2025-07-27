@@ -131,10 +131,13 @@ class SurveyGenerator:
         for name, template in template_dict.items():
             template = template.inline_dependencies()
             params = template.all_parameters
-            values = {param.rsplit('_',1)[0]:param for param in params if '_value' in param}
-            print('values', values.values())
-            value_names = [param for param in params if ('_name' in param) and (param.replace('_name','_value') in values.values())]
-            entities = [param for param in params if ('_name' in param) and (param not in value_names)]
+            # Getting the stuff before -name-value (could change to 1 if I just want to get rid of -value)
+            values = {param.rsplit('-',2)[0]:param for param in params if '-value' in param}
+            print('values:', values.values())
+            # have to change since value just appended to name now
+            value_names = [param for param in params if (param.endswith('-name')) and (param + '-value' in values.values())]
+            print('values names:', value_names)
+            entities = [param for param in params if ('-name' in param) and (param not in value_names)]
             # empty_params[template.name] = entities + value_names
             empty_params[template.name] = value_names
             param_mapping[template.name] = values
@@ -153,7 +156,8 @@ class SurveyGenerator:
     def _edit_cols(self, file, mapping, remove_params, first_col='name'):
         """Edit column names in CSV file"""
         df = pd.read_csv(file)
-        new_cols = [mapping.get(first_col, first_col)] + [mapping.get(col, col) for col in df.columns if col != first_col]
+        param_to_new_name = {v:k for k,v in mapping.items()}
+        new_cols = [param_to_new_name.get(first_col, first_col)] + [param_to_new_name.get(col, col) for col in df.columns if col != first_col]
         new_cols = [col for col in new_cols if col not in remove_params]
         df = pd.DataFrame(columns = new_cols)
         df.to_csv(file, index=False)
@@ -164,51 +168,6 @@ class SurveyGenerator:
         with open(self.base_dir / f"point_list.csv", "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(headers)
-    
-    # This is still a little custom - but maybe ok if we want to further constrain survey-based modeling
-    # TODO: Further generalize way to create structure
-    def _building_structure(self, hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows):
-        """Generate the complete building structure and prefill CSVs
-        
-        Args:
-            hvacs_feed_hvacs: dict
-                Dictionary that describes which HVAC systems feed which HVAC systems.
-                e.g. {ahu_1: [vav_1, vav_2, vav_3]}
-            hvacs_feed_zones: dict
-                Dictionary that describes which HVAC systems feed which zones.
-                e.g. {vav_1: [zone_1], vav_2: [zone_2, zone_3]}
-            zones_contain_spaces: dict
-                Dictionary describing which zones contain which spaces.
-                e.g. {zone_1: [space_1, space_2, space_3]}
-            zones_contain_windows: dict
-                Dictionary describing which zones contain which windows.
-                e.g. {zone_1: [window1, window2]}
-        """
-        # Data validation
-        validate_dict(hvacs_feed_hvacs)
-        validate_dict(hvacs_feed_zones)
-        validate_dict(zones_contain_spaces)
-        validate_dict(zones_contain_windows)
-
-        # Save configuration
-        config = {
-            "site_id": self.site_id,
-            "hvac_type": self.hvac_type,
-            "empty_params": self.empty_params,
-            "param_mapping": self.param_mapping,
-            "hvacs_feed_hvacs": hvacs_feed_hvacs,
-            "hvacs_feed_zones": hvacs_feed_zones,
-            "zones_contain_spaces": zones_contain_spaces,
-            "zones_contain_windows": zones_contain_windows,
-        }
-        print(config)
-        with open(self.base_dir / "config.json", "w") as f:
-            json.dump(config, f, indent=4)
-        return config
-    
-    # TODO: generate bindings based on structure
-    # def _generate_bindings(self, config):
-    #     for template in self.
 
 class HPFlexSurvey(SurveyGenerator):
     """
@@ -284,7 +243,42 @@ class HPFlexSurvey(SurveyGenerator):
         self._prefill_csv_defaults(config)
 
     def _building_structure(self, hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows):
-        config = super()._building_structure(hvacs_feed_hvacs, hvacs_feed_zones, zones_contain_spaces, zones_contain_windows)
+        """Generate the complete building structure and prefill CSVs
+        
+        Args:
+            hvacs_feed_hvacs: dict
+                Dictionary that describes which HVAC systems feed which HVAC systems.
+                e.g. {ahu_1: [vav_1, vav_2, vav_3]}
+            hvacs_feed_zones: dict
+                Dictionary that describes which HVAC systems feed which zones.
+                e.g. {vav_1: [zone_1], vav_2: [zone_2, zone_3]}
+            zones_contain_spaces: dict
+                Dictionary describing which zones contain which spaces.
+                e.g. {zone_1: [space_1, space_2, space_3]}
+            zones_contain_windows: dict
+                Dictionary describing which zones contain which windows.
+                e.g. {zone_1: [window1, window2]}
+        """
+        # Data validation
+        validate_dict(hvacs_feed_hvacs)
+        validate_dict(hvacs_feed_zones)
+        validate_dict(zones_contain_spaces)
+        validate_dict(zones_contain_windows)
+
+        # Save configuration
+        config = {
+            "site_id": self.site_id,
+            "hvac_type": self.hvac_type,
+            "empty_params": self.empty_params,
+            "param_mapping": self.param_mapping,
+            "hvacs_feed_hvacs": hvacs_feed_hvacs,
+            "hvacs_feed_zones": hvacs_feed_zones,
+            "zones_contain_spaces": zones_contain_spaces,
+            "zones_contain_windows": zones_contain_windows,
+        }
+        print(config)
+        with open(self.base_dir / "config.json", "w") as f:
+            json.dump(config, f, indent=4)
         return config
 
     def _prefill_csv_defaults(self, config):
@@ -309,7 +303,68 @@ class HPFlexSurvey(SurveyGenerator):
         # Prefill thermostat CSV (one per zone)
         if 'tstat' in self.template_csvs and 'hvacs_feed_zones' in config:
             self._prefill_tstat_csv(config['hvacs_feed_zones'])
+        
+        # TODO: can lead with this. May not need to do the whole hvacs_feed_hvacs, hvacs_feed_zones config, since this info covers that
+        if 'zone' in self.template_csvs and 'zones_contain_windows' in config and 'zones_contain_spaces' in config and 'hvacs_feed_zones' in config:
+            self._prefill_zone_csv(config)
+    
+    # tstat should be handled more like other things
+    # Everything highly customized in this function
+    # Adding and filling this in is redundant with the rest of the config, but the information makes less sence as a table
+    def _prefill_zone_csv(self,config):
+        space_file = self.template_csvs['zone']
+        
+        # Read existing CSV to get column structure
+        existing_df = pd.read_csv(space_file)
+        columns = existing_df.columns.tolist()
+        new_rows = []
+        extra_rows = []
+        for zone_name, spaces in config["zones_contain_spaces"].items():
+            # Start with empty row
+            row = {col: '' for col in columns}
 
+            if 'tstat-name' in columns:
+                row['tstat-name'] = f"tstat_{zone_name}"
+
+            hvacs = config['hvacs_feed_zones']
+            for hvac_name, hvac_zone_names in hvacs.items():
+                if not isinstance(hvac_zone_names, list):
+                    raise TypeError(f"Expected hvac_zone_names {hvac_zone_names} to be a list, instead {type(hvac_zone_names)}")
+                if zone_name in hvac_zone_names:
+                    if 'hvac-name' in columns:
+                        row['hvac-name'] = hvac_name
+            if 'name' in columns:
+                row['name'] = zone_name
+
+            for i, space_name in enumerate(spaces):
+                if i>0:
+                    extra_row = {col: '' for col in columns}
+                    extra_row['name'] = zone_name
+                    if 'space-name' in columns:
+                        extra_row['space-name'] = space_name
+                    extra_rows.append(extra_row)
+                else:
+                    if 'space-name' in columns:
+                        row['space-name'] = space_name
+
+            windows = config['zones_contain_windows'][zone_name]
+            for window_name in windows:
+                if i>0:
+                    extra_row = {col: '' for col in columns}
+                    extra_row['name'] = zone_name
+                    if 'window-name' in columns:
+                        extra_row['window-name'] = window_name
+                    extra_rows.append(extra_row)
+                else:
+                    if 'window-name' in columns:
+                        row['window-name'] = window_name
+
+            new_rows.append(row)
+        new_rows = new_rows + extra_rows
+        
+        # Create new dataframe with prefilled data
+        new_df = pd.DataFrame(new_rows, columns=columns)
+        new_df.to_csv(space_file, index=False)
     def _prefill_space_csv(self, zones_contain_spaces):
         """Prefill space CSV with space names and default values"""
         space_file = self.template_csvs['space']
@@ -326,8 +381,8 @@ class HPFlexSurvey(SurveyGenerator):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = space_name
-                if 'area_unit' in columns:
-                    row['area_unit'] = self.default_area_unit
+                if 'area-unit' in columns:
+                    row['area-unit'] = self.default_area_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -350,8 +405,8 @@ class HPFlexSurvey(SurveyGenerator):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = window_name
-                if 'area_unit' in columns:
-                    row['area_unit'] = self.default_area_unit
+                if 'area-unit' in columns:
+                    row['area-unit'] = self.default_area_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
