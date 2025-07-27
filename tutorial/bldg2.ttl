@@ -15,6 +15,7 @@ bldg:hpflex_demo a brick:Site ;
     brick:hasNOAAStation bldg:hpflex_demo.noaastation ;
     brick:latitude bldg:hpflex_demo.latitude ;
     brick:longitude bldg:hpflex_demo.longitude ;
+    brick:siteID bldg:hpflex_demo.site_id ;
     brick:timezone bldg:hpflex_demo.timezone .
 
 bldg:hpflex_demo.building_id brick:buildingID "bldg2" .
@@ -28,6 +29,9 @@ bldg:hpflex_demo.longitude qudt:hasQuantityKind quantitykind:Longitude ;
     brick:value -1.222544e+02 .
 
 bldg:hpflex_demo.noaastation hpflex:hasNOAAStation "" .
+
+bldg:hpflex_demo.site_id qudt:hasUnit unit:SiteID ;
+    brick:value "hpflex_demo" .
 
 bldg:hpflex_demo.timezone qudt:hasUnit unit:Timezone ;
     brick:value "US/Pacific" .

@@ -344,8 +344,8 @@ class BuildingMetadataLoader:
             "longitude": self._get_property_value(self.site, BRICK.longitude),
             "NOAAstation": self._get_property_value(self.site, BRICK.hasNOAAStation),
             # project_id and site_id are currently the same
-            "project_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
-            "site_id": next(self.g.triples((None,RDF.type, BRICK.Site)))[0],
+            "project_id": self._get_property_value(self.site, BRICK.siteID),
+            "site_id": self._get_property_value(self.site, BRICK.siteID),
             "building_id": self._get_property_value(self.site, BRICK.buildingID),
         }
         else:

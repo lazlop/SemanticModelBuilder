@@ -128,7 +128,8 @@ class SurveyReader:
             latitude=float(self.site_info['latitude']),
             longitude=float(self.site_info['longitude']),
             noaa_station=self.site_info['noaa_station'],
-            building_id=self.site_info['building_id']
+            building_id=self.site_info['building_id'],
+            site_id=self.site_info['site_id']
         )
         # Process zones and their associated equipment
         zones = self._load_zones()
