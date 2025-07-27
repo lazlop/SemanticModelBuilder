@@ -1,8 +1,8 @@
-name,azimuth,area-name-unit,area,tilt
-window_1_1,azimuth_1,FT2,area_1,tilt_1
-window_1_2,azimuth_2,FT2,area_2,tilt_2
-window_2_1,azimuth_3,FT2,area_3,tilt_3
-window_2_2,azimuth_4,FT2,area_4,tilt_4
-window_3_1,azimuth_5,FT2,area_5,tilt_5
-window_3_2,azimuth_6,FT2,area_6,tilt_6
-window_3_3,azimuth_7,FT2,area_7,tilt_7
+name,tilt,azimuth,area,area-name-unit
+window_1_1,tilt_1,azimuth_1,area_1,FT2
+window_1_2,tilt_2,azimuth_2,area_2,FT2
+window_2_1,tilt_3,azimuth_3,area_3,FT2
+window_2_2,tilt_4,azimuth_4,area_4,FT2
+window_3_1,tilt_5,azimuth_5,area_5,FT2
+window_3_2,tilt_6,azimuth_6,area_6,FT2
+window_3_3,tilt_7,azimuth_7,area_7,FT2

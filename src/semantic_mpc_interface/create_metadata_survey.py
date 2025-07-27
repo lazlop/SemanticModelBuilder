@@ -65,7 +65,8 @@ class SurveyGenerator:
         self.building_ns = Namespace(f"urn:hpflex/{self.site_id}#")
         self.model = Model.create(self.building_ns)
         self.graph = self.model.graph
-        self.graph.bind('bldg', self.building_ns)
+        bind_prefixes(self.graph)
+        self.graph.bind("bldg", self.building_ns)
         self.building_id = building_id
         self.base_dir = None
         self.ontology = ontology
@@ -93,7 +94,8 @@ class SurveyGenerator:
         except Exception as e:
             print(f"Failed to load templates from {template_dir}: {e}")
             raise
-
+    
+    # TODO: alter this so the init makes sense even if you are just reading the survey
     def _create_directory_structure(self, base_path, overwrite=False):
         """Create the directory structure for the survey"""
         self.base_dir = Path(base_path) / self.site_id / self.building_id
@@ -150,7 +152,7 @@ class SurveyGenerator:
             variatic_params[template.name] = value_names
             param_mapping[template.name] = values
         return param_mapping, variatic_params
-
+    # TODO: buildingmotif feature improvement - mapper for columns to namespaces/literals
     def _read_csv(self, serialize = True):
         for filename, template in self.template_dict.items():
             def fill_variatic_params(filename, variatic_params):
@@ -206,13 +208,18 @@ class SurveyGenerator:
             def mapper(col, map = self.param_mapping[template.name]):
                 return map.get(col,col)
             
-            def change_unit_ns(graph):
+            # NOTE: patch for missing bmotif feature
+            def change_ns(graph):
                 add = []
                 remove = []
                 for s,o in graph.subject_objects(QUDT.hasUnit):
                     if str(o).startswith(str(self.building_ns)):
                         remove.append((s, QUDT.hasUnit, o))
                         add.append((s, QUDT.hasUnit, URIRef(str(o).replace(str(self.building_ns),str(QUDT)))))
+                for s,o in graph.subject_objects(BRICK.value):
+                    if str(o).startswith(str(self.building_ns)):
+                        remove.append((s, BRICK.value, o))
+                        add.append((s, BRICK.value, Literal(str(o).replace(str(self.building_ns),""))))
                 for triple in add:
                     graph.add(triple)
                 for triple in remove:
@@ -224,9 +231,10 @@ class SurveyGenerator:
             ingress = TemplateIngress(template, mapper, csv_in)
             #NOTE: Ingress puts everything into the given namespace, will have to change unit namespaces manually 
             graph = ingress.graph(self.building_ns)
-            change_unit_ns(graph)
+            change_ns(graph)
             self.graph += graph
-        self.graph.serialize(self.base_dir / f'{self.building_id}.ttl')
+        if serialize:
+            self.graph.serialize(self.base_dir / f'{self.building_id}.ttl')
 
 
     def _create_csv(self, file_name, template):
