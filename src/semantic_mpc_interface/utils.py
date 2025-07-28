@@ -5,6 +5,10 @@ from rdflib import Graph, Literal, URIRef
 
 from .namespaces import *
 
+from importlib.resources import files
+
+brick_templates = str(files("semantic_mpc_interface").joinpath("templates").joinpath('brick-templates'))
+s223_templates = str(files("semantic_mpc_interface").joinpath("templates").joinpath('s223-templates'))
 
 def get_prefixes(g: Graph):
     return "\n".join(
