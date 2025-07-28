@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Example usage of the prefill_csv_survey function
 
@@ -8,7 +7,8 @@ populate CSV survey files based on an existing configuration.
 import pandas as pd
 import json
 from pathlib import Path
-from semantic_mpc_interface import HPFlexSurvey
+from semantic_mpc_interface import HPFlexSurvey, SHACLHandler
+from pyshacl.rdfutil import clone
 
 def prefill_csv_survey(survey_directory):
     """
@@ -132,6 +132,12 @@ def main():
     prefill_csv_survey('test_site/test_build')
     print("\n=== Done! Now loading csv===")
     s.read_csv()
-    print("\n=== Done! reading csv===")
+    print("\n=== Done! Now generating SHACL===")
+    og = clone.clone_graph(s.graph)
+    handler = SHACLHandler(ontology='brick')
+    handler.generate_shapes()
+    # Validate a model
+    conforms, results_graph, results_text = handler.validate_model(s.graph)
+    (s.graph-og).print()
 if __name__ == "__main__":
     main()

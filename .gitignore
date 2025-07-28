@@ -220,3 +220,4 @@ development_files/
 survey_*.json
 responses_*.json
 dashboard_*.json
+.vscode/

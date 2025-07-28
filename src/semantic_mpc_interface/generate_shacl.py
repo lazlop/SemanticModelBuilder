@@ -40,7 +40,8 @@ class SHACLHandler:
             .joinpath("templates")
             .joinpath(f"{self.ontology}-templates")
         )
-        self.nodes_templates = str(self.template_dir.joinpath("nodes.yml"))
+        self.entity_templates = str(self.template_dir.joinpath("entities.yml"))
+        self.value_templates = str(self.template_dir.joinpath("values.yml"))
         self.relations_templates = str(self.template_dir.joinpath("relations.yml"))
         try:
             self.bm = get_building_motif()
@@ -57,8 +58,11 @@ class SHACLHandler:
         p = Namespace("urn:___param___#")
         types = list(g.objects(p.name, RDF.type))
         main_type = None
+        # TODO: Added for brick classes - not sure what else to cover
         for rdf_type in types:
             if URIRef(S223) == g.compute_qname(rdf_type)[1]:
+                main_type = rdf_type
+            if URIRef(BRICK) == g.compute_qname(rdf_type)[1]:
                 main_type = rdf_type
         if main_type is None:
             raise ValueError("No main type found in template")
@@ -70,16 +74,23 @@ class SHACLHandler:
             if dependencies["args"]["name"] == name:
                 return dependencies["template"]
 
+    # TODO: Values no longer have a type - need different logic ot handle
     def generate_shapes(self):
-        with open(self.nodes_templates, "r") as f:
+        with open(self.entity_templates, "r") as f:
             templates = yaml.safe_load(f)
-        self.nodes_templates_names = list(templates.keys())
+        self.entity_templates_names = list(templates.keys())
+
+        # with open(self.value_templates, "r") as f:
+        #     templates = yaml.safe_load(f)
+        # self.value_templates_names = list(templates.keys())
 
         with open(self.relations_templates, "r") as f:
             templates = yaml.safe_load(f)
         self.relations_templates_names = list(templates.keys())
 
-        self._generate_shapes(templates_file=self.nodes_templates)
+        self._generate_shapes(templates_file=self.entity_templates)
+        # TODO: brick entity properties do not have a type... 
+        # self._generate_shapes(templates_file=self.value_templates)
         self._generate_relation_inference(templates_file=self.relations_templates)
 
     def _parse_template(self, template_data):

@@ -152,49 +152,50 @@ site:
     - template: noaastation
       args: {"name": "noaastation-name"}
 
-# Adding connection point templates to match S223
-air-bidirectional-connectionpoint:
-  body: >
-    @prefix p: <urn:___param___#> .
-    @prefix brick: <https://brickschema.org/schema/Brick#> .
-    @prefix qudt: <http://qudt.org/schema/qudt/> .
-    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
-    @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
-    p:name a brick:Connection_Point ;
-      brick:hasMedium brick:Air ;
-    .
+# Adding connection point templates to match S223, 
+# TODO: AI generated, need to check
+# air-bidirectional-connectionpoint:
+#   body: >
+#     @prefix p: <urn:___param___#> .
+#     @prefix brick: <https://brickschema.org/schema/Brick#> .
+#     @prefix qudt: <http://qudt.org/schema/qudt/> .
+#     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+#     @prefix unit: <http://qudt.org/vocab/unit/> .
+#     @prefix hpf: <urn:hpflex#> .
+#     p:name a brick:Connection_Point ;
+#       brick:hasMedium brick:Air ;
+#     .
 
-air-outlet-connectionpoint:
-  body: >
-    @prefix p: <urn:___param___#> .
-    @prefix brick: <https://brickschema.org/schema/Brick#> .
-    @prefix qudt: <http://qudt.org/schema/qudt/> .
-    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
-    @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
-    p:name a brick:Connection_Point, brick:Outlet ;
-      brick:hasMedium brick:Air ;
-    .
+# air-outlet-connectionpoint:
+#   body: >
+#     @prefix p: <urn:___param___#> .
+#     @prefix brick: <https://brickschema.org/schema/Brick#> .
+#     @prefix qudt: <http://qudt.org/schema/qudt/> .
+#     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+#     @prefix unit: <http://qudt.org/vocab/unit/> .
+#     @prefix hpf: <urn:hpflex#> .
+#     p:name a brick:Connection_Point, brick:Outlet ;
+#       brick:hasMedium brick:Air ;
+#     .
 
-air-inlet-connectionpoint:
-  body: >
-    @prefix p: <urn:___param___#> .
-    @prefix brick: <https://brickschema.org/schema/Brick#> .
-    @prefix qudt: <http://qudt.org/schema/qudt/> .
-    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
-    @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
-    p:name a brick:Connection_Point, brick:Inlet ;
-      brick:hasMedium brick:Air ;
-    .
+# air-inlet-connectionpoint:
+#   body: >
+#     @prefix p: <urn:___param___#> .
+#     @prefix brick: <https://brickschema.org/schema/Brick#> .
+#     @prefix qudt: <http://qudt.org/schema/qudt/> .
+#     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+#     @prefix unit: <http://qudt.org/vocab/unit/> .
+#     @prefix hpf: <urn:hpflex#> .
+#     p:name a brick:Connection_Point, brick:Inlet ;
+#       brick:hasMedium brick:Air ;
+#     .
 
-connection:
-  body: >
-    @prefix p: <urn:___param___#> .
-    @prefix brick: <https://brickschema.org/schema/Brick#> .
-    @prefix qudt: <http://qudt.org/schema/qudt/> .
-    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
-    @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
-    p:name a brick:Connection .
+# connection:
+#   body: >
+#     @prefix p: <urn:___param___#> .
+#     @prefix brick: <https://brickschema.org/schema/Brick#> .
+#     @prefix qudt: <http://qudt.org/schema/qudt/> .
+#     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+#     @prefix unit: <http://qudt.org/vocab/unit/> .
+#     @prefix hpf: <urn:hpflex#> .
+#     p:name a brick:Connection .

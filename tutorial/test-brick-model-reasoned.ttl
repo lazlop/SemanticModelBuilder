@@ -9,7 +9,8 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 bldg:hvac_1 a brick:Packaged_Heat_Pump,
-        brick:RTU ;
+        brick:RTU,
+        hpfs:hp-rtu ;
     brick:coolingCapacity bldg:hvac_1-cooling_capacity-name ;
     brick:coolingCoefficientOfPerformance bldg:hvac_1-cooling_COP-name ;
     brick:feeds bldg:zone_1 ;
@@ -18,7 +19,8 @@ bldg:hvac_1 a brick:Packaged_Heat_Pump,
     hpfs:air-connects-to bldg:zone_1 .
 
 bldg:hvac_2 a brick:Packaged_Heat_Pump,
-        brick:RTU ;
+        brick:RTU,
+        hpfs:hp-rtu ;
     brick:coolingCapacity bldg:hvac_2-cooling_capacity-name ;
     brick:coolingCoefficientOfPerformance bldg:hvac_2-cooling_COP-name ;
     brick:feeds bldg:zone_2 ;
@@ -27,7 +29,8 @@ bldg:hvac_2 a brick:Packaged_Heat_Pump,
     hpfs:air-connects-to bldg:zone_2 .
 
 bldg:hvac_3 a brick:Packaged_Heat_Pump,
-        brick:RTU ;
+        brick:RTU,
+        hpfs:hp-rtu ;
     brick:coolingCapacity bldg:hvac_3-cooling_capacity-name ;
     brick:coolingCoefficientOfPerformance bldg:hvac_3-cooling_COP-name ;
     brick:feeds bldg:zone_3 ;
@@ -35,13 +38,15 @@ bldg:hvac_3 a brick:Packaged_Heat_Pump,
     brick:heatingCoefficientOfPerformance bldg:hvac_3-heating_COP-name ;
     hpfs:air-connects-to bldg:zone_3 .
 
-bldg:test_site a brick:Site ;
+bldg:test_site a brick:Site,
+        hpfs:site ;
     brick:hasNOAAStation bldg:test_site-noaastation-name ;
     brick:latitude bldg:test_site-latitude-name ;
     brick:longitude bldg:test_site-longitude-name ;
     brick:timezone bldg:test_site-timezone-name .
 
-bldg:tstat_zone_1 a brick:Thermostat ;
+bldg:tstat_zone_1 a brick:Thermostat,
+        hpfs:tstat ;
     brick:hasLocation bldg:zone_1 ;
     brick:hasPoint bldg:tstat_zone_1-active-name,
         bldg:tstat_zone_1-setpoint_deadband-name,
@@ -53,7 +58,8 @@ bldg:tstat_zone_1 a brick:Thermostat ;
         bldg:tstat_zone_1-setpoint_deadband-name,
         bldg:tstat_zone_1-tolerance-name .
 
-bldg:tstat_zone_2 a brick:Thermostat ;
+bldg:tstat_zone_2 a brick:Thermostat,
+        hpfs:tstat ;
     brick:hasLocation bldg:zone_2 ;
     brick:hasPoint bldg:tstat_zone_2-active-name,
         bldg:tstat_zone_2-setpoint_deadband-name,
@@ -65,7 +71,8 @@ bldg:tstat_zone_2 a brick:Thermostat ;
         bldg:tstat_zone_2-setpoint_deadband-name,
         bldg:tstat_zone_2-tolerance-name .
 
-bldg:tstat_zone_3 a brick:Thermostat ;
+bldg:tstat_zone_3 a brick:Thermostat,
+        hpfs:tstat ;
     brick:hasLocation bldg:zone_3 ;
     brick:hasPoint bldg:tstat_zone_3-active-name,
         bldg:tstat_zone_3-setpoint_deadband-name,
@@ -77,17 +84,20 @@ bldg:tstat_zone_3 a brick:Thermostat ;
         bldg:tstat_zone_3-setpoint_deadband-name,
         bldg:tstat_zone_3-tolerance-name .
 
-bldg:window_2_1 a brick:Window ;
+bldg:window_2_1 a brick:Window,
+        hpfs:window ;
     brick:area bldg:window_2_1-area-name ;
     brick:azimuth bldg:window_2_1-azimuth-name ;
     brick:tilt bldg:window_2_1-tilt-name .
 
-bldg:window_3_1 a brick:Window ;
+bldg:window_3_1 a brick:Window,
+        hpfs:window ;
     brick:area bldg:window_3_1-area-name ;
     brick:azimuth bldg:window_3_1-azimuth-name ;
     brick:tilt bldg:window_3_1-tilt-name .
 
-bldg:window_3_2 a brick:Window ;
+bldg:window_3_2 a brick:Window,
+        hpfs:window ;
     brick:area bldg:window_3_2-area-name ;
     brick:azimuth bldg:window_3_2-azimuth-name ;
     brick:tilt bldg:window_3_2-tilt-name .
@@ -328,39 +338,48 @@ bldg: a owl:Ontology ;
     hpfs:air-connects-to bldg:zone_1 ;
     hpfs:has-location bldg:zone_1 .
 
-bldg:space_1_1 a brick:Space ;
+bldg:space_1_1 a brick:Space,
+        hpfs:space ;
     brick:area bldg:space_1_1-area-name .
 
-bldg:space_1_2 a brick:Space ;
+bldg:space_1_2 a brick:Space,
+        hpfs:space ;
     brick:area bldg:space_1_2-area-name .
 
-bldg:space_2_1 a brick:Space ;
+bldg:space_2_1 a brick:Space,
+        hpfs:space ;
     brick:area bldg:space_2_1-area-name .
 
-bldg:space_3_1 a brick:Space ;
+bldg:space_3_1 a brick:Space,
+        hpfs:space ;
     brick:area bldg:space_3_1-area-name .
 
-bldg:window_1_1 a brick:Window ;
+bldg:window_1_1 a brick:Window,
+        hpfs:window ;
     brick:area bldg:window_1_1-area-name ;
     brick:azimuth bldg:window_1_1-azimuth-name ;
     brick:tilt bldg:window_1_1-tilt-name .
 
-bldg:window_1_2 a brick:Window ;
+bldg:window_1_2 a brick:Window,
+        hpfs:window ;
     brick:area bldg:window_1_2-area-name ;
     brick:azimuth bldg:window_1_2-azimuth-name ;
     brick:tilt bldg:window_1_2-tilt-name .
 
-bldg:window_2_2 a brick:Window ;
+bldg:window_2_2 a brick:Window,
+        hpfs:window ;
     brick:area bldg:window_2_2-area-name ;
     brick:azimuth bldg:window_2_2-azimuth-name ;
     brick:tilt bldg:window_2_2-tilt-name .
 
-bldg:window_3_3 a brick:Window ;
+bldg:window_3_3 a brick:Window,
+        hpfs:window ;
     brick:area bldg:window_3_3-area-name ;
     brick:azimuth bldg:window_3_3-azimuth-name ;
     brick:tilt bldg:window_3_3-tilt-name .
 
-bldg:zone_2 a brick:HVAC_Zone ;
+bldg:zone_2 a brick:HVAC_Zone,
+        hpfs:hvac-zone ;
     brick:hasPart bldg:space_2_1,
         bldg:window_2_2 ;
     hpfs:has-space bldg:space_2_1,
@@ -368,7 +387,8 @@ bldg:zone_2 a brick:HVAC_Zone ;
     hpfs:has-window bldg:space_2_1,
         bldg:window_2_2 .
 
-bldg:zone_3 a brick:HVAC_Zone ;
+bldg:zone_3 a brick:HVAC_Zone,
+        hpfs:hvac-zone ;
     brick:hasPart bldg:space_3_1,
         bldg:window_3_3 ;
     hpfs:has-space bldg:space_3_1,
@@ -376,7 +396,8 @@ bldg:zone_3 a brick:HVAC_Zone ;
     hpfs:has-window bldg:space_3_1,
         bldg:window_3_3 .
 
-bldg:zone_1 a brick:HVAC_Zone ;
+bldg:zone_1 a brick:HVAC_Zone,
+        hpfs:hvac-zone ;
     brick:hasPart bldg:,
         bldg:space_1_1,
         bldg:space_1_2,

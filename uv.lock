@@ -2739,6 +2739,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "buildingmotif" },
+    { name = "grafanalib" },
     { name = "ipykernel", version = "6.29.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "ipykernel", version = "6.30.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "pandas", version = "2.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -2781,6 +2782,7 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0" },
     { name = "buildingmotif", specifier = ">=0.3.0" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0" },
+    { name = "grafanalib", specifier = ">=0.7.1" },
     { name = "grafanalib", marker = "extra == 'grafana'", specifier = ">=0.7.1" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.0" },
