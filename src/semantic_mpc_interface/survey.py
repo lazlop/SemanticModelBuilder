@@ -155,7 +155,7 @@ class Survey:
             param_mapping[template.name] = values
         return param_mapping, variatic_params
     # TODO: buildingmotif feature improvement - mapper for columns to namespaces/literals
-    def _read_csv(self, serialize = True):
+    def read_csv(self, serialize = True):
         for filename, template in self.template_dict.items():
             def fill_variatic_params(filename, variatic_params):
                 df = pd.read_csv(filename)
@@ -272,7 +272,7 @@ class HPFlexSurvey(Survey):
     """
     # TODO: update to use template_dict
     def __init__(self, site_id, building_id, output_dir, system_of_units="IP", ontology='brick', 
-                 template_dict={'zone':'hvac-zone',"space":"space", "hvac":"hp-rtu", "tstat":"tstat", "window":"window"}, overwrite=False):
+                 template_dict={'zone':'hvac-zone',"space":"space", "hvac":"hp-rtu", "tstat":"tstat", "window":"window", "site":"site"}, overwrite=False):
         """
         Initialize the building structure generator.
         
@@ -401,6 +401,9 @@ class HPFlexSurvey(Survey):
         if 'tstat' in self.template_csvs and 'hvacs_feed_zones' in config:
             self._prefill_tstat_csv(config['hvacs_feed_zones'])
         
+        if 'site' in self.template_csvs:
+            self._prefill_site_csv(self.site_id)
+
         # TODO: can lead with this. May not need to do the whole hvacs_feed_hvacs, hvacs_feed_zones config, since this info covers that
         if 'zone' in self.template_csvs and 'zones_contain_windows' in config and 'zones_contain_spaces' in config and 'hvacs_feed_zones' in config:
             self._prefill_zone_csv(config)
@@ -559,6 +562,22 @@ class HPFlexSurvey(Survey):
         # Create new dataframe with prefilled data
         new_df = pd.DataFrame(new_rows, columns=columns)
         new_df.to_csv(tstat_file, index=False)
+    
+    def _prefill_site_csv(self, site_id):
+        """Prefill thermostat CSV with thermostat names (one per zone) and default values"""
+        site_file = self.template_csvs['site']
+        
+        # Read existing CSV to get column structure
+        existing_df = pd.read_csv(site_file)
+        columns = existing_df.columns.tolist()
+        
+        # Create new rows with only the values we want to prefill
+        new_rows = []
+        row = {col: '' for col in columns}
+        row['name'] = site_id
+        new_rows.append(row)
+        new_df = pd.DataFrame(new_rows, columns=columns)
+        new_df.to_csv(site_file, index=False)
 
     def prefill_from_config(self, config_path=None):
         """

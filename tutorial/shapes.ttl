@@ -2,11 +2,11 @@
 @prefix brick: <https://brickschema.org/schema/Brick#> .
 @prefix hpflex: <urn:hpflex#> .
 @prefix hpfs: <urn:hpflex/shapes#> .
+@prefix ns1: <https://brickschema.org/schema/Brick/ref#> .
 @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 @prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix ref: <https://brickschema.org/schema/Brick/ref#> .
 @prefix s223: <http://data.ashrae.org/standard223#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix unit: <http://qudt.org/vocab/unit/> .
@@ -478,7 +478,7 @@ hpfs:has-pointAnnotation a sh:NodeShape ;
 
 hpfs:has-referenceAnnotation a sh:NodeShape ;
     sh:rule hpfs:has-referenceAnnotationRule ;
-    sh:targetSubjectsOf ref:hasExternalReference .
+    sh:targetSubjectsOf ns1:hasExternalReference .
 
 hpfs:has-spaceAnnotation a sh:NodeShape ;
     sh:rule hpfs:has-spaceAnnotationRule ;
@@ -746,8 +746,8 @@ hpfs:air-bidirectional-connects-toAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#air-bidirectional-connects-to> ?target .
                 }
                 WHERE {
-	?target <https://brickschema.org/schema/Brick#feed> ?name . 
 	?name <https://brickschema.org/schema/Brick#feeds> ?target . 
+	?target <https://brickschema.org/schema/Brick#feed> ?name . 
 }""" .
 
 hpfs:air-connects-toAnnotationRule a sh:SPARQLRule ;
@@ -2237,7 +2237,7 @@ hpfs:volttron-external-referenceAnnotationRule a sh:TripleRule ;
 hpfs:volttron-external-reference_hasTopicName rdfs:label "volttron-external-reference_hasTopicName" ;
     sh:maxCount 1 ;
     sh:minCount 1 ;
-    sh:path ref:hasTopicName .
+    sh:path ns1:hasTopicName .
 
 hpfs:volttron-external-reference_noAspects rdfs:label "volttron-external-reference_noAspects" ;
     sh:maxCount 0 ;

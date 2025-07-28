@@ -1,5 +1,6 @@
 # Brick templates for nodes
 # Updated to match S223 templates structure
+# TODO: Changed template method (including fixing misconception about dependencies) so have to update SHACL gen
 hvac-zone:
   body: >
     @prefix p: <urn:___param___#> .
@@ -136,20 +137,20 @@ site:
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
     p:name a brick:Site ;
-      brick:timezone p:timezone ;
-      brick:latitude p:latitude ;
-      brick:longitude p:longitude ;
-      brick:hasNOAAStation p:noaastation ;
+      brick:timezone p:timezone-name ;
+      brick:latitude p:latitude-name ;
+      brick:longitude p:longitude-name ;
+      brick:hasNOAAStation p:noaastation-name ;
       .
   dependencies:
     - template: timezone
-      args: {"name": "timezone-name", "value": "timezone-value"}
+      args: {"name": "timezone-name"}
     - template: latitude
-      args: {"name": "latitude-name", "value": "latitude-value"}
+      args: {"name": "latitude-name"}
     - template: longitude
-      args: {"name": "longitude-name", "value": "longitude-value"}
+      args: {"name": "longitude-name"}
     - template: noaastation
-      args: {"name": "noaastation-name", "value": "noaastation-value"}
+      args: {"name": "noaastation-name"}
 
 # Adding connection point templates to match S223
 air-bidirectional-connectionpoint:

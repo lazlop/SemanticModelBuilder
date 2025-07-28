@@ -143,7 +143,7 @@ class SHACLHandler:
                     Literal(sparql_rule),
                 )
             )
-
+    # TODO: need to fix SHACL gen... was using dependencies incorrectly
     def _generate_shapes(self, templates_file):
         """Convert templates to SHACL shapes
 

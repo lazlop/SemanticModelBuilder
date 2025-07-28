@@ -105,7 +105,8 @@ def _fill_all_empty_columns(template_csvs):
                         current_value = df.at[idx, col]
                         if pd.isna(current_value) or str(current_value).strip() == '' or str(current_value).strip().lower() == 'nan':
                             # Create a default value using column name + row number
-                            default_value = f"{col}_{idx + 1}"
+                            default_value = idx+1
+                            # default_value = f"{col}_{idx + 1}"
                             df.at[idx, col] = default_value
                             filled_cells += 1
             
@@ -130,7 +131,7 @@ def main():
     print("=== Prefilling test_site/test_build survey ===")
     prefill_csv_survey('test_site/test_build')
     print("\n=== Done! Now loading csv===")
-    s._read_csv()
+    s.read_csv()
     print("\n=== Done! reading csv===")
 if __name__ == "__main__":
     main()
