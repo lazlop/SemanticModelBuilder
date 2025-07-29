@@ -8,7 +8,7 @@ import tempfile
 
 import pytest
 
-from semantic_mpc_interface import BuildingMetadataLoader, Survey, SurveyReader
+from semantic_mpc_interface import LoadModel, Survey, SurveyReader
 
 
 class TestSurvey:
@@ -175,8 +175,8 @@ class TestSurveyReader:
             assert os.path.exists(output_file)
 
 
-class TestBuildingMetadataLoader:
-    """Test cases for BuildingMetadataLoader."""
+class TestLoadModel:
+    """Test cases for LoadModel."""
 
     @pytest.fixture
     def sample_model_file(self):
@@ -202,7 +202,7 @@ ex:tstat1 a brick:Thermostat ;
     def test_init_with_model_file(self, sample_model_file):
         """Test initialization with model file."""
         try:
-            loader = BuildingMetadataLoader(sample_model_file, ontology='brick')
+            loader = LoadModel(sample_model_file, ontology='brick')
             # Check that loader was created successfully
             assert loader is not None
             assert loader.ontology == 'brick'
@@ -212,7 +212,7 @@ ex:tstat1 a brick:Thermostat ;
     def test_get_site_info(self, sample_model_file):
         """Test extracting site information."""
         try:
-            loader = BuildingMetadataLoader(sample_model_file, ontology='brick')
+            loader = LoadModel(sample_model_file, ontology='brick')
             site_info = loader.get_site_info()
             
             # Check that site_info is returned (structure may vary)
@@ -223,7 +223,7 @@ ex:tstat1 a brick:Thermostat ;
     def test_get_thermostat_data(self, sample_model_file):
         """Test extracting thermostat data."""
         try:
-            loader = BuildingMetadataLoader(sample_model_file, ontology='brick')
+            loader = LoadModel(sample_model_file, ontology='brick')
             thermostat_data = loader.get_thermostat_data()
             
             # Check that thermostat_data is returned
@@ -234,7 +234,7 @@ ex:tstat1 a brick:Thermostat ;
     def test_get_thermostat_data_for_zone(self, sample_model_file):
         """Test extracting thermostat data for specific zone."""
         try:
-            loader = BuildingMetadataLoader(sample_model_file, ontology='brick')
+            loader = LoadModel(sample_model_file, ontology='brick')
             thermostat_data = loader.get_thermostat_data(for_zone='zone1')
             
             # Check that zone-specific data is returned
@@ -245,7 +245,7 @@ ex:tstat1 a brick:Thermostat ;
     def test_get_complete_output(self, sample_model_file):
         """Test getting complete metadata output."""
         try:
-            loader = BuildingMetadataLoader(sample_model_file, ontology='brick')
+            loader = LoadModel(sample_model_file, ontology='brick')
             complete_output = loader.get_complete_output()
             
             # Check that complete output is returned
@@ -256,7 +256,7 @@ ex:tstat1 a brick:Thermostat ;
     def test_convert_model_to_si(self, sample_model_file):
         """Test converting model units to SI."""
         try:
-            loader = BuildingMetadataLoader(sample_model_file, ontology='brick')
+            loader = LoadModel(sample_model_file, ontology='brick')
             loader.convert_model_to_si()
             
             # Test should complete without error

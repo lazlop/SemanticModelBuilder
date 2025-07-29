@@ -39,7 +39,7 @@ class Value:
         return f"Value(value={self.value}, unit='{self.unit}')"
 
 
-class BuildingMetadataLoader:
+class LoadModel:
     # Could do all alignment through templates by redefining mapping brick and s223 to hpf namespace, but this seems onerous
     def __init__(self, source: Union[str, Graph], ontology: str):
         if os.path.isfile(source):

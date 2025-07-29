@@ -1,7 +1,7 @@
 from .brick_to_grafana import BrickToGrafana
 from .survey import Survey, HPFlexSurvey
 from .generate_shacl import SHACLHandler
-from .get_metadata import BuildingMetadataLoader
+from .load_model import LoadModel
 from .parse_points import add_points
 from .unit_conversion import *
 from .utils import *
