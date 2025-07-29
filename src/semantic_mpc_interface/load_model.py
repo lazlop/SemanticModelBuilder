@@ -407,10 +407,10 @@ class LoadModel:
         # Get hvac zone objects
         try:
             hvac_zone_objects = self.get_objects_generalized('hvac-zone')
-            results['hvac_zones'] = hvac_zone_objects
+            results['zones'] = hvac_zone_objects
         except Exception as e:
             print(f"Warning: Could not retrieve hvac zone objects: {e}")
-            results['hvac_zones'] = []
+            results['zones'] = []
         
         # Try to get other common building objects
         common_templates = ['space', 'equipment', 'sensor', 'actuator', 'point']
