@@ -1784,6 +1784,19 @@ wheels = [
 ]
 
 [[package]]
+name = "oxrdflib"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyoxigraph" },
+    { name = "rdflib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b0/03/e272b69fa63e1b0fc5039420457e9bb556870ae3211af8955de574b2757a/oxrdflib-0.4.0.tar.gz", hash = "sha256:37d4c025d4e39c5e5472527c393998bfd10e5ac185a30e080b5b510f6dd7da86", size = 20307 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/56/39/c4e6b4a23e9ce5aafbd8dfff6960b751a70b9844f4e90dd39462b0e32cc4/oxrdflib-0.4.0-py3-none-any.whl", hash = "sha256:c6203636b05817e21fbe7c469154b2e312593d0801cdaa14058c2d99dcfc12a6", size = 10670 },
+]
+
+[[package]]
 name = "packaging"
 version = "25.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2173,6 +2186,43 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217 },
+]
+
+[[package]]
+name = "pyoxigraph"
+version = "0.4.11"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/50/23/d64f6b8ba918b76c0d048f5ec32ffd2b79a9455e1ec07d9637adccf8868e/pyoxigraph-0.4.11.tar.gz", hash = "sha256:19da535c5026eacb11140ee03e2055d8757eb0e9800e722476f52fa46fe96658", size = 4897598 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/98/9a/f0540dbd68ade8aa518a9a01996c2211d2fcb2558e73c423648426cb7417/pyoxigraph-0.4.11-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:008dd50b7dcab025d9a64df7de178220d197d684cdff3da53442ae759d8d700c", size = 6847415 },
+    { url = "https://files.pythonhosted.org/packages/8c/ac/004bf714899e53db677ec0fedac0b63a28953dad03cd3e16275a0dc21ad1/pyoxigraph-0.4.11-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:91e74596d0d9dc234ca77873369bb047672e38be11dfcde8b2db0fa0d0f3bd34", size = 7247911 },
+    { url = "https://files.pythonhosted.org/packages/2a/4b/acbe70d6403825c1a73c9067c2b40aa5ff3767a1b079185b92dc2b18a6b6/pyoxigraph-0.4.11-cp310-cp310-musllinux_1_2_aarch64.whl", hash = "sha256:cd86f7f04624a23ccb821716ad34943d301524d266b9ac415e5f9cb4f4f339e6", size = 7893741 },
+    { url = "https://files.pythonhosted.org/packages/4d/b3/8f255d9eeea227b00e36d8d785b7695da4966eb405766badfc2c348cd20b/pyoxigraph-0.4.11-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:7a0a3d84c887820473f1218e2e9633c2322eafed5e785b22a955ee0caaff882d", size = 8503949 },
+    { url = "https://files.pythonhosted.org/packages/12/6b/3bc9fd6049f6f3b29c9adf85363e8e981854a8565aba2db6885a7157f5b1/pyoxigraph-0.4.11-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1ff9c48ebb0faa48c17691d56d0dab88fa15fadef70e494153bb1511d3fc17ab", size = 6846859 },
+    { url = "https://files.pythonhosted.org/packages/97/8a/9a8ed1a7bacb6460fade4d30e5e0b33d26ad830fa5c6a1d0e761b256d9a7/pyoxigraph-0.4.11-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9dcba1517a42a7d1a9f96b8d248579a8773e9256e35762f353207a486bdbf25b", size = 7247699 },
+    { url = "https://files.pythonhosted.org/packages/50/26/c8a2bbe36cb24228cb7b94a25e69c9f728b7d174844e03c2067fa21ba7d1/pyoxigraph-0.4.11-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:6ae5f76d69498862fde26aa84ddf8d10a30478cf7f3be1fa8c82380e2f57af78", size = 7893442 },
+    { url = "https://files.pythonhosted.org/packages/66/0b/8e61f7cf78b05aebc68d139b62aa865da07f7a403dd1f3c2ed34fc97df51/pyoxigraph-0.4.11-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:1e58de7bd2b1b6df2aa8a7bb95ce898c78c1309f9fb0d0658c51be38bf630620", size = 8503348 },
+    { url = "https://files.pythonhosted.org/packages/2a/db/86b0d03d34674978ed147331868533d0d1f1da48acb5e2a41c337cf15935/pyoxigraph-0.4.11-cp38-abi3-macosx_10_14_x86_64.whl", hash = "sha256:d6725d754893e81d5f397f3c6c29664b17eb52c99c9b705d4b800cc4416a53f4", size = 5772593 },
+    { url = "https://files.pythonhosted.org/packages/07/67/e3106b945867e44696634e7bf4614d5cb4fd5058cd6cc0e53f9483c4f215/pyoxigraph-0.4.11-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:b5757598733e38e3fee70513cfb38a2d10191dbbe1522af0329c70801a1f715e", size = 5233235 },
+    { url = "https://files.pythonhosted.org/packages/7f/4a/fe40b1c9d2380c2eeb0668e9c9b7d6d69df2fb0a7828c180fc19dc5d3774/pyoxigraph-0.4.11-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2eaf4f7421ba2815cf9f60c7bc2379344a03afe0ef6e749df9689a2d0c970b8a", size = 6844237 },
+    { url = "https://files.pythonhosted.org/packages/6d/80/00e6775a0c5e08387c5d2fb30406781e77e8f7082cec2428d098192c31fc/pyoxigraph-0.4.11-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0826ed60ec53f3c539cdf4f2b9977089302478d02927293a09da49dedc604660", size = 7246680 },
+    { url = "https://files.pythonhosted.org/packages/19/68/672ecef6fa84aa7edf1bfc1cc27cfaa06a60a39cd642a34ff6bc9b70e646/pyoxigraph-0.4.11-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:9322083f3854b26324f4f2aa23b0823c87802e404eb3e19d490f5d40f82a28bd", size = 7891848 },
+    { url = "https://files.pythonhosted.org/packages/35/d5/65e3bb7e133dcbd7f577cbf6658098bc9315c94ece9510bf731e42c0f3a0/pyoxigraph-0.4.11-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:e035770fa70ba818073ea20de1989dc24e111f5ad93e52f44b5bd84c77d3057b", size = 8498122 },
+    { url = "https://files.pythonhosted.org/packages/bd/06/c7c1fe91d5b854f4cb86d29fb7772e0a8ac807ea555767c442cb417b842a/pyoxigraph-0.4.11-cp38-abi3-win_amd64.whl", hash = "sha256:26d862905a378ac922dda56ff6e36b047aea106203a2b5503a6dfc5feda55273", size = 4918145 },
+    { url = "https://files.pythonhosted.org/packages/f4/e8/b99960f881f68fa48f61a2f4aca8ee4c64a9406a45f8a3f9c00070637058/pyoxigraph-0.4.11-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:86acdd2e72f42a89778d8b5837e477c8609f0c4d87f8453cb3eeb014217ba268", size = 6847748 },
+    { url = "https://files.pythonhosted.org/packages/9d/31/bde09f67d42d3e74beb304d1a959871da9918092ff7f9352890b8eb6d591/pyoxigraph-0.4.11-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bd162020913e44088c94b566b51600d58d76ac8e7983d3001bc5e5fac667d34f", size = 7248398 },
+    { url = "https://files.pythonhosted.org/packages/10/73/1a9deea9f94012bef8ccde342d1ac37134c6a18423401bdb689867187481/pyoxigraph-0.4.11-cp38-cp38-musllinux_1_2_aarch64.whl", hash = "sha256:1d9a6fdfeb06b895767353b9837d4d822d28fcf3ecf9580eca4b38669aff4e90", size = 7893941 },
+    { url = "https://files.pythonhosted.org/packages/97/aa/0adc3e4637c8fc6f3efcd3ff63fcfa97571bcdba37f18f5f31cd75176210/pyoxigraph-0.4.11-cp38-cp38-musllinux_1_2_x86_64.whl", hash = "sha256:97ab378c23e14b1465d7ad0bc4ce64ebce51cbf953ec9b9afe180fe93d1069d6", size = 8503885 },
+    { url = "https://files.pythonhosted.org/packages/15/da/8d443005d5ce50555a07fec5207405669346b5e03ef0aae0bf773d0553d4/pyoxigraph-0.4.11-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8abfb7ee202d7f5a7694415e3e4c782d4b376097db08d2cbc92707fd3097b1da", size = 6848002 },
+    { url = "https://files.pythonhosted.org/packages/c9/25/7d592da5b9293dd29351cbfe9b5735e4a6f5c0a2a77c153950aecd28646a/pyoxigraph-0.4.11-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ae8b8f6fdf6613aa5d0e092e33e07279757d3b846dcf11d5c05a6aaad9d9cd06", size = 7248439 },
+    { url = "https://files.pythonhosted.org/packages/11/08/3f8573e9d9a3339eb5121b11e8bc7f10fac4be45bb579fc808565007ee9e/pyoxigraph-0.4.11-cp39-cp39-musllinux_1_2_aarch64.whl", hash = "sha256:cf5075d9e17ecc63ea744fc3777fbdce5c02dd66f3085202507174fff90cedcc", size = 7894026 },
+    { url = "https://files.pythonhosted.org/packages/d9/d8/85904561e08eb97322cdf06801b0c6c5d6a6d2ca0fbaff15d897c6ec627d/pyoxigraph-0.4.11-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:c1b5cb7ddd4434be0b835192451eb6ed3222bd2255f06c59d9f9861f60ffeb87", size = 8503509 },
+    { url = "https://files.pythonhosted.org/packages/ea/c6/eadaa5ec6f1632a256dbcb4a3f47745770c9f6fec03d2c8a1f4b5e4fc33b/pyoxigraph-0.4.11-pp310-pypy310_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:aed2ee7b60daaf096e3c652ecb4ccdd36ec4e507194a9002b63456b25c0af5c6", size = 6846911 },
+    { url = "https://files.pythonhosted.org/packages/e5/ba/2f4149c62ea3353810afda1f5e3e5c8b61310e4cbd7fce32f668e056b650/pyoxigraph-0.4.11-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c8afe83fd73f9f071302f451d987991a280a9703d19508a6dbcd63e9d5222e77", size = 7247384 },
+    { url = "https://files.pythonhosted.org/packages/47/37/20a14731bd3b64ffcdc3b58553edbf4643810a184e3cee205e891f6d9b49/pyoxigraph-0.4.11-pp311-pypy311_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2dbb7dd027645ca74dfa588740e9beb8f148a19c70350eeb307448fbfd566ce5", size = 6846919 },
+    { url = "https://files.pythonhosted.org/packages/64/43/8b2e35585249c5a631656b7ec98f1eab28beacfe9e794cca4af6f860ef6e/pyoxigraph-0.4.11-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9c6c3024541bd3dd03a5c838ce2feaedbf19463232417bdbf396291c4d9d2add", size = 7247434 },
+    { url = "https://files.pythonhosted.org/packages/f7/be/5cd5fc4b88f5cb4795b59fea0d2c4196965d3b9292b1b3bbe5ad930ee638/pyoxigraph-0.4.11-pp39-pypy39_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0ebe04cb782cc359d8c782b1c8843accf5b8568ff942bc5cf204e9e395522c65", size = 6846797 },
+    { url = "https://files.pythonhosted.org/packages/1a/32/cd2b4e5b00327cd4e4ad916c63a4f505ed43480f999ac659907e3bf2a87c/pyoxigraph-0.4.11-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ac504982b5e6d19a51a303db9ad4913889b08b2dcd2276cc832b2f0054124f50", size = 7247612 },
 ]
 
 [[package]]
@@ -2742,6 +2792,7 @@ dependencies = [
     { name = "grafanalib" },
     { name = "ipykernel", version = "6.29.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "ipykernel", version = "6.30.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "oxrdflib" },
     { name = "pandas", version = "2.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "pandas", version = "2.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "pyshacl" },
@@ -2788,6 +2839,7 @@ requires-dist = [
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=0.18" },
+    { name = "oxrdflib", specifier = ">=0.4.0" },
     { name = "pandas", specifier = ">=2.0.3" },
     { name = "pyshacl", specifier = ">=0.26.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0" },
