@@ -1,4 +1,4 @@
-name,heating_capacity,cooling_COP,heating_COP,cooling_capacity
+name,heating_capacity,cooling_capacity,cooling_COP,heating_COP
 hvac_1,1.0,1.0,1.0,1.0
 hvac_2,2.0,2.0,2.0,2.0
 hvac_3,3.0,3.0,3.0,3.0
