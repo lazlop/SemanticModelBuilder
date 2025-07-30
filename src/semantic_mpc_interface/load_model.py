@@ -23,7 +23,7 @@ UNIT_CONVERSIONS = {
 
 # TODO: Still in vibe coded state - should clean up and generalize a little
 class Value:
-    def __init__(self, value, unit, name=None):
+    def __init__(self, value, unit, is_delta = False, name=None):
         # Try to convert to float, but keep as string if it fails
         if value is not None:
             try:
@@ -35,14 +35,15 @@ class Value:
             
         self.unit = str(unit).replace('unit:', '') if unit is not None else None
         self.name = name
+        self.is_delta = is_delta
     def __repr__(self):
         return f"Value(value={self.value}, unit='{self.unit}')"
-    
+
     def convert_to_si(self):
         if URIRef(self.unit) in UNIT_CONVERSIONS.keys():
             new_units = UNIT_CONVERSIONS[URIRef(self.unit)]
             print(f"CONVERT {self.unit} to {new_units}")
-            self.value = convert_units((self.value), URIRef(self.unit), URIRef(new_units))
+            self.value = convert_units((self.value), URIRef(self.unit), URIRef(new_units), self.is_delta)
             self.unit = new_units
 
 class LoadModel:
@@ -174,6 +175,7 @@ class LoadModel:
     def _identify_entity_attributes(self, df: pd.DataFrame, entity_name: str) -> Dict[str, Any]:
         """
         Identify attributes for an entity based on column patterns in the dataframe.
+        Added delta quantity after the fact - fairly disconnected
         """
         attributes = {}
         
@@ -189,21 +191,25 @@ class LoadModel:
         
         # For each attribute base, try to create a Value object
         for attr_base in attribute_bases:
-            name_col = f"{entity_name}_{attr_base}_name"
+            name_col = f"{entity_name}_{attr_base}"
             value_col = f"{entity_name}_{attr_base}_value"
             unit_col = f"{entity_name}_{attr_base}_unit"
             
             # Check if we have meaningful data in the _name column (prefer this)
+            # TODO: This code never seems to be run, only backup code is. Should double check why. 
             if name_col in df.columns and not df.empty and pd.notna(df[name_col].iloc[0]):
                 name_data = df[name_col].iloc[0]
+                value_data = df[value_col].iloc[0]
                 # Only create attribute if the _name column contains actual numeric/meaningful data
                 # Skip if it contains URI strings
-                if not str(name_data).startswith('urn:') and not '-name' in str(name_data):
+                if not str(value_data).startswith('urn:') and not '-name' in str(value_data):
                     try:
                         # Try to convert to number to verify it's meaningful data
-                        float(name_data)
+                        float(value_data)
                         unit_data = df[unit_col].iloc[0] if unit_col in df.columns and pd.notna(df[unit_col].iloc[0]) else None
-                        value_obj = Value(value=name_data, unit=unit_data, name=name_data)
+                        # get is delta
+                        is_delta = self._is_delta_quantity(name_data)
+                        value_obj = Value(value=value_data, unit=unit_data, is_delta = is_delta, name=name_data)
                         # Use clean attribute name (remove redundant prefixes and suffixes)
                         clean_attr_name = attr_base.replace('name_', '').replace('_name', '')
                         attributes[clean_attr_name] = value_obj
@@ -211,23 +217,6 @@ class LoadModel:
                         # Skip non-numeric data in _name columns
                         pass
             
-            # If no meaningful _name data, check _value column
-            elif value_col in df.columns and not df.empty and pd.notna(df[value_col].iloc[0]):
-                value_data = df[value_col].iloc[0]
-                # Only create attribute if the _value column contains actual numeric/meaningful data
-                if not str(value_data).startswith('urn:') and not '-name' in str(value_data):
-                    try:
-                        # Try to convert to number to verify it's meaningful data
-                        float(value_data)
-                        unit_data = df[unit_col].iloc[0] if unit_col in df.columns and pd.notna(df[unit_col].iloc[0]) else None
-                        value_obj = Value(value=value_data, unit=unit_data, name=None)
-                        # Use clean attribute name (remove redundant prefixes and suffixes)
-                        clean_attr_name = attr_base.replace('name_', '').replace('_name', '')
-                        attributes[clean_attr_name] = value_obj
-                    except (ValueError, TypeError):
-                        # Skip non-numeric data in _value columns
-                        pass
-        
         # Also look for simple string attributes (columns that end with the entity name)
         for col in df.columns:
             if col == entity_name and col not in attributes:
@@ -266,6 +255,11 @@ class LoadModel:
         
         cls = type(container_name, (), methods)
         return cls
+
+    def _is_delta_quantity(self, uri):
+        is_delta = self.g.value(URIRef(uri), QUDT["isDeltaQuantity"])
+        return bool(is_delta)
+        # return True if is_delta == URIRef('true') else False
 
     def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str):
         """
@@ -366,6 +360,7 @@ class LoadModel:
         template_inlined = template.inline_dependencies()
         query = self._get_query(template_inlined.body)
         df = query_to_df(query, self.g, prefixed=False)
+        print(df.columns)
         objects = self._dataframe_to_objects_generalized(df, template_name)
         return objects
 

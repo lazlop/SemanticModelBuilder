@@ -1,4 +1,4 @@
-name,tilt,area-name-unit,azimuth,area
+name,tilt,area-name-unit,area,azimuth
 window_1_1,1.0,FT2,1.0,1.0
 window_1_2,2.0,FT2,2.0,2.0
 window_2_1,3.0,FT2,3.0,3.0
