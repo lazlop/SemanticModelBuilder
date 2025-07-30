@@ -65,9 +65,9 @@
     2.0
   ],
   "azimuth_unit": [
-    "Unkown",
-    "Unkown",
-    "Unkown"
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree"
   ],
   "tilt_list": [
     7.0,
@@ -75,9 +75,9 @@
     2.0
   ],
   "tilt_unit": [
-    "Unkown",
-    "Unkown",
-    "Unkown"
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree"
   ],
   "zone_ids": [
     "zone_3",
@@ -110,9 +110,9 @@
     1.0
   ],
   "cooling_capacity_unit": [
-    "Unkown",
-    "Unkown",
-    "Unkown"
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW"
   ],
   "heating_capacity": [
     3.0,
@@ -120,9 +120,9 @@
     1.0
   ],
   "heating_capacity_unit": [
-    "Unkown",
-    "Unkown",
-    "Unkown"
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW"
   ],
   "cooling_cop": [
     3.0,
