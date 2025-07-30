@@ -25,15 +25,14 @@ def convert_to_prefixed(uri, g: Graph):
         print(e)
         return uri
 
-
-def query_to_df(query, g: Graph):
+def query_to_df(query, g: Graph, prefixed = True):
     results = g.query(query)
     formatted_results = [
         [
-            (
+            ( 
                 convert_to_prefixed(value, g)
-                if isinstance(value, (str, bytes)) and value.startswith("http")
-                else str(value)
+                if isinstance(value, (str, bytes)) and (value.startswith("http") or value.startswith("urn")) and prefixed
+                else value
             )
             for value in row
         ]

@@ -217,7 +217,7 @@ class Survey:
                 for s,o in graph.subject_objects(QUDT.hasUnit):
                     if str(o).startswith(str(self.building_ns)):
                         remove.append((s, QUDT.hasUnit, o))
-                        add.append((s, QUDT.hasUnit, URIRef(str(o).replace(str(self.building_ns),str(QUDT)))))
+                        add.append((s, QUDT.hasUnit, URIRef(str(o).replace(str(self.building_ns),str(UNIT)))))
                 for s,o in graph.subject_objects(BRICK.value):
                     if str(o).startswith(str(self.building_ns)):
                         remove.append((s, BRICK.value, o))

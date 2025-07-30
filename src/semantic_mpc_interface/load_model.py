@@ -12,6 +12,7 @@ from .namespaces import *
 from .unit_conversion import convert_units
 from .utils import *
 
+# Unit, to unit, and if delta quantity
 UNIT_CONVERSIONS = {
     UNIT["DEG_F"]: UNIT["DEG_C"],
     UNIT["FT"]: UNIT["M"],
@@ -34,14 +35,21 @@ class Value:
             
         self.unit = str(unit).replace('unit:', '') if unit is not None else None
         self.name = name
-    
     def __repr__(self):
         return f"Value(value={self.value}, unit='{self.unit}')"
-
+    
+    def convert_to_si(self):
+        if URIRef(self.unit) in UNIT_CONVERSIONS.keys():
+            new_units = UNIT_CONVERSIONS[URIRef(self.unit)]
+            print(f"CONVERT {self.unit} to {new_units}")
+            self.value = convert_units((self.value), URIRef(self.unit), URIRef(new_units))
+            self.unit = new_units
 
 class LoadModel:
     # Could do all alignment through templates by redefining mapping brick and s223 to hpf namespace, but this seems onerous
-    def __init__(self, source: Union[str, Graph], ontology: str):
+    def __init__(self, source: Union[str, Graph], ontology: str, template_dict = {
+            'sites': 'site',
+            'zones': 'hvac-zone',}):
         if os.path.isfile(source):
             self.g = Graph(store = 'Oxigraph')
             self.g.parse(source)
@@ -54,7 +62,7 @@ class LoadModel:
         self.HPF = Namespace("urn:hpflex#")
         self.site = self.g.value(None, RDF.type, BRICK.Site)
         self.ontology = ontology
-
+        self.template_dict = template_dict
         # Only one query so far requires loading the ontology to use subClassOf in 223:
         if ontology == "s223":
             self.g.parse("https://open223.info/223p.ttl", format="ttl")
@@ -64,7 +72,7 @@ class LoadModel:
         self.model = Model.create(self.HPF)
         self.library = Library.load(directory=brick_templates)
 
-    def get_var_name(self, graph, node):
+    def _get_var_name(self, graph, node):
         """Generate variable names for SPARQL queries from RDF nodes."""
         if isinstance(node, Literal):
             return node
@@ -75,24 +83,24 @@ class LoadModel:
             q_n = convert_to_prefixed(node, graph).replace('-','_')
         return q_n
 
-    def make_where(self, graph):
+    def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
         where = []
         for s, p, o in graph.triples((None, None, None)):
-            qs = self.get_var_name(graph, s)
-            qo = self.get_var_name(graph, o)
+            qs = self._get_var_name(graph, s)
+            qo = self._get_var_name(graph, o)
             qp = convert_to_prefixed(p, graph).replace('-','_')
             where.append(f"{qs} {qp} {qo} .")
         return "\n".join(where)
 
-    def get_query(self, graph):
+    def _get_query(self, graph):
         """Generate complete SPARQL query from RDF graph."""
-        where = self.make_where(graph)
+        where = self._make_where(graph)
         prefixes = get_prefixes(graph)
         query = f"""{prefixes}\nSELECT DISTINCT * WHERE {{ {where} }}"""
         return query
 
-    def extract_attributes_from_template(self, template_name: str) -> Dict[str, str]:
+    def _extract_attributes_from_template(self, template_name: str) -> Dict[str, str]:
         """
         Extract attribute information from a template by analyzing its dependencies.
         Returns a dictionary mapping attribute names to their types.
@@ -139,7 +147,7 @@ class LoadModel:
         
         return attributes
 
-    def create_dynamic_class(self, class_name: str, attributes: Dict[str, str]) -> Type:
+    def _create_dynamic_class(self, class_name: str, attributes: Dict[str, str]) -> Type:
         """
         Dynamically create a class with the specified attributes.
         """
@@ -163,29 +171,7 @@ class LoadModel:
         
         return cls
 
-    def extract_value_columns(self, df: pd.DataFrame, base_name: str) -> Value:
-        """
-        Extract value, unit, and name columns for a given base name and create a Value object.
-        """
-        value_col = f"{base_name}_value"
-        unit_col = f"{base_name}_unit" 
-        name_col = f"{base_name}_name"
-        
-        # Get the first row's values (assuming all rows have same structure for this entity)
-        if not df.empty:
-            # Prefer _name column data as the primary value when available
-            name_data = df[name_col].iloc[0] if name_col in df.columns and pd.notna(df[name_col].iloc[0]) else None
-            value_data = df[value_col].iloc[0] if value_col in df.columns and pd.notna(df[value_col].iloc[0]) else None
-            unit_data = df[unit_col].iloc[0] if unit_col in df.columns and pd.notna(df[unit_col].iloc[0]) else None
-            
-            # Use name_data as the primary value if available, otherwise use value_data
-            primary_value = name_data if name_data is not None else value_data
-            
-            return Value(value=primary_value, unit=unit_data, name=name_data)
-        
-        return None
-
-    def identify_entity_attributes(self, df: pd.DataFrame, entity_name: str) -> Dict[str, Any]:
+    def _identify_entity_attributes(self, df: pd.DataFrame, entity_name: str) -> Dict[str, Any]:
         """
         Identify attributes for an entity based on column patterns in the dataframe.
         """
@@ -250,7 +236,7 @@ class LoadModel:
         
         return attributes
 
-    def create_container_class(self, container_name: str, contained_types: List[str]) -> Type:
+    def _create_container_class(self, container_name: str, contained_types: List[str]) -> Type:
         """
         Create a container class (like Zone) that can hold multiple types of entities.
         """
@@ -281,7 +267,7 @@ class LoadModel:
         cls = type(container_name, (), methods)
         return cls
 
-    def dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str):
+    def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str):
         """
         Convert dataframe results into objects based on template structure.
         This is a generalized version that works with any template.
@@ -318,16 +304,16 @@ class LoadModel:
         entity_classes = {}
         for entity_type in entity_types:
             # Get attributes for this entity type from the dataframe
-            sample_attributes = self.identify_entity_attributes(df, entity_type)
+            sample_attributes = self._identify_entity_attributes(df, entity_type)
             attr_types = {attr: 'Value' if isinstance(val, Value) else 'str' 
                          for attr, val in sample_attributes.items()}
             
-            entity_classes[entity_type] = self.create_dynamic_class(
+            entity_classes[entity_type] = self._create_dynamic_class(
                 entity_type.capitalize(), attr_types
             )
         
         # Create container class
-        container_class = self.create_container_class(
+        container_class = self._create_container_class(
             main_entity_name.replace('_', '').capitalize(), 
             [et.capitalize() for et in entity_types]
         )
@@ -352,7 +338,7 @@ class LoadModel:
                     entity_name = row[entity_name_col]
                     
                     # Get attributes for this entity
-                    entity_attributes = self.identify_entity_attributes(pd.DataFrame([row]), entity_type)
+                    entity_attributes = self._identify_entity_attributes(pd.DataFrame([row]), entity_type)
                     
                     # Remove 'name' from entity_attributes to avoid conflict with positional name parameter
                     filtered_attributes = {k: v for k, v in entity_attributes.items() if k != 'name'}
@@ -369,7 +355,7 @@ class LoadModel:
         
         return list(containers.values())
 
-    def get_objects_generalized(self, template_name: str = 'hvac-zone'):
+    def _get_objects_generalized(self, template_name: str = 'hvac-zone'):
         """
         Generalized function to get objects from any template.
         """
@@ -378,51 +364,49 @@ class LoadModel:
             raise ValueError(f"Template '{template_name}' not found")
         
         template_inlined = template.inline_dependencies()
-        query = self.get_query(template_inlined.body)
-        df = query_to_df(query, self.g)
-        objects = self.dataframe_to_objects_generalized(df, template_name)
+        query = self._get_query(template_inlined.body)
+        df = query_to_df(query, self.g, prefixed=False)
+        objects = self._dataframe_to_objects_generalized(df, template_name)
         return objects
 
-    def get_site_objects(self):
+    def get_objects_from_templates(self, template_dict) -> Dict[str, List]:
         """
-        Get site objects using the site template.
+        Get objects from specified templates.
+        
+        Args:
+            template_dict: Dictionary mapping result keys to template names
+                          e.g., {'zone': 'hvac-zone', 'site': 'site'}
+        
+        Returns:
+            Dictionary with keys from template_dict and lists of objects as values
         """
-        return self.get_objects_generalized('site')
+        results = {}
+        
+        for result_key, template_name in template_dict.items():
+            try:
+                objects = self._get_objects_generalized(template_name)
+                results[result_key] = objects
+            except Exception as e:
+                print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
+                results[result_key] = []
+        
+        return results
 
-    def get_all_building_objects(self):
+    def get_all_building_objects(self, convert_to_si_units = True):
         """
         Get all building objects including site and hvac zones.
         Returns a dictionary with object types as keys.
         """
+        # Get objects from all templates
+        all_objects = self.get_objects_from_templates(self.template_dict)
+
+        # Filter out empty results to maintain backward compatibility
         results = {}
+        for key, objects in all_objects.items():
+            if objects:  # Only include if we got results
+                results[key] = objects
         
-        # Get site objects
-        try:
-            site_objects = self.get_site_objects()
-            results['sites'] = site_objects
-        except Exception as e:
-            print(f"Warning: Could not retrieve site objects: {e}")
-            results['sites'] = []
-        
-        # Get hvac zone objects
-        try:
-            hvac_zone_objects = self.get_objects_generalized('hvac-zone')
-            results['zones'] = hvac_zone_objects
-        except Exception as e:
-            print(f"Warning: Could not retrieve hvac zone objects: {e}")
-            results['zones'] = []
-        
-        # Try to get other common building objects
-        common_templates = ['space', 'equipment', 'sensor', 'actuator', 'point']
-        for template_name in common_templates:
-            try:
-                objects = self.get_objects_generalized(template_name)
-                if objects:  # Only add if we got results
-                    results[template_name + 's'] = objects
-            except Exception as e:
-                # Silently skip templates that don't exist or fail
-                pass
-        
+        # Convert all objects to SI units if requested
         return results
 
     def list_available_templates(self):
@@ -430,44 +414,3 @@ class LoadModel:
         List all available templates in the library.
         """
         return [template.name for template in self.library.get_templates()]
-
-    def convert_model_to_si(self):
-        """
-        Convert all quantities in a Brick model to SI units
-
-        Args:
-            g: The RDF graph containing the Brick model
-
-        Returns:
-            Graph: The modified graph with SI units
-        """
-        query = sparql_queries["convert_to_si"][self.ontology]
-
-        for row_dict in self.g.query(query).bindings:
-            # will throw error if not all things are present
-            subject, value, unit = row_dict["s"], row_dict["v"], row_dict["u"]
-            isDelta = row_dict.get("isDelta", False)
-
-            if unit in UNIT_CONVERSIONS:
-                print(
-                    "changing value of ",
-                    subject,
-                    "from",
-                    unit,
-                    "to",
-                    UNIT_CONVERSIONS[unit],
-                )
-                new_unit = UNIT_CONVERSIONS[unit]
-                new_value = convert_units(value, unit, new_unit, isDelta)
-
-                if self.ontology == "brick":
-                    self.g.set((subject, BRICK.value, Literal(new_value)))
-                    self.g.set((subject, QUDT.hasUnit, new_unit))
-                else:
-                    self.g.set((subject, S223.hasValue, Literal(new_value)))
-                    self.g.set((subject, QUDT.hasUnit, new_unit))
-
-    def _get_value(self, subject, predicate) -> Any:
-        """Helper method to get a value from the RDF graph."""
-        value = self.g.value(subject, predicate)
-        return value.toPython() if value else None

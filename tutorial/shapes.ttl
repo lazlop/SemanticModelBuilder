@@ -127,8 +127,8 @@ hpfs:air-bidirectional-connects-toAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#air-bidirectional-connects-to> ?target .
                 }
                 WHERE {
-	?target <https://brickschema.org/schema/Brick#feed> ?name . 
 	?name <https://brickschema.org/schema/Brick#feeds> ?target . 
+	?target <https://brickschema.org/schema/Brick#feed> ?name . 
 }""" .
 
 hpfs:air-connects-toAnnotationRule a sh:SPARQLRule ;

@@ -1,2 +1,2 @@
-name,noaastation,longitude,timezone,latitude
+name,longitude,latitude,noaastation,timezone
 test_site,1.0,1.0,1.0,1.0
