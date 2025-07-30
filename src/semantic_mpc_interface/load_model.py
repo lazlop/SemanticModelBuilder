@@ -519,19 +519,27 @@ class LoadModel:
                             if hasattr(hvac, 'cooling_capacity') and hvac.cooling_capacity:
                                 cooling_cap = hvac.cooling_capacity.value 
                                 thermostat_data["cooling_capacity"].append(cooling_cap)
+                            else:
+                                thermostat_data["cooling_capacity"].append('Unkown')
                                 
                             if hasattr(hvac.cooling_capacity, 'unit') and hvac.cooling_capacity.unit:
                                 unit_str = str(hvac.cooling_capacity.unit)
                                 thermostat_data["cooling_capacity_unit"].append(unit_str)
+                            else:
+                                thermostat_data["cooling_capacity_unit"].append('Unkown')
                             
                             # Heating capacity
                             if hasattr(hvac, 'heating_capacity') and hvac.heating_capacity:
                                 heating_cap = hvac.heating_capacity.value
                                 thermostat_data["heating_capacity"].append(heating_cap)
+                            else:
+                                thermostat_data["heating_capacity"].append('Unkown')
                                 
                             if hasattr(hvac.heating_capacity, 'unit') and hvac.heating_capacity.unit:
                                 unit_str = str(hvac.heating_capacity.unit)
                                 thermostat_data["heating_capacity_unit"].append(unit_str)
+                            else:
+                                thermostat_data["heating_capacity_unit"].append('Unkown')
                             
                             # COP values
                             if hasattr(hvac, 'cooling_COP') and hvac.cooling_COP:
@@ -562,7 +570,6 @@ class LoadModel:
                         
                         # Process window data (take largest window by area)
                         largest_window_area = 0.0
-                        window_area_unit = "M2"
                         
                         if hasattr(zone, 'windows') and zone.windows:
                             for window in zone.windows:
@@ -581,13 +588,17 @@ class LoadModel:
                                         if hasattr(window.azimuth, 'unit') and window.azimuth.unit:
                                             unit_str = str(window.azimuth.unit)
                                             window_azimuth_unit = unit_str
+                                        else:
+                                             window_azimuth_unit = 'Unkown'
 
                                         if hasattr(window, 'tilt') and window.tilt:
-                                            window_tilt = window.tilt.value
+                                            window_tilt = window.tilt.value 
                                         
                                         if hasattr(window.tilt, 'unit') and window.tilt.unit:
-                                            unit_str = str(window.tilt.unit)
+                                            unit_str = str(window.tilt.unit) if hasattr(window.azimuth, 'unit') else 'Unkown'
                                             window_tilt_unit = unit_str
+                                        else:
+                                            window_tilt_unit = 'Unkown'
                                             
                         
                         thermostat_data["window_area_list"].append(largest_window_area)

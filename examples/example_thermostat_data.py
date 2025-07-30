@@ -1,3 +1,4 @@
+#%%
 """
 Example script demonstrating the use of LoadModel.get_thermostat_data()
 
@@ -52,30 +53,10 @@ def main():
     with open(output_file, 'w') as f:
         json.dump(thermostat_data, f, indent=2)
     print(f"Thermostat data exported to {output_file}")
-    
-    # Compare with original BuildingMetadataLoader approach
-    print("\n=== Comparison with BuildingMetadataLoader ===")
-    try:
-        sys.path.append('../BrickModelInterface')
-        from get_metadata import BuildingMetadataLoader
-        
-        # Load with the original approach
-        original_loader = BuildingMetadataLoader(model_path, 'brick')
-        original_data = original_loader.get_thermostat_data()
-        
-        print("Original approach found:", len(original_data['zone_ids']), "thermostats")
-        print("New approach found:", len(thermostat_data['zone_ids']), "thermostats")
-        
-        # Compare some key values
-        print("\nComparison of key values:")
-        print("Zone IDs match:", set(original_data['zone_ids']) == set(thermostat_data['zone_ids']))
-        print("Heat tolerance values match:", original_data['heat_tolerance'] == thermostat_data['heat_tolerance'])
-        print("Cool tolerance values match:", original_data['cool_tolerance'] == thermostat_data['cool_tolerance'])
-        
-    except ImportError:
-        print("BuildingMetadataLoader not available for comparison")
-    except Exception as e:
-        print(f"Error comparing with original approach: {e}")
+
+    return loader, thermostat_data
 
 if __name__ == "__main__":
-    main()
+    loader, thermostat_data = main()
+
+# %%

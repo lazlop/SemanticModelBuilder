@@ -45,9 +45,9 @@
     3.0
   ],
   "floor_area_unit": [
-    "4.0",
-    "3.0",
-    "1.0"
+    "http://qudt.org/vocab/unit/4.0",
+    "http://qudt.org/vocab/unit/3.0",
+    "http://qudt.org/vocab/unit/1.0"
   ],
   "window_area_list": [
     7.0,
@@ -55,9 +55,9 @@
     2.0
   ],
   "window_area_unit": [
-    "FT2",
-    "FT2",
-    "FT2"
+    "http://qudt.org/vocab/unit/FT2",
+    "http://qudt.org/vocab/unit/FT2",
+    "http://qudt.org/vocab/unit/FT2"
   ],
   "azimuth_list": [
     7.0,
@@ -65,9 +65,9 @@
     2.0
   ],
   "azimuth_unit": [
-    "DEGREE",
-    "DEGREE",
-    "DEGREE"
+    "Unkown",
+    "Unkown",
+    "Unkown"
   ],
   "tilt_list": [
     7.0,
@@ -75,9 +75,9 @@
     2.0
   ],
   "tilt_unit": [
-    "DEGREE",
-    "DEGREE",
-    "DEGREE"
+    "Unkown",
+    "Unkown",
+    "Unkown"
   ],
   "zone_ids": [
     "zone_3",
@@ -85,9 +85,9 @@
     "zone_1"
   ],
   "hvacs": [
-    "hvac_3",
-    "hvac_2",
-    "hvac_1"
+    "urn:hpflex/test_site#hvac_3",
+    "urn:hpflex/test_site#hvac_2",
+    "urn:hpflex/test_site#hvac_1"
   ],
   "setpoint_type": [
     "double",
@@ -110,9 +110,9 @@
     1.0
   ],
   "cooling_capacity_unit": [
-    "W",
-    "W",
-    "W"
+    "Unkown",
+    "Unkown",
+    "Unkown"
   ],
   "heating_capacity": [
     3.0,
@@ -120,9 +120,9 @@
     1.0
   ],
   "heating_capacity_unit": [
-    "W",
-    "W",
-    "W"
+    "Unkown",
+    "Unkown",
+    "Unkown"
   ],
   "cooling_cop": [
     3.0,
@@ -150,8 +150,8 @@
     1.0
   ],
   "temperature_unit": [
-    "IP",
-    "IP",
-    "IP"
+    "unit_str",
+    "unit_str",
+    "unit_str"
   ]
 }
