@@ -7,28 +7,28 @@
             "area-name": "<name>-area-name"
         },
         "hp-rtu": {
-            "heating_COP-name": "<name>-heating_COP-name",
-            "heating_capacity-name": "<name>-heating_capacity-name",
             "cooling_capacity-name": "<name>-cooling_capacity-name",
-            "cooling_COP-name": "<name>-cooling_COP-name"
+            "cooling_COP-name": "<name>-cooling_COP-name",
+            "heating_COP-name": "<name>-heating_COP-name",
+            "heating_capacity-name": "<name>-heating_capacity-name"
         },
         "tstat": {
-            "setpoint_deadband-name": "<name>-setpoint_deadband-name",
-            "stage_count-name": "<name>-stage_count-name",
-            "resolution-name": "<name>-resolution-name",
             "active-name": "<name>-active-name",
-            "tolerance-name": "<name>-tolerance-name"
+            "resolution-name": "<name>-resolution-name",
+            "tolerance-name": "<name>-tolerance-name",
+            "setpoint_deadband-name": "<name>-setpoint_deadband-name",
+            "stage_count-name": "<name>-stage_count-name"
         },
         "window": {
-            "tilt-name": "<name>-tilt-name",
             "azimuth-name": "<name>-azimuth-name",
+            "tilt-name": "<name>-tilt-name",
             "area-name": "<name>-area-name"
         },
         "site": {
-            "timezone-name": "<name>-timezone-name",
-            "noaastation-name": "<name>-noaastation-name",
             "longitude-name": "<name>-longitude-name",
-            "latitude-name": "<name>-latitude-name"
+            "latitude-name": "<name>-latitude-name",
+            "timezone-name": "<name>-timezone-name",
+            "noaastation-name": "<name>-noaastation-name"
         }
     },
     "param_mapping": {
@@ -37,28 +37,28 @@
             "area": "area-name-value"
         },
         "hp-rtu": {
+            "heating_capacity": "heating_capacity-name-value",
             "cooling_capacity": "cooling_capacity-name-value",
             "heating_COP": "heating_COP-name-value",
-            "heating_capacity": "heating_capacity-name-value",
             "cooling_COP": "cooling_COP-name-value"
         },
         "tstat": {
+            "setpoint_deadband": "setpoint_deadband-name-value",
             "resolution": "resolution-name-value",
             "active": "active-name-value",
-            "setpoint_deadband": "setpoint_deadband-name-value",
             "stage_count": "stage_count-name-value",
             "tolerance": "tolerance-name-value"
         },
         "window": {
-            "tilt": "tilt-name-value",
+            "azimuth": "azimuth-name-value",
             "area": "area-name-value",
-            "azimuth": "azimuth-name-value"
+            "tilt": "tilt-name-value"
         },
         "site": {
-            "timezone": "timezone-name-value",
+            "longitude": "longitude-name-value",
             "noaastation": "noaastation-name-value",
-            "latitude": "latitude-name-value",
-            "longitude": "longitude-name-value"
+            "timezone": "timezone-name-value",
+            "latitude": "latitude-name-value"
         }
     },
     "hvacs_feed_hvacs": {},

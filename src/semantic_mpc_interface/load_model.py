@@ -42,7 +42,6 @@ class Value:
     def convert_to_si(self):
         if URIRef(self.unit) in UNIT_CONVERSIONS.keys():
             new_units = UNIT_CONVERSIONS[URIRef(self.unit)]
-            print(f"CONVERT {self.unit} to {new_units}")
             self.value = convert_units((self.value), URIRef(self.unit), URIRef(new_units), self.is_delta)
             self.unit = new_units
 
@@ -50,7 +49,7 @@ class LoadModel:
     # Could do all alignment through templates by redefining mapping brick and s223 to hpf namespace, but this seems onerous
     def __init__(self, source: Union[str, Graph], ontology: str, template_dict = {
             'sites': 'site',
-            'zones': 'hvac-zone',}):
+            'zones': 'hvac-zone',}, as_si_units = False):
         if os.path.isfile(source):
             self.g = Graph(store = 'Oxigraph')
             self.g.parse(source)
@@ -64,6 +63,7 @@ class LoadModel:
         self.site = self.g.value(None, RDF.type, BRICK.Site)
         self.ontology = ontology
         self.template_dict = template_dict
+        self.as_si_units = as_si_units
         # Only one query so far requires loading the ontology to use subClassOf in 223:
         if ontology == "s223":
             self.g.parse("https://open223.info/223p.ttl", format="ttl")
@@ -210,6 +210,8 @@ class LoadModel:
                         # get is delta
                         is_delta = self._is_delta_quantity(name_data)
                         value_obj = Value(value=value_data, unit=unit_data, is_delta = is_delta, name=name_data)
+                        if self.as_si_units:
+                            value_obj.convert_to_si()
                         # Use clean attribute name (remove redundant prefixes and suffixes)
                         clean_attr_name = attr_base.replace('name_', '').replace('_name', '')
                         attributes[clean_attr_name] = value_obj
@@ -360,7 +362,6 @@ class LoadModel:
         template_inlined = template.inline_dependencies()
         query = self._get_query(template_inlined.body)
         df = query_to_df(query, self.g, prefixed=False)
-        print(df.columns)
         objects = self._dataframe_to_objects_generalized(df, template_name)
         return objects
 
