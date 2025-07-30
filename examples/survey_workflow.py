@@ -6,7 +6,7 @@ This example demonstrates how to generate, fill out, and process
 building metadata surveys.
 """
 
-from semantic_mpc_interface import SurveyGenerator, SurveyReader, MetadataProcessor, SemanticModelBuilder
+from semantic_mpc_interface import Survey, SurveyReader, MetadataProcessor, SemanticModelBuilder
 import json
 
 def main():
@@ -14,7 +14,7 @@ def main():
     
     # Step 1: Generate a survey
     print("Step 1: Generating survey...")
-    generator = SurveyGenerator()
+    generator = Survey()
     survey = generator.generate_building_survey()
     generator.save_survey(survey, "building_survey.json")
     print("Survey saved to: building_survey.json")

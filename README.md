@@ -26,10 +26,18 @@ The Semantic MPC Interface provides a unified API for working with semantic buil
 
 ### Basic Installation
 
+Eventually when this is pip installable 
 ```bash
 pip install semantic-mpc-interface
 ```
-
+For now 
+```
+uv pip install git+https://github.com/lazlop/SemanticModelBuilder.git
+```
+```
+To install the dev branch using uv
+uv pip install git+https://github.com/lazlop/SemanticModelBuilder.git@develop
+```
 ### With Optional Dependencies
 
 ```bash
@@ -94,10 +102,10 @@ builder.save_model("building_model.ttl")
 ### Working with Metadata Surveys
 
 ```python
-from semantic_mpc_interface import SurveyGenerator, SurveyReader
+from semantic_mpc_interface import Survey, SurveyReader
 
 # Generate a survey
-generator = SurveyGenerator()
+generator = Survey()
 survey = generator.generate_building_survey()
 generator.save_survey(survey, "building_survey.json")
 

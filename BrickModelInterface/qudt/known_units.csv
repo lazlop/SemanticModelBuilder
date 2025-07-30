@@ -1,8 +1,0 @@
-unit,conversionFactor,offset
-http://qudt.org/vocab/unit/DEG_F,0.5555555555555556,459.67
-http://qudt.org/vocab/unit/DEG_C,1.0,273.15
-http://qudt.org/vocab/unit/FT,0.3048,0.0
-http://qudt.org/vocab/unit/M,1.0,0.0
-http://qudt.org/vocab/unit/K,1.0,0.0
-http://qudt.org/vocab/unit/FT2,0.09290304,0.0
-http://qudt.org/vocab/unit/M2,1.0,0.0
