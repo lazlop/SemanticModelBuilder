@@ -1,0 +1,157 @@
+{
+  "heat_availability": [
+    true,
+    true,
+    true
+  ],
+  "cool_availability": [
+    true,
+    true,
+    true
+  ],
+  "heat_tolerance": [
+    -3.0,
+    -2.0,
+    -1.0
+  ],
+  "cool_tolerance": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "setpoint_deadband": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "active": [
+    true,
+    true,
+    true
+  ],
+  "control_group": [
+    "DEPRECATED",
+    "DEPRECATED",
+    "DEPRECATED"
+  ],
+  "control_type_list": [
+    "stage",
+    "stage",
+    "binary"
+  ],
+  "floor_area_list": [
+    4.0,
+    3.0,
+    3.0
+  ],
+  "floor_area_unit": [
+    "4.0",
+    "3.0",
+    "1.0"
+  ],
+  "window_area_list": [
+    7.0,
+    4.0,
+    2.0
+  ],
+  "window_area_unit": [
+    "FT2",
+    "FT2",
+    "FT2"
+  ],
+  "azimuth_list": [
+    7.0,
+    4.0,
+    2.0
+  ],
+  "azimuth_unit": [
+    "DEGREE",
+    "DEGREE",
+    "DEGREE"
+  ],
+  "tilt_list": [
+    7.0,
+    4.0,
+    2.0
+  ],
+  "tilt_unit": [
+    "DEGREE",
+    "DEGREE",
+    "DEGREE"
+  ],
+  "zone_ids": [
+    "zone_3",
+    "zone_2",
+    "zone_1"
+  ],
+  "hvacs": [
+    "hvac_3",
+    "hvac_2",
+    "hvac_1"
+  ],
+  "setpoint_type": [
+    "double",
+    "double",
+    "double"
+  ],
+  "fuel_heat_list": [
+    "electricity",
+    "electricity",
+    "electricity"
+  ],
+  "fuel_cool_list": [
+    "electricity",
+    "electricity",
+    "electricity"
+  ],
+  "cooling_capacity": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "cooling_capacity_unit": [
+    "W",
+    "W",
+    "W"
+  ],
+  "heating_capacity": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "heating_capacity_unit": [
+    "W",
+    "W",
+    "W"
+  ],
+  "cooling_cop": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "heating_cop": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "cooling_electricity": [
+    true,
+    true,
+    true
+  ],
+  "heating_electricity": [
+    true,
+    true,
+    true
+  ],
+  "resolution": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "temperature_unit": [
+    "IP",
+    "IP",
+    "IP"
+  ]
+}

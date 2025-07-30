@@ -1,0 +1,298 @@
+@prefix bldg: <urn:hpflex/hpflex_demo#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix hpflex: <urn:hpflex#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+bldg: a owl:Ontology,
+        hpflex:Project .
+
+bldg:hpflex_demo a brick:Site ;
+    brick:buildingID bldg:hpflex_demo.building_id ;
+    brick:hasNOAAStation bldg:hpflex_demo.noaastation ;
+    brick:latitude bldg:hpflex_demo.latitude ;
+    brick:longitude bldg:hpflex_demo.longitude ;
+    brick:siteID bldg:hpflex_demo.site_id ;
+    brick:timezone bldg:hpflex_demo.timezone .
+
+bldg:hpflex_demo.building_id brick:buildingID "bldg2" .
+
+bldg:hpflex_demo.latitude qudt:hasQuantityKind quantitykind:Latitude ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 3.787913e+01 .
+
+bldg:hpflex_demo.longitude qudt:hasQuantityKind quantitykind:Longitude ;
+    qudt:hasUnit unit:Degree ;
+    brick:value -1.222544e+02 .
+
+bldg:hpflex_demo.noaastation hpflex:hasNOAAStation "" .
+
+bldg:hpflex_demo.site_id qudt:hasUnit unit:SiteID ;
+    brick:value "hpflex_demo" .
+
+bldg:hpflex_demo.timezone qudt:hasUnit unit:Timezone ;
+    brick:value "US/Pacific" .
+
+bldg:space1_1 a brick:Space ;
+    brick:area bldg:space1_1_area ;
+    brick:isPartOf bldg:bldg2_zone1 .
+
+bldg:space1_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+03 .
+
+bldg:space2_1 a brick:Space ;
+    brick:area bldg:space2_1_area ;
+    brick:isPartOf bldg:bldg2_zone2 .
+
+bldg:space2_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+03 .
+
+bldg:space3_1 a brick:Space ;
+    brick:area bldg:space3_1_area ;
+    brick:isPartOf bldg:bldg2_zone3 .
+
+bldg:space3_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+03 .
+
+bldg:space4_1 a brick:Space ;
+    brick:area bldg:space4_1_area ;
+    brick:isPartOf bldg:bldg2_zone4 .
+
+bldg:space4_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+03 .
+
+bldg:tstat_bldg2_zone1_active a brick:Availability_Status ;
+    brick:isPointOf bldg:tstat_bldg2_zone1 ;
+    brick:value true .
+
+bldg:tstat_bldg2_zone1_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "float" .
+
+bldg:tstat_bldg2_zone1_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone1 ;
+    brick:value 4e+00 .
+
+bldg:tstat_bldg2_zone1_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 1 .
+
+bldg:tstat_bldg2_zone1_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone1 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg2_zone2_active a brick:Availability_Status ;
+    brick:isPointOf bldg:tstat_bldg2_zone2 ;
+    brick:value true .
+
+bldg:tstat_bldg2_zone2_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "float" .
+
+bldg:tstat_bldg2_zone2_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone2 ;
+    brick:value 4e+00 .
+
+bldg:tstat_bldg2_zone2_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 1 .
+
+bldg:tstat_bldg2_zone2_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone2 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg2_zone3_active a brick:Availability_Status ;
+    brick:isPointOf bldg:tstat_bldg2_zone3 ;
+    brick:value true .
+
+bldg:tstat_bldg2_zone3_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "float" .
+
+bldg:tstat_bldg2_zone3_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone3 ;
+    brick:value 4e+00 .
+
+bldg:tstat_bldg2_zone3_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 1 .
+
+bldg:tstat_bldg2_zone3_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone3 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg2_zone4_active a brick:Availability_Status ;
+    brick:isPointOf bldg:tstat_bldg2_zone4 ;
+    brick:value true .
+
+bldg:tstat_bldg2_zone4_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "float" .
+
+bldg:tstat_bldg2_zone4_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone4 ;
+    brick:value 4e+00 .
+
+bldg:tstat_bldg2_zone4_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 1 .
+
+bldg:tstat_bldg2_zone4_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg2_zone4 ;
+    brick:value 5e-01 .
+
+bldg:window1_1 a brick:Window ;
+    brick:area bldg:window1_1_area ;
+    brick:azimuth bldg:window1_1_azimuth ;
+    brick:isPartOf bldg:bldg2_zone1 ;
+    brick:tilt bldg:window1_1_tilt .
+
+bldg:window1_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+02 .
+
+bldg:window1_1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window1_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window2_1 a brick:Window ;
+    brick:area bldg:window2_1_area ;
+    brick:azimuth bldg:window2_1_azimuth ;
+    brick:isPartOf bldg:bldg2_zone2 ;
+    brick:tilt bldg:window2_1_tilt .
+
+bldg:window2_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+02 .
+
+bldg:window2_1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window2_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window3_1 a brick:Window ;
+    brick:area bldg:window3_1_area ;
+    brick:azimuth bldg:window3_1_azimuth ;
+    brick:isPartOf bldg:bldg2_zone3 ;
+    brick:tilt bldg:window3_1_tilt .
+
+bldg:window3_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+02 .
+
+bldg:window3_1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window3_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window4_1 a brick:Window ;
+    brick:area bldg:window4_1_area ;
+    brick:azimuth bldg:window4_1_azimuth ;
+    brick:isPartOf bldg:bldg2_zone4 ;
+    brick:tilt bldg:window4_1_tilt .
+
+bldg:window4_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+02 .
+
+bldg:window4_1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window4_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:bldg2_zone1 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space1_1,
+        bldg:window1_1 ;
+    brick:isLocationOf bldg:tstat_bldg2_zone1 .
+
+bldg:bldg2_zone2 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space2_1,
+        bldg:window2_1 ;
+    brick:isLocationOf bldg:tstat_bldg2_zone2 .
+
+bldg:bldg2_zone3 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space3_1,
+        bldg:window3_1 ;
+    brick:isLocationOf bldg:tstat_bldg2_zone3 .
+
+bldg:bldg2_zone4 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space4_1,
+        bldg:window4_1 ;
+    brick:isLocationOf bldg:tstat_bldg2_zone4 .
+
+bldg:tstat_bldg2_zone1 a brick:Thermostat ;
+    brick:hasLocation bldg:bldg2_zone1 ;
+    brick:hasPoint bldg:tstat_bldg2_zone1_active,
+        bldg:tstat_bldg2_zone1_setpoint_deadband,
+        bldg:tstat_bldg2_zone1_tolerance ;
+    brick:operationalStageCount bldg:tstat_bldg2_zone1_stage_count ;
+    brick:resolution bldg:tstat_bldg2_zone1_resolution .
+
+bldg:tstat_bldg2_zone2 a brick:Thermostat ;
+    brick:hasLocation bldg:bldg2_zone2 ;
+    brick:hasPoint bldg:tstat_bldg2_zone2_active,
+        bldg:tstat_bldg2_zone2_setpoint_deadband,
+        bldg:tstat_bldg2_zone2_tolerance ;
+    brick:operationalStageCount bldg:tstat_bldg2_zone2_stage_count ;
+    brick:resolution bldg:tstat_bldg2_zone2_resolution .
+
+bldg:tstat_bldg2_zone3 a brick:Thermostat ;
+    brick:hasLocation bldg:bldg2_zone3 ;
+    brick:hasPoint bldg:tstat_bldg2_zone3_active,
+        bldg:tstat_bldg2_zone3_setpoint_deadband,
+        bldg:tstat_bldg2_zone3_tolerance ;
+    brick:operationalStageCount bldg:tstat_bldg2_zone3_stage_count ;
+    brick:resolution bldg:tstat_bldg2_zone3_resolution .
+
+bldg:tstat_bldg2_zone4 a brick:Thermostat ;
+    brick:hasLocation bldg:bldg2_zone4 ;
+    brick:hasPoint bldg:tstat_bldg2_zone4_active,
+        bldg:tstat_bldg2_zone4_setpoint_deadband,
+        bldg:tstat_bldg2_zone4_tolerance ;
+    brick:operationalStageCount bldg:tstat_bldg2_zone4_stage_count ;
+    brick:resolution bldg:tstat_bldg2_zone4_resolution .
+

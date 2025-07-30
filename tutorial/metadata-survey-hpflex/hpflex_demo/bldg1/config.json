@@ -1,0 +1,41 @@
+{
+    "site_id": "hpflex_demo",
+    "hvac_type": "hp-rtu",
+    "hvacs_feed_hvacs": {},
+    "hvacs_feed_zones": {
+        "hvac1": [
+            "bldg1_zone1"
+        ],
+        "hvac2": [
+            "bldg1_zone2"
+        ],
+        "hvac3": [
+            "bldg1_zone3"
+        ]
+    },
+    "zones_contain_spaces": {
+        "bldg1_zone1": [
+            "space1_1"
+        ],
+        "bldg1_zone2": [
+            "space2_1"
+        ],
+        "bldg1_zone3": [
+            "space3_1"
+        ]
+    },
+    "zones_contain_windows": {
+        "bldg1_zone1": [
+            "window1_1"
+        ],
+        "bldg1_zone2": [
+            "window2_1",
+            "window2_2"
+        ],
+        "bldg1_zone3": [
+            "window3_1",
+            "window3_2",
+            "window3_3"
+        ]
+    }
+}

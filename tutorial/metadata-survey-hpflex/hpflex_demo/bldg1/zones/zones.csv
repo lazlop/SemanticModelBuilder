@@ -1,0 +1,4 @@
+tstat_id,zone_id,stage_count,setpoint_deadband,tolerance,active,resolution,temperature_unit
+tstat_bldg1_zone1,bldg1_zone1,4,0.5,0.5,TRUE,float,DEG_F
+tstat_bldg1_zone2,bldg1_zone2,4,0.5,0.5,TRUE,float,DEG_F
+tstat_bldg1_zone3,bldg1_zone3,4,0.5,0.5,TRUE,float,DEG_F

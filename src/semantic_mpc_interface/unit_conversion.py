@@ -2,13 +2,26 @@
 # May want to cache the conversion factors we actually use, then reach out to qudt if we need to
 # So many qudt units, querying is pretty slow.
 import csv
-from importlib.resources import files
-
+from importlib.resources import files, as_file
+from.namespaces import * 
+import csv
 from rdflib import Graph, Literal, Namespace, URIRef
 
-from .namespaces import *
-
 qudt_dir = files("semantic_mpc_interface").joinpath("data/qudt")
+# Helper --------------------------------------------------------------------
+# When a Python package is installed from a wheel it is often imported from a
+# zip-file.  In that case the resources (csv / ttl) are not present on the file
+# system and cannot be accessed with a normal `open(path)`.  The helper below
+# returns a "Traversable" object pointing at the requested resource so we can
+# either 1) open it directly (for text files) or 2) ask importlib.resources to
+# give us a temporary on-disk copy via `as_file` (needed for libraries like
+# rdflib that expect a real path).
+
+
+def _resource_path(*parts):
+    """Return a Traversable object for a resource shipped with the package."""
+
+    return files('semantic_mpc_interface').joinpath(*parts)
 
 
 def _get_known_conversion_factor(unit):

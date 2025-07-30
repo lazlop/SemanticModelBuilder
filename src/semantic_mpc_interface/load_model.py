@@ -410,3 +410,228 @@ class LoadModel:
         List all available templates in the library.
         """
         return [template.name for template in self.library.get_templates()]
+
+    def get_thermostat_data(self, for_zone_list: Optional[List[str]] = None) -> Dict:
+        """
+        Generate thermostat metadata similar to BuildingMetadataLoader.get_thermostat_data()
+        but using the object-oriented approach from LoadModel.
+        
+        Args:
+            for_zone_list: Optional list of zone IDs to filter by
+            
+        Returns:
+            Dictionary with thermostat metadata organized in lists
+        """
+        # Initialize the output dictionary with empty lists
+        thermostat_data = {
+            "heat_availability": [],
+            "cool_availability": [],
+            "heat_tolerance": [],
+            "cool_tolerance": [],
+            "setpoint_deadband": [],
+            "active": [],
+            "control_group": [],
+            "control_type_list": [],
+            "floor_area_list": [],
+            "floor_area_unit": [],
+            "window_area_list": [],
+            "window_area_unit": [],
+            "azimuth_list": [],
+            "azimuth_unit": [],
+            "tilt_list": [],
+            "tilt_unit": [],
+            "zone_ids": [],
+            "hvacs": [],
+            "setpoint_type": [],
+            "fuel_heat_list": [],
+            "fuel_cool_list": [],
+            "cooling_capacity": [],
+            "cooling_capacity_unit": [],
+            "heating_capacity": [],
+            "heating_capacity_unit": [],
+            "cooling_cop": [],
+            "heating_cop": [],
+            "cooling_electricity": [],
+            "heating_electricity": [],
+            "resolution": [],
+            "temperature_unit": [],
+        }
+        
+        # Get all building objects
+        all_objects = self.get_all_building_objects()
+        
+        # Process zones if they exist
+        if 'zones' in all_objects:
+            for zone in all_objects['zones']:
+                # Filter by zone list if provided
+                if for_zone_list is not None:
+                    zone_id = zone.name.split('#')[-1] if '#' in zone.name else zone.name
+                    if zone_id not in for_zone_list:
+                        continue
+                
+                # Process each thermostat in the zone
+                if hasattr(zone, 'tstats') and zone.tstats:
+                    for tstat in zone.tstats:
+                        # Extract zone ID
+                        zone_id = zone.name.split('#')[-1] if '#' in zone.name else zone.name
+                        thermostat_data["zone_ids"].append(zone_id)
+                        
+                        # Process thermostat properties
+                        if hasattr(tstat, 'tolerance') and tstat.tolerance:
+                            tolerance_val = tstat.tolerance.value if hasattr(tstat.tolerance, 'value') else 0.0
+                            thermostat_data["heat_tolerance"].append(-1.0 * tolerance_val)
+                            thermostat_data["cool_tolerance"].append(1.0 * tolerance_val)
+                        else:
+                            thermostat_data["heat_tolerance"].append(0.0)
+                            thermostat_data["cool_tolerance"].append(0.0)
+                        
+                        if hasattr(tstat, 'setpoint_deadband') and tstat.setpoint_deadband:
+                            deadband_val = tstat.setpoint_deadband.value if hasattr(tstat.setpoint_deadband, 'value') else 0.0
+                            thermostat_data["setpoint_deadband"].append(deadband_val)
+                        else:
+                            thermostat_data["setpoint_deadband"].append(0.0)
+                        
+                        if hasattr(tstat, 'active') and tstat.active:
+                            active_val = tstat.active.value if hasattr(tstat.active, 'value') else True
+                            thermostat_data["active"].append(bool(active_val))
+                        else:
+                            thermostat_data["active"].append(True)
+                        
+                        if hasattr(tstat, 'stage_count') and tstat.stage_count:
+                            stage_count = tstat.stage_count.value if hasattr(tstat.stage_count, 'value') else 1
+                            thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
+                        else:
+                            thermostat_data["control_type_list"].append("binary")
+                        
+                        if hasattr(tstat, 'resolution') and tstat.resolution:
+                            resolution_val = tstat.resolution.value if hasattr(tstat.resolution, 'value') else 1.0
+                            thermostat_data["resolution"].append(resolution_val)
+                            
+                            # Determine temperature unit from resolution unit
+                            if hasattr(tstat.resolution, 'unit') and tstat.resolution.unit:
+                                unit_str = str(tstat.resolution.unit).upper()
+                                if 'DEG_F' in unit_str or 'FAHRENHEIT' in unit_str:
+                                    thermostat_data["temperature_unit"].append('IP')
+                                else:
+                                    thermostat_data["temperature_unit"].append('SI')
+                            else:
+                                thermostat_data["temperature_unit"].append('SI')
+                        else:
+                            thermostat_data["resolution"].append(1.0)
+                            thermostat_data["temperature_unit"].append('SI')
+                        
+                        # Default values for control group and setpoint type
+                        thermostat_data["control_group"].append("DEPRECATED")
+                        thermostat_data["setpoint_type"].append("double")  # Default assumption
+                        
+                        # Process HVAC data
+                        if hasattr(zone, 'hvacs') and zone.hvacs:
+                            hvac = zone.hvacs[0]  # Take first HVAC unit
+                            hvac_id = hvac.name.split('#')[-1] if '#' in hvac.name else hvac.name
+                            thermostat_data["hvacs"].append(hvac_id)
+                            
+                            # Cooling capacity
+                            if hasattr(hvac, 'cooling_capacity') and hvac.cooling_capacity:
+                                cooling_cap = hvac.cooling_capacity.value if hasattr(hvac.cooling_capacity, 'value') else 0.0
+                                thermostat_data["cooling_capacity"].append(cooling_cap)
+                                
+                                if hasattr(hvac.cooling_capacity, 'unit') and hvac.cooling_capacity.unit:
+                                    unit_str = str(hvac.cooling_capacity.unit).split('/')[-1]
+                                    thermostat_data["cooling_capacity_unit"].append(unit_str)
+                                else:
+                                    thermostat_data["cooling_capacity_unit"].append("W")
+                            else:
+                                thermostat_data["cooling_capacity"].append(0.0)
+                                thermostat_data["cooling_capacity_unit"].append("W")
+                            
+                            # Heating capacity
+                            if hasattr(hvac, 'heating_capacity') and hvac.heating_capacity:
+                                heating_cap = hvac.heating_capacity.value if hasattr(hvac.heating_capacity, 'value') else 0.0
+                                thermostat_data["heating_capacity"].append(heating_cap)
+                                
+                                if hasattr(hvac.heating_capacity, 'unit') and hvac.heating_capacity.unit:
+                                    unit_str = str(hvac.heating_capacity.unit).split('/')[-1]
+                                    thermostat_data["heating_capacity_unit"].append(unit_str)
+                                else:
+                                    thermostat_data["heating_capacity_unit"].append("W")
+                            else:
+                                thermostat_data["heating_capacity"].append(0.0)
+                                thermostat_data["heating_capacity_unit"].append("W")
+                            
+                            # COP values
+                            if hasattr(hvac, 'cooling_COP') and hvac.cooling_COP:
+                                cooling_cop = hvac.cooling_COP.value if hasattr(hvac.cooling_COP, 'value') else 3.0
+                                thermostat_data["cooling_cop"].append(cooling_cop)
+                            else:
+                                thermostat_data["cooling_cop"].append(3.0)
+                            
+                            if hasattr(hvac, 'heating_COP') and hvac.heating_COP:
+                                heating_cop = hvac.heating_COP.value if hasattr(hvac.heating_COP, 'value') else 3.0
+                                thermostat_data["heating_cop"].append(heating_cop)
+                            else:
+                                thermostat_data["heating_cop"].append(3.0)
+                        else:
+                            # Default HVAC values
+                            thermostat_data["hvacs"].append("unknown")
+                            thermostat_data["cooling_capacity"].append(0.0)
+                            thermostat_data["cooling_capacity_unit"].append("W")
+                            thermostat_data["heating_capacity"].append(0.0)
+                            thermostat_data["heating_capacity_unit"].append("W")
+                            thermostat_data["cooling_cop"].append(3.0)
+                            thermostat_data["heating_cop"].append(3.0)
+                        
+                        # Process space data (floor area)
+                        total_floor_area = 0.0
+                        floor_area_unit = "M2"
+                        if hasattr(zone, 'spaces') and zone.spaces:
+                            for space in zone.spaces:
+                                if hasattr(space, 'area') and space.area:
+                                    area_val = space.area.value if hasattr(space.area, 'value') else 0.0
+                                    total_floor_area += area_val
+                                    
+                                    if hasattr(space.area, 'unit') and space.area.unit:
+                                        unit_str = str(space.area.unit).split('/')[-1]
+                                        floor_area_unit = unit_str
+                        
+                        thermostat_data["floor_area_list"].append(total_floor_area)
+                        thermostat_data["floor_area_unit"].append(floor_area_unit)
+                        
+                        # Process window data (take largest window by area)
+                        largest_window_area = 0.0
+                        window_area_unit = "M2"
+                        window_azimuth = 0.0
+                        window_tilt = 0.0
+                        
+                        if hasattr(zone, 'windows') and zone.windows:
+                            for window in zone.windows:
+                                if hasattr(window, 'area') and window.area:
+                                    area_val = window.area.value if hasattr(window.area, 'value') else 0.0
+                                    if area_val > largest_window_area:
+                                        largest_window_area = area_val
+                                        
+                                        if hasattr(window.area, 'unit') and window.area.unit:
+                                            unit_str = str(window.area.unit).split('/')[-1]
+                                            window_area_unit = unit_str
+                                        
+                                        if hasattr(window, 'azimuth') and window.azimuth:
+                                            window_azimuth = window.azimuth.value if hasattr(window.azimuth, 'value') else 0.0
+                                        
+                                        if hasattr(window, 'tilt') and window.tilt:
+                                            window_tilt = window.tilt.value if hasattr(window.tilt, 'value') else 0.0
+                        
+                        thermostat_data["window_area_list"].append(largest_window_area)
+                        thermostat_data["window_area_unit"].append(window_area_unit)
+                        thermostat_data["azimuth_list"].append(window_azimuth)
+                        thermostat_data["azimuth_unit"].append("DEGREE")
+                        thermostat_data["tilt_list"].append(window_tilt)
+                        thermostat_data["tilt_unit"].append("DEGREE")
+                        
+                        # Default fuel and availability assumptions (electric heat pump)
+                        thermostat_data["fuel_heat_list"].append("electricity")
+                        thermostat_data["fuel_cool_list"].append("electricity")
+                        thermostat_data["heat_availability"].append(True)
+                        thermostat_data["cool_availability"].append(True)
+                        thermostat_data["cooling_electricity"].append(True)
+                        thermostat_data["heating_electricity"].append(True)
+        
+        return thermostat_data

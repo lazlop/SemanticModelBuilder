@@ -1,0 +1,365 @@
+@prefix bldg: <urn:hpflex/hpflex_demo#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix hpflex: <urn:hpflex#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+bldg: a owl:Ontology,
+        hpflex:Project .
+
+bldg:hpflex_demo a brick:Site ;
+    brick:buildingID bldg:hpflex_demo.building_id ;
+    brick:hasNOAAStation bldg:hpflex_demo.noaastation ;
+    brick:latitude bldg:hpflex_demo.latitude ;
+    brick:longitude bldg:hpflex_demo.longitude ;
+    brick:siteID bldg:hpflex_demo.site_id ;
+    brick:timezone bldg:hpflex_demo.timezone .
+
+bldg:hpflex_demo.building_id brick:buildingID "bldg1" .
+
+bldg:hpflex_demo.latitude qudt:hasQuantityKind quantitykind:Latitude ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 3.787913e+01 .
+
+bldg:hpflex_demo.longitude qudt:hasQuantityKind quantitykind:Longitude ;
+    qudt:hasUnit unit:Degree ;
+    brick:value -1.222544e+02 .
+
+bldg:hpflex_demo.noaastation hpflex:hasNOAAStation "" .
+
+bldg:hpflex_demo.site_id qudt:hasUnit unit:SiteID ;
+    brick:value "hpflex_demo" .
+
+bldg:hpflex_demo.timezone qudt:hasUnit unit:Timezone ;
+    brick:value "US/Pacific" .
+
+bldg:hvac1 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac1_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac1_cooling_COP ;
+    brick:feeds bldg:bldg1_zone1 ;
+    brick:heatingCapacity bldg:hvac1_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac1_heating_COP .
+
+bldg:hvac1_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.5e+00 .
+
+bldg:hvac1_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value -7.5e+00 .
+
+bldg:hvac1_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.94e+00 .
+
+bldg:hvac1_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 1e+01 .
+
+bldg:hvac2 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac2_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac2_cooling_COP ;
+    brick:feeds bldg:bldg1_zone2 ;
+    brick:heatingCapacity bldg:hvac2_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac2_heating_COP .
+
+bldg:hvac2_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.5e+00 .
+
+bldg:hvac2_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value -7.5e+00 .
+
+bldg:hvac2_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.94e+00 .
+
+bldg:hvac2_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 1e+01 .
+
+bldg:hvac3 a brick:Packaged_Heat_Pump,
+        brick:RTU ;
+    brick:coolingCapacity bldg:hvac3_cooling_capacity ;
+    brick:coolingCoefficientOfPerformance bldg:hvac3_cooling_COP ;
+    brick:feeds bldg:bldg1_zone3 ;
+    brick:heatingCapacity bldg:hvac3_heating_capacity ;
+    brick:heatingCoefficientOfPerformance bldg:hvac3_heating_COP .
+
+bldg:hvac3_cooling_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.5e+00 .
+
+bldg:hvac3_cooling_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value -7.5e+00 .
+
+bldg:hvac3_heating_COP qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 2.94e+00 .
+
+bldg:hvac3_heating_capacity qudt:hasQuantityKind quantitykind:Power ;
+    qudt:hasUnit unit:KiloW ;
+    brick:value 1e+01 .
+
+bldg:space_1_1 a brick:Space ;
+    brick:area bldg:space_1_1_area ;
+    brick:isPartOf bldg:bldg1_zone1 .
+
+bldg:space_1_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.3e+03 .
+
+bldg:space_2_1 a brick:Space ;
+    brick:area bldg:space_2_1_area ;
+    brick:isPartOf bldg:bldg1_zone2 .
+
+bldg:space_2_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.3e+03 .
+
+bldg:space_3_1 a brick:Space ;
+    brick:area bldg:space_3_1_area ;
+    brick:isPartOf bldg:bldg1_zone3 .
+
+bldg:space_3_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.3e+03 .
+
+bldg:tstat_bldg1_zone1_active a brick:Availability_Status ;
+    brick:isPointOf bldg:tstat_bldg1_zone1 ;
+    brick:value true .
+
+bldg:tstat_bldg1_zone1_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "float" .
+
+bldg:tstat_bldg1_zone1_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg1_zone1 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg1_zone1_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 4 .
+
+bldg:tstat_bldg1_zone1_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg1_zone1 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg1_zone2_active a brick:Availability_Status ;
+    brick:isPointOf bldg:tstat_bldg1_zone2 ;
+    brick:value true .
+
+bldg:tstat_bldg1_zone2_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "float" .
+
+bldg:tstat_bldg1_zone2_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg1_zone2 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg1_zone2_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 4 .
+
+bldg:tstat_bldg1_zone2_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg1_zone2 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg1_zone3_active a brick:Availability_Status ;
+    brick:isPointOf bldg:tstat_bldg1_zone3 ;
+    brick:value true .
+
+bldg:tstat_bldg1_zone3_resolution qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:value "float" .
+
+bldg:tstat_bldg1_zone3_setpoint_deadband a brick:Temperature_Deadband_Setpoint ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg1_zone3 ;
+    brick:value 5e-01 .
+
+bldg:tstat_bldg1_zone3_stage_count qudt:hasQuantityKind quantitykind:Count ;
+    qudt:hasUnit unit:NUM ;
+    brick:value 4 .
+
+bldg:tstat_bldg1_zone3_tolerance a brick:Temperature_Tolerance_Parameter ;
+    qudt:hasQuantityKind quantitykind:Temperature ;
+    qudt:hasUnit unit:DEG_F ;
+    qudt:isDeltaQuantity true ;
+    brick:isPointOf bldg:tstat_bldg1_zone3 ;
+    brick:value 5e-01 .
+
+bldg:window1_1 a brick:Window ;
+    brick:area bldg:window1_1_area ;
+    brick:azimuth bldg:window1_1_azimuth ;
+    brick:isPartOf bldg:bldg1_zone1 ;
+    brick:tilt bldg:window1_1_tilt .
+
+bldg:window1_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 1.5e+02 .
+
+bldg:window1_1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window1_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window2_1 a brick:Window ;
+    brick:area bldg:window2_1_area ;
+    brick:azimuth bldg:window2_1_azimuth ;
+    brick:isPartOf bldg:bldg1_zone2 ;
+    brick:tilt bldg:window2_1_tilt .
+
+bldg:window2_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 8e+01 .
+
+bldg:window2_1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window2_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window2_2 a brick:Window ;
+    brick:area bldg:window2_2_area ;
+    brick:azimuth bldg:window2_2_azimuth ;
+    brick:isPartOf bldg:bldg1_zone2 ;
+    brick:tilt bldg:window2_2_tilt .
+
+bldg:window2_2_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 8e+01 .
+
+bldg:window2_2_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window2_2_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window3_1 a brick:Window ;
+    brick:area bldg:window3_1_area ;
+    brick:azimuth bldg:window3_1_azimuth ;
+    brick:isPartOf bldg:bldg1_zone3 ;
+    brick:tilt bldg:window3_1_tilt .
+
+bldg:window3_1_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 5e+01 .
+
+bldg:window3_1_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window3_1_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window3_2 a brick:Window ;
+    brick:area bldg:window3_2_area ;
+    brick:azimuth bldg:window3_2_azimuth ;
+    brick:isPartOf bldg:bldg1_zone3 ;
+    brick:tilt bldg:window3_2_tilt .
+
+bldg:window3_2_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 5e+01 .
+
+bldg:window3_2_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window3_2_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:window3_3 a brick:Window ;
+    brick:area bldg:window3_3_area ;
+    brick:azimuth bldg:window3_3_azimuth ;
+    brick:isPartOf bldg:bldg1_zone3 ;
+    brick:tilt bldg:window3_3_tilt .
+
+bldg:window3_3_area qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:FT2 ;
+    brick:value 5e+01 .
+
+bldg:window3_3_azimuth qudt:hasQuantityKind quantitykind:Azimuth ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 1.8e+02 .
+
+bldg:window3_3_tilt qudt:hasQuantityKind quantitykind:Tilt ;
+    qudt:hasUnit unit:Degree ;
+    brick:value 9e+01 .
+
+bldg:bldg1_zone1 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space_1_1,
+        bldg:window1_1 ;
+    brick:isFedBy bldg:hvac1 ;
+    brick:isLocationOf bldg:tstat_bldg1_zone1 .
+
+bldg:tstat_bldg1_zone1 a brick:Thermostat ;
+    brick:hasLocation bldg:bldg1_zone1 ;
+    brick:hasPoint bldg:tstat_bldg1_zone1_active,
+        bldg:tstat_bldg1_zone1_setpoint_deadband,
+        bldg:tstat_bldg1_zone1_tolerance ;
+    brick:operationalStageCount bldg:tstat_bldg1_zone1_stage_count ;
+    brick:resolution bldg:tstat_bldg1_zone1_resolution .
+
+bldg:tstat_bldg1_zone2 a brick:Thermostat ;
+    brick:hasLocation bldg:bldg1_zone2 ;
+    brick:hasPoint bldg:tstat_bldg1_zone2_active,
+        bldg:tstat_bldg1_zone2_setpoint_deadband,
+        bldg:tstat_bldg1_zone2_tolerance ;
+    brick:operationalStageCount bldg:tstat_bldg1_zone2_stage_count ;
+    brick:resolution bldg:tstat_bldg1_zone2_resolution .
+
+bldg:tstat_bldg1_zone3 a brick:Thermostat ;
+    brick:hasLocation bldg:bldg1_zone3 ;
+    brick:hasPoint bldg:tstat_bldg1_zone3_active,
+        bldg:tstat_bldg1_zone3_setpoint_deadband,
+        bldg:tstat_bldg1_zone3_tolerance ;
+    brick:operationalStageCount bldg:tstat_bldg1_zone3_stage_count ;
+    brick:resolution bldg:tstat_bldg1_zone3_resolution .
+
+bldg:bldg1_zone2 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space_2_1,
+        bldg:window2_1,
+        bldg:window2_2 ;
+    brick:isFedBy bldg:hvac2 ;
+    brick:isLocationOf bldg:tstat_bldg1_zone2 .
+
+bldg:bldg1_zone3 a brick:HVAC_Zone ;
+    brick:hasPart bldg:space_3_1,
+        bldg:window3_1,
+        bldg:window3_2,
+        bldg:window3_3 ;
+    brick:isFedBy bldg:hvac3 ;
+    brick:isLocationOf bldg:tstat_bldg1_zone3 .
+
