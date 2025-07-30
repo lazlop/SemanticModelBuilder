@@ -1,0 +1,5 @@
+hvac_id,zone_id,cooling_capacity,heating_capacity,cooling_cop,heating_cop
+hvac1,bldg2_zone1,,,,
+hvac2,bldg2_zone2,,,,
+hvac3,bldg2_zone3,,,,
+hvac4,bldg2_zone4,,,,

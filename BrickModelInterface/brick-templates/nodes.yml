@@ -362,6 +362,8 @@ site:
       brick:latitude p:latitude ;
       brick:longitude p:longitude ;
       brick:hasNOAAStation p:noaastation ;
+      brick:buildingID p:building_id ;
+      brick:siteID p:site_id ;
       .
   dependencies:
     - template: timezone
@@ -372,7 +374,21 @@ site:
       args: {"name": "longitude", "value": "longitude_value"}
     - template: noaastation
       args: {"name": "noaastation", "value": "noaastation_value"}
+    - template: building_id
+      args: {"name": "building_id", "value": "building_id_value"}
+    - template: site_id
+      args: {"name": "site_id", "value": "site_id_value"}
 
+site_id:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:value p:value ;
+        qudt:hasUnit unit:SiteID .
 timezone:
   body: >
     @prefix p: <urn:___param___#> .
@@ -417,6 +433,16 @@ noaastation:
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
     p:name hpf:hasNOAAStation p:value .
+
+building_id:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name brick:buildingID p:value .
 
 volttron-external-reference:
   body: >

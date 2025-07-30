@@ -69,7 +69,7 @@ class BrickModelBuilder:
 
 
 
-    def add_site(self,timezone, latitude, longitude, noaa_station):
+    def add_site(self,timezone, latitude, longitude, noaa_station, building_id,site_id):
         site_template = self.templates.get_template_by_name('site')
         site_info = {
             "name": self.building_ns[self.site_id],
@@ -81,6 +81,10 @@ class BrickModelBuilder:
             "longitude_value": Literal(longitude),
             "noaastation": self.building_ns[f'{self.site_id}.noaastation'],
             "noaastation_value": Literal(noaa_station),
+            "building_id": self.building_ns[f'{self.site_id}.building_id'],
+            "building_id_value": Literal(building_id),
+            "site_id": self.building_ns[f'{self.site_id}.site_id'],
+            "site_id_value": Literal(site_id),
         }        
         self.evaluate_template(site_template, site_info)
         self.model.graph.add((self.building_ns[""], A, Namespace("urn:hpflex#")['Project']))
