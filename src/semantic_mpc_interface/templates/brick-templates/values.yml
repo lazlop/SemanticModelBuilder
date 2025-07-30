@@ -16,7 +16,7 @@ tilt:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name brick:value p:value ;
-        qudt:hasUnit unit:Degree ;
+        qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Tilt .
 azimuth:
   body: >
@@ -26,7 +26,7 @@ azimuth:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name brick:value p:value ;
-        qudt:hasUnit unit:Degree ;
+        qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Azimuth .
 
 
@@ -38,7 +38,7 @@ cooling-COP:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name brick:value p:value ;
-        qudt:hasUnit unit:KiloW ;
+        qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
 
 heating-COP:
@@ -49,7 +49,7 @@ heating-COP:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name brick:value p:value ;
-        qudt:hasUnit unit:KiloW ;
+        qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
 cooling-capacity:
   body: >
@@ -59,7 +59,7 @@ cooling-capacity:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name brick:value p:value ;
-        qudt:hasUnit unit:KiloW ;
+        qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Power .
 heating-capacity:
   body: >
@@ -69,7 +69,7 @@ heating-capacity:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name brick:value p:value ;
-        qudt:hasUnit unit:KiloW ;
+        qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Power .
 temperature:
   body: >

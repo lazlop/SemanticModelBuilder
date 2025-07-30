@@ -293,9 +293,15 @@ class HPFlexSurvey(Survey):
         if system_of_units == "IP":
             self.default_area_unit = "FT2"
             self.default_temperature_unit = "DEG_F"
+            self.default_angle_unit = "Degree"  # degrees for tilt and azimuth
+            self.default_cop_unit = "UNITLESS"  # COP is dimensionless
+            self.default_power_unit = "BTU_IT-PER-HR"  # BTU/hr for IP system
         else:
             self.default_area_unit = "M2"
             self.default_temperature_unit = "DEG_C"
+            self.default_angle_unit = "Degree"  # degrees for tilt and azimuth
+            self.default_cop_unit = "UNITLESS"  # COP is dimensionless
+            self.default_power_unit = "KiloW"  # kW for SI system
         
         # Initialize parent class
         super().__init__(site_id, building_id, output_dir, ontology, template_dict, overwrite)
@@ -528,6 +534,21 @@ class HPFlexSurvey(Survey):
             row = {col: '' for col in columns}
             # Only set the values we want to prefill
             row['name'] = hvac_name
+            
+            # Set default units for the newly parameterized units
+            if 'cooling-COP-unit' in columns:
+                row['cooling-COP-unit'] = self.default_cop_unit
+            if 'heating-COP-unit' in columns:
+                row['heating-COP-unit'] = self.default_cop_unit
+            if 'cooling-capacity-unit' in columns:
+                row['cooling-capacity-unit'] = self.default_power_unit
+            if 'heating-capacity-unit' in columns:
+                row['heating-capacity-unit'] = self.default_power_unit
+            if 'tilt-unit' in columns:
+                row['tilt-unit'] = self.default_angle_unit
+            if 'azimuth-unit' in columns:
+                row['azimuth-unit'] = self.default_angle_unit
+                
             new_rows.append(row)
         
         # Create new dataframe with prefilled data
