@@ -19,6 +19,7 @@ UNIT_CONVERSIONS = {
     UNIT["FT2"]: UNIT["M2"],
     UNIT["FT3"]: UNIT["M3"],
     UNIT["PSI"]: UNIT["PA"],
+    UNIT['BTU_IT-PER-HR']:UNIT['KiloW'],
 }
 
 # TODO: Still in vibe coded state - should clean up and generalize a little
@@ -613,6 +614,7 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                     # TODO: Fix this part based on old results
                     thermostat_data["fuel_heat_list"].append("electricity")
                     thermostat_data["fuel_cool_list"].append("electricity")
+                    # TODO: Are these needed or a part of the metadata
                     thermostat_data["heat_availability"].append(True)
                     thermostat_data["cool_availability"].append(True)
                     thermostat_data["cooling_electricity"].append(True)

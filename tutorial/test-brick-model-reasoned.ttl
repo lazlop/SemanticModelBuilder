@@ -103,67 +103,67 @@ bldg:window_3_2 a brick:Window,
     brick:tilt bldg:window_3_2-tilt-name .
 
 bldg:hvac_1-cooling_COP-name qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:UNITLESS ;
     brick:value "1.0" .
 
 bldg:hvac_1-cooling_capacity-name qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:BTU_IT-PER-HR ;
     brick:value "1.0" .
 
 bldg:hvac_1-heating_COP-name qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:UNITLESS ;
     brick:value "1.0" .
 
 bldg:hvac_1-heating_capacity-name qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:BTU_IT-PER-HR ;
     brick:value "1.0" .
 
 bldg:hvac_2-cooling_COP-name qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:UNITLESS ;
     brick:value "2.0" .
 
 bldg:hvac_2-cooling_capacity-name qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:BTU_IT-PER-HR ;
     brick:value "2.0" .
 
 bldg:hvac_2-heating_COP-name qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:UNITLESS ;
     brick:value "2.0" .
 
 bldg:hvac_2-heating_capacity-name qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:BTU_IT-PER-HR ;
     brick:value "2.0" .
 
 bldg:hvac_3-cooling_COP-name qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:UNITLESS ;
     brick:value "3.0" .
 
 bldg:hvac_3-cooling_capacity-name qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:BTU_IT-PER-HR ;
     brick:value "3.0" .
 
 bldg:hvac_3-heating_COP-name qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:UNITLESS ;
     brick:value "3.0" .
 
 bldg:hvac_3-heating_capacity-name qudt:hasQuantityKind quantitykind:Power ;
-    qudt:hasUnit unit:KiloW ;
+    qudt:hasUnit unit:BTU_IT-PER-HR ;
     brick:value "3.0" .
 
 bldg:space_1_1-area-name qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:1.0 ;
+    qudt:hasUnit unit:FT2 ;
     brick:value "1.0" .
 
 bldg:space_1_2-area-name qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:2.0 ;
+    qudt:hasUnit unit:FT2 ;
     brick:value "2.0" .
 
 bldg:space_2_1-area-name qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:3.0 ;
+    qudt:hasUnit unit:FT2 ;
     brick:value "3.0" .
 
 bldg:space_3_1-area-name qudt:hasQuantityKind quantitykind:Area ;
-    qudt:hasUnit unit:4.0 ;
+    qudt:hasUnit unit:FT2 ;
     brick:value "4.0" .
 
 bldg:test_site-latitude-name qudt:hasQuantityKind quantitykind:Latitude ;

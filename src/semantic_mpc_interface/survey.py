@@ -487,8 +487,8 @@ class HPFlexSurvey(Survey):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = space_name
-                if 'area-unit' in columns:
-                    row['area-unit'] = self.default_area_unit
+                if 'area-name-unit' in columns:
+                    row['area-name-unit'] = self.default_area_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -513,6 +513,10 @@ class HPFlexSurvey(Survey):
                 row['name'] = window_name
                 if 'area-name-unit' in columns:
                     row['area-name-unit'] = self.default_area_unit
+                if 'tilt-name-unit' in columns:
+                    row['tilt-name-unit'] = self.default_angle_unit
+                if 'azimuth-name-unit' in columns:
+                    row['azimuth-name-unit'] = self.default_angle_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -536,18 +540,14 @@ class HPFlexSurvey(Survey):
             row['name'] = hvac_name
             
             # Set default units for the newly parameterized units
-            if 'cooling-COP-unit' in columns:
-                row['cooling-COP-unit'] = self.default_cop_unit
-            if 'heating-COP-unit' in columns:
-                row['heating-COP-unit'] = self.default_cop_unit
-            if 'cooling-capacity-unit' in columns:
-                row['cooling-capacity-unit'] = self.default_power_unit
-            if 'heating-capacity-unit' in columns:
-                row['heating-capacity-unit'] = self.default_power_unit
-            if 'tilt-unit' in columns:
-                row['tilt-unit'] = self.default_angle_unit
-            if 'azimuth-unit' in columns:
-                row['azimuth-unit'] = self.default_angle_unit
+            if 'cooling_COP-name-unit' in columns:
+                row['cooling_COP-name-unit'] = self.default_cop_unit
+            if 'heating_COP-name-unit' in columns:
+                row['heating_COP-name-unit'] = self.default_cop_unit
+            if 'cooling_capacity-name-unit' in columns:
+                row['cooling_capacity-name-unit'] = self.default_power_unit
+            if 'heating_capacity-name-unit' in columns:
+                row['heating_capacity-name-unit'] = self.default_power_unit
                 
             new_rows.append(row)
         

@@ -43,10 +43,6 @@ def prefill_csv_survey(survey_directory):
     # Get site_id from config for unit defaults
     site_id = config.get('site_id', 'default_site')
     
-    # Set default units (assuming IP units like in the example)
-    default_area_unit = "FT2"
-    default_temperature_unit = "DEG_F"
-    
     # Create template_csvs mapping by finding CSV files in directory
     template_csvs = {}
     for csv_file in survey_path.glob("*.csv"):
