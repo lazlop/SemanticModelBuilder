@@ -412,7 +412,7 @@ class LoadModel:
         """
         return [template.name for template in self.library.get_templates()]
 
-
+# To be migrated to MPC repo
 def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[str]] = None) -> Dict:
     """
     Generate thermostat metadata similar to BuildingMetadataLoader.get_thermostat_data()
