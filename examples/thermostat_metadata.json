@@ -1,0 +1,157 @@
+{
+  "heat_availability": [
+    true,
+    true,
+    true
+  ],
+  "cool_availability": [
+    true,
+    true,
+    true
+  ],
+  "heat_tolerance": [
+    -3.0,
+    -2.0,
+    -1.0
+  ],
+  "cool_tolerance": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "setpoint_deadband": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "active": [
+    true,
+    true,
+    true
+  ],
+  "control_group": [
+    "DEPRECATED",
+    "DEPRECATED",
+    "DEPRECATED"
+  ],
+  "control_type_list": [
+    "stage",
+    "stage",
+    "binary"
+  ],
+  "floor_area_list": [
+    4.0,
+    3.0,
+    3.0
+  ],
+  "floor_area_unit": [
+    "http://qudt.org/vocab/unit/4.0",
+    "http://qudt.org/vocab/unit/3.0",
+    "http://qudt.org/vocab/unit/1.0"
+  ],
+  "window_area_list": [
+    7.0,
+    4.0,
+    2.0
+  ],
+  "window_area_unit": [
+    "http://qudt.org/vocab/unit/FT2",
+    "http://qudt.org/vocab/unit/FT2",
+    "http://qudt.org/vocab/unit/FT2"
+  ],
+  "azimuth_list": [
+    7.0,
+    4.0,
+    2.0
+  ],
+  "azimuth_unit": [
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree"
+  ],
+  "tilt_list": [
+    7.0,
+    4.0,
+    2.0
+  ],
+  "tilt_unit": [
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree",
+    "http://qudt.org/vocab/unit/Degree"
+  ],
+  "zone_ids": [
+    "zone_3",
+    "zone_2",
+    "zone_1"
+  ],
+  "hvacs": [
+    "urn:hpflex/test_site#hvac_3",
+    "urn:hpflex/test_site#hvac_2",
+    "urn:hpflex/test_site#hvac_1"
+  ],
+  "setpoint_type": [
+    "double",
+    "double",
+    "double"
+  ],
+  "fuel_heat_list": [
+    "electricity",
+    "electricity",
+    "electricity"
+  ],
+  "fuel_cool_list": [
+    "electricity",
+    "electricity",
+    "electricity"
+  ],
+  "cooling_capacity": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "cooling_capacity_unit": [
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW"
+  ],
+  "heating_capacity": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "heating_capacity_unit": [
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW",
+    "http://qudt.org/vocab/unit/KiloW"
+  ],
+  "cooling_cop": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "heating_cop": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "cooling_electricity": [
+    true,
+    true,
+    true
+  ],
+  "heating_electricity": [
+    true,
+    true,
+    true
+  ],
+  "resolution": [
+    3.0,
+    2.0,
+    1.0
+  ],
+  "temperature_unit": [
+    "unit_str",
+    "unit_str",
+    "unit_str"
+  ]
+}

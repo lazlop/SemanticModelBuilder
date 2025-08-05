@@ -1,109 +1,62 @@
 """
-Tests for the conversion module.
+Tests for the unit conversion functionality.
 """
 
 import pytest
 
-from semantic_mpc_interface.conversion import (
-    UnitConverter,
-    convert_value,
-    get_unit_string,
-)
+from semantic_mpc_interface import convert_units
 
 
-class TestConversion:
+class TestUnitConversion:
     """Test cases for unit conversion functions."""
 
-    def test_temperature_conversion_si_to_ip(self):
-        """Test temperature conversion from SI to IP."""
-        result = convert_value(0, "temperature", "SI", "IP")
-        assert result == 32.0  # 0°C = 32°F
+    def test_temperature_conversion_celsius_to_fahrenheit(self):
+        """Test temperature conversion from Celsius to Fahrenheit."""
+        result = convert_units(0, "DEG_C", "DEG_F")
+        assert abs(result - 32.0) < 0.001  # 0°C = 32°F
 
-        result = convert_value(100, "temperature", "SI", "IP")
-        assert result == 212.0  # 100°C = 212°F
+        result = convert_units(100, "DEG_C", "DEG_F")
+        assert abs(result - 212.0) < 0.001  # 100°C = 212°F
 
-    def test_temperature_conversion_ip_to_si(self):
-        """Test temperature conversion from IP to SI."""
-        result = convert_value(32, "temperature", "IP", "SI")
-        assert result == 0.0  # 32°F = 0°C
+    def test_temperature_conversion_fahrenheit_to_celsius(self):
+        """Test temperature conversion from Fahrenheit to Celsius."""
+        result = convert_units(32, "DEG_F", "DEG_C")
+        assert abs(result - 0.0) < 0.001  # 32°F = 0°C
 
-        result = convert_value(212, "temperature", "IP", "SI")
-        assert result == 100.0  # 212°F = 100°C
+        result = convert_units(212, "DEG_F", "DEG_C")
+        assert abs(result - 100.0) < 0.001  # 212°F = 100°C
 
-    def test_area_conversion_si_to_ip(self):
-        """Test area conversion from SI to IP."""
-        result = convert_value(1, "area", "SI", "IP")
-        assert abs(result - 10.764) < 0.001  # 1 m² ≈ 10.764 ft²
+    def test_temperature_conversion_celsius_to_kelvin(self):
+        """Test temperature conversion from Celsius to Kelvin."""
+        result = convert_units(0, "DEG_C", "K")
+        assert abs(result - 273.15) < 0.01  # 0°C = 273.15K
 
-    def test_same_system_conversion(self):
-        """Test that same system conversion returns original value."""
-        result = convert_value(100, "temperature", "SI", "SI")
+    def test_length_conversion_feet_to_meters(self):
+        """Test length conversion from feet to meters."""
+        result = convert_units(10, "FT", "M")
+        assert abs(result - 3.048) < 0.001  # 10 ft ≈ 3.048 m
+
+    def test_same_unit_conversion(self):
+        """Test that same unit conversion returns original value."""
+        result = convert_units(100, "DEG_C", "DEG_C")
         assert result == 100
 
-    def test_invalid_quantity_type(self):
-        """Test that invalid quantity type raises ValueError."""
-        with pytest.raises(ValueError, match="Conversion not supported"):
-            convert_value(100, "invalid_type", "SI", "IP")
+        result = convert_units(50, "M", "M")
+        assert result == 50
 
-    def test_invalid_unit_systems(self):
-        """Test that invalid unit systems raise ValueError."""
-        with pytest.raises(ValueError, match="Invalid unit systems"):
-            convert_value(100, "temperature", "INVALID", "SI")
+    def test_delta_quantity_conversion(self):
+        """Test delta quantity conversion (temperature differences)."""
+        # Temperature difference should not include offset
+        result = convert_units(10, "DEG_C", "DEG_F", is_delta_quantity=True)
+        assert abs(result - 18.0) < 0.001  # 10°C difference = 18°F difference
 
-    def test_get_unit_string_si(self):
-        """Test getting unit strings for SI system."""
-        assert get_unit_string("temperature", "SI") == "DEG_C"
-        assert get_unit_string("area", "SI") == "M2"
-        assert get_unit_string("power", "SI") == "KiloW"
+    def test_invalid_unit_conversion(self):
+        """Test that invalid unit conversion raises appropriate error."""
+        with pytest.raises(ValueError):
+            convert_units(100, "INVALID_UNIT", "DEG_C")
 
-    def test_get_unit_string_ip(self):
-        """Test getting unit strings for IP system."""
-        assert get_unit_string("temperature", "IP") == "DEG_F"
-        assert get_unit_string("area", "IP") == "FT2"
-        assert get_unit_string("power", "IP") == "BTU_IT-PER-HR"
-
-    def test_get_unit_string_invalid_system(self):
-        """Test that invalid system raises ValueError."""
-        with pytest.raises(ValueError, match="Unknown unit system"):
-            get_unit_string("temperature", "INVALID")
-
-    def test_get_unit_string_invalid_quantity(self):
-        """Test that invalid quantity type raises ValueError."""
-        with pytest.raises(ValueError, match="Unknown quantity type"):
-            get_unit_string("invalid", "SI")
-
-
-class TestUnitConverter:
-    """Test cases for UnitConverter class."""
-
-    def test_init_default_system(self):
-        """Test initialization with default system."""
-        converter = UnitConverter()
-        assert converter.default_system == "SI"
-
-    def test_init_custom_system(self):
-        """Test initialization with custom system."""
-        converter = UnitConverter("IP")
-        assert converter.default_system == "IP"
-
-    def test_convert_building_data(self):
-        """Test converting building data between systems."""
-        converter = UnitConverter("SI")
-
-        data = {
-            "temperature": {"value": 20.0, "type": "temperature"},
-            "area": {"value": 100.0, "type": "area"},
-            "name": "Test Building",  # Non-convertible data
-        }
-
-        converted = converter.convert_building_data(data, "IP")
-
-        # Check temperature conversion (20°C = 68°F)
-        assert abs(converted["temperature"]["value"] - 68.0) < 0.1
-        assert converted["temperature"]["unit"] == "DEG_F"
-
-        # Check area conversion
-        assert converted["area"]["unit"] == "FT2"
-
-        # Check non-convertible data is preserved
-        assert converted["name"] == "Test Building"
+    def test_area_conversion(self):
+        """Test area conversion."""
+        result = convert_units(1, "M2", "FT2")
+        # 1 m² ≈ 10.764 ft²
+        assert abs(result - 10.764) < 0.1

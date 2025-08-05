@@ -1,6 +1,0 @@
-hvac_id,zone_id,cooling_capacity,heating_capacity,cooling_cop,heating_cop
-FCU1,Zone1,,,,
-FCU2,Zone2,,,,
-FCU3,Zone3,,,,
-HP1,,,,
-HP2,,,,
