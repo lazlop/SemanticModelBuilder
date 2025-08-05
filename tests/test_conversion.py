@@ -44,26 +44,19 @@ class TestUnitConversion:
         result = convert_units(50, "M", "M")
         assert result == 50
 
+    def test_delta_quantity_conversion(self):
+        """Test delta quantity conversion (temperature differences)."""
+        # Temperature difference should not include offset
+        result = convert_units(10, "DEG_C", "DEG_F", is_delta_quantity=True)
+        assert abs(result - 18.0) < 0.001  # 10°C difference = 18°F difference
+
     def test_invalid_unit_conversion(self):
         """Test that invalid unit conversion raises appropriate error."""
-        # This test may need to be adjusted based on actual error handling
-        try:
-            result = convert_units(100, "INVALID_UNIT", "DEG_C")
-            # If no error is raised, the function might return None or the original value
-            # Adjust assertion based on actual behavior
-        except Exception as e:
-            # Expected behavior for invalid units
-            assert True
+        with pytest.raises(ValueError):
+            convert_units(100, "INVALID_UNIT", "DEG_C")
 
     def test_area_conversion(self):
-        """Test area conversion if supported."""
-        # This test assumes area conversion is available
-        # Adjust based on actual implementation
-        try:
-            result = convert_units(1, "M2", "FT2")
-            # 1 m² ≈ 10.764 ft²
-            if result is not None:
-                assert abs(result - 10.764) < 0.1
-        except Exception:
-            # If area conversion is not implemented, skip this test
-            pytest.skip("Area conversion not implemented")
+        """Test area conversion."""
+        result = convert_units(1, "M2", "FT2")
+        # 1 m² ≈ 10.764 ft²
+        assert abs(result - 10.764) < 0.1
