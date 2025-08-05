@@ -362,7 +362,9 @@ class LoadModel:
         
         template_inlined = template.inline_dependencies()
         query = self._get_query(template_inlined.body)
+        print(query)
         df = query_to_df(query, self.g, prefixed=False)
+        print(df)
         objects = self._dataframe_to_objects_generalized(df, template_name)
         return objects
 

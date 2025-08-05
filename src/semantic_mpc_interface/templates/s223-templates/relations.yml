@@ -58,11 +58,12 @@ has-window:
     @prefix hpf: <urn:hpflex#> .
     p:name a s223:DomainSpace .
     p:target a s223:Window .
-  dependencies:
-    - template: air-bidirectional-connects-to
-      args: {"name": "name", "target": "target"}
+    p:name s223:connectedTo p:target .
+  # dependencies:
+  #   - template: air-bidirectional-connected-to
+  #     args: {"name": "name", "target": "target"}
 
-air-connects-to:
+air-connected-to:
   body: >
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
@@ -71,9 +72,9 @@ air-connects-to:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:name s223:connectsTo p:target .
+    p:name s223:connectedTo p:target .
 
-air-bidirectional-connects-to:
+air-bidirectional-connected-to:
   body: >
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
@@ -82,6 +83,6 @@ air-bidirectional-connects-to:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:target s223:connectsTo p:name .
-    p:name s223:connectsTo p:target .
+    p:target s223:connectedTo p:name .
+    p:name s223:connectedTo p:target .
   

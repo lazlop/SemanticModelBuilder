@@ -42,7 +42,7 @@ s.easy_config(zone_space_window_list=[(2,2),(1,2),(1,3)])
 # %%
 # Will just fill the columns programmatically for testing, csv should be filled out otherwise
 import sys
-sys.path.insert(0,'../examples')
+sys.path.insert(0,'examples')
 from example_prefill_usage import prefill_csv_survey
 
 # %%

@@ -49,6 +49,7 @@ hpfs:hvac-zone a s223:Class,
     sh:class s223:DomainSpace,
         s223:PhysicalSpace ;
     sh:property hpfs:hvac-zone_Domain-HVAC,
+        hpfs:hvac-zone_encloses,
         hpfs:hvac-zone_hasDomain,
         hpfs:hvac-zone_noAspects .
 
@@ -88,17 +89,17 @@ hpfs:window a s223:Class,
     sh:property hpfs:window_hasProperty,
         hpfs:window_noAspects .
 
-hpfs:air-bidirectional-connects-toAnnotation a sh:NodeShape ;
-    sh:rule hpfs:air-bidirectional-connects-toAnnotationRule ;
-    sh:targetSubjectsOf s223:connectsTo .
+hpfs:air-bidirectional-connected-toAnnotation a sh:NodeShape ;
+    sh:rule hpfs:air-bidirectional-connected-toAnnotationRule ;
+    sh:targetSubjectsOf s223:connectedTo .
 
 hpfs:air-bidirectional-cpAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-bidirectional-cpAnnotationRule ;
     sh:targetClass s223:BidirectionalConnectionPoint .
 
-hpfs:air-connects-toAnnotation a sh:NodeShape ;
-    sh:rule hpfs:air-connects-toAnnotationRule ;
-    sh:targetSubjectsOf s223:connectsTo .
+hpfs:air-connected-toAnnotation a sh:NodeShape ;
+    sh:rule hpfs:air-connected-toAnnotationRule ;
+    sh:targetSubjectsOf s223:connectedTo .
 
 hpfs:air-inlet-cpAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-inlet-cpAnnotationRule ;
@@ -160,14 +161,14 @@ hpfs:windowAnnotation a sh:NodeShape ;
     sh:rule hpfs:windowAnnotationRule ;
     sh:targetClass s223:Window .
 
-hpfs:air-bidirectional-connects-toAnnotationRule a sh:SPARQLRule ;
+hpfs:air-bidirectional-connected-toAnnotationRule a sh:SPARQLRule ;
     sh:construct """
                 CONSTRUCT {
-                    ?name <urn:hpflex/shapes#air-bidirectional-connects-to> ?target .
+                    ?name <urn:hpflex/shapes#air-bidirectional-connected-to> ?target .
                 }
                 WHERE {
-	?target <http://data.ashrae.org/standard223#connectsTo> ?name . 
-	?name <http://data.ashrae.org/standard223#connectsTo> ?target . 
+	?target <http://data.ashrae.org/standard223#connectedTo> ?name . 
+	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
 }""" .
 
 hpfs:air-bidirectional-cpAnnotationRule a sh:TripleRule ;
@@ -196,13 +197,13 @@ hpfs:air-bidirectional-cp_noAspects rdfs:label "air-bidirectional-cp_noAspects" 
     sh:minCount 0 ;
     sh:path s223:hasAspect .
 
-hpfs:air-connects-toAnnotationRule a sh:SPARQLRule ;
+hpfs:air-connected-toAnnotationRule a sh:SPARQLRule ;
     sh:construct """
                 CONSTRUCT {
-                    ?name <urn:hpflex/shapes#air-connects-to> ?target .
+                    ?name <urn:hpflex/shapes#air-connected-to> ?target .
                 }
                 WHERE {
-	?name <http://data.ashrae.org/standard223#connectsTo> ?target . 
+	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
 }""" .
 
 hpfs:air-inlet-cpAnnotationRule a sh:TripleRule ;
@@ -301,9 +302,9 @@ hpfs:has-spaceAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-space> ?target .
                 }
                 WHERE {
+	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#PhysicalSpace> . 
 	?name <http://data.ashrae.org/standard223#contains> ?target . 
-	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 }""" .
 
 hpfs:has-windowAnnotationRule a sh:SPARQLRule ;
@@ -312,10 +313,10 @@ hpfs:has-windowAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-window> ?target .
                 }
                 WHERE {
-	?target <http://data.ashrae.org/standard223#connectsTo> ?name . 
+	?target <http://data.ashrae.org/standard223#connectedTo> ?name . 
 	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Window> . 
-	?name <http://data.ashrae.org/standard223#connectsTo> ?target . 
+	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
 }""" .
 
 hpfs:hp-rtuAnnotationRule a sh:TripleRule ;
@@ -349,6 +350,11 @@ hpfs:hvac-zone_Domain-HVAC a sh:PropertyShape ;
 hpfs:hvac-zone_Domain-HVAC-1 a sh:NodeShape ;
     rdfs:label "hvac-zone_Domain-HVAC-1" ;
     sh:hasValue s223:Domain-HVAC .
+
+hpfs:hvac-zone_encloses rdfs:label "hvac-zone_encloses" ;
+    sh:maxCount 1 ;
+    sh:minCount 1 ;
+    sh:path s223:encloses .
 
 hpfs:hvac-zone_hasDomain rdfs:label "hvac-zone_hasDomain" ;
     sh:maxCount 1 ;

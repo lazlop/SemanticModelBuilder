@@ -3,12 +3,14 @@
 
 # connection points are complicated, as we don't know cardinality at the template level
 # zone can connect to many windows, can't easily add connection points. 
+# Maybe bending the rules - but this is really what we mean by hvac-zone 
 hvac-zone:
   body: >
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     @prefix s223: <http://data.ashrae.org/standard223#> .
     p:name a s223:DomainSpace, s223:PhysicalSpace ;
+      s223:encloses p:name ;
       s223:hasDomain s223:Domain-HVAC  .
   optional: [space-name,window-name,tstat-name,hvac-name]
   dependencies:
@@ -24,7 +26,7 @@ hvac-zone:
       args: {'name': 'tstat-name', 'target':"name"}
     - template: tstat
       args: {'name': 'tstat-name'}
-    - template: air-connects-to
+    - template: air-connected-to
       args: {'name':'hvac-name', 'target':'name'}
     - template: hp-rtu
       args: {'name': 'hvac-name'}

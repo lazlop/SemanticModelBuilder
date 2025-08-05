@@ -20,7 +20,7 @@ hvac-zone:
       args: {'name': 'tstat-name', 'target':"name"}
     - template: tstat
       args: {'name': 'tstat-name'}
-    - template: air-connects-to
+    - template: air-connected-to
       args: {'name':'hvac-name', 'target':'name'}
     - template: hp-rtu
       args: {'name': 'hvac-name'}
