@@ -4,6 +4,7 @@
 # connection points are complicated, as we don't know cardinality at the template level
 # zone can connect to many windows, can't easily add connection points. 
 # Maybe bending the rules - but this is really what we mean by hvac-zone 
+
 hvac-zone:
   body: >
     @prefix p: <urn:___param___#> .
@@ -12,24 +13,24 @@ hvac-zone:
     p:name a s223:DomainSpace, s223:PhysicalSpace ;
       s223:encloses p:name ;
       s223:hasDomain s223:Domain-HVAC  .
-  optional: [space-name,window-name,tstat-name,hvac-name]
+  optional: [space_name,window_name,tstat_name,hvac_name]
   dependencies:
     - template: has-space
-      args: {"name":"name", "target":"space-name"}
+      args: {"name":"name", "target":"space_name"}
     - template: space
-      args: {"name":"space-name"}
+      args: {"name":"space_name"}
     - template: has-window
-      args: {'name': 'name', 'target':'window-name'}
+      args: {'name': 'name', 'target':'window_name'}
     - template: window
-      args: {'name': 'window-name'}
+      args: {'name': 'window_name'}
     - template: has-location
-      args: {'name': 'tstat-name', 'target':"name"}
+      args: {'name': 'tstat_name', 'target':"name"}
     - template: tstat
-      args: {'name': 'tstat-name'}
+      args: {'name': 'tstat_name'}
     - template: air-connected-to
-      args: {'name':'hvac-name', 'target':'name'}
+      args: {'name':'hvac_name', 'target':'name'}
     - template: hp-rtu
-      args: {'name': 'hvac-name'}
+      args: {'name': 'hvac_name'}
 
 space:
   body: >
@@ -37,10 +38,10 @@ space:
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     @prefix s223: <http://data.ashrae.org/standard223#> .
     p:name a s223:PhysicalSpace ;
-        s223:hasProperty p:area-name .
+        s223:hasProperty p:area_name .
   dependencies:
     - template: area
-      args: {"name": "area-name"}
+      args: {"name": "area_name"}
 
 window:
   body: >
@@ -49,36 +50,36 @@ window:
     @prefix s223: <http://data.ashrae.org/standard223#> .
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     p:name a s223:Window ;
-        s223:hasProperty p:area-name ;
-        s223:hasProperty p:azimuth-name ;
-        s223:hasProperty p:tilt-name .
+        s223:hasProperty p:area_name ;
+        s223:hasProperty p:azimuth_name ;
+        s223:hasProperty p:tilt_name .
   dependencies:
     - template: area
-      args: {"name": "area-name"}
+      args: {"name": "area_name"}
     - template: azimuth
-      args: {"name": "azimuth-name"}
+      args: {"name": "azimuth_name"}
     - template: tilt
-      args: {"name": "tilt-name"}
+      args: {"name": "tilt_name"}
 
 hp-rtu:
   body: >
     @prefix p: <urn:___param___#> .
     @prefix s223: <http://data.ashrae.org/standard223#> .
     p:name a s223:AirToAirHeatPump ;
-      s223:hasProperty p:cooling_capacity-name ;
-      s223:hasProperty p:heating_capacity-name ;
-      s223:hasProperty p:heating_COP-name ;
-      s223:hasProperty p:cooling_COP-name ;
+      s223:hasProperty p:cooling_capacity_name ;
+      s223:hasProperty p:heating_capacity_name ;
+      s223:hasProperty p:heating_COP_name ;
+      s223:hasProperty p:cooling_COP_name ;
       .
   dependencies:
     - template: cooling-capacity
-      args: {"name": "cooling_capacity-name"}
+      args: {"name": "cooling_capacity_name"}
     - template: heating-capacity
-      args: {"name": "heating_capacity-name"}
+      args: {"name": "heating_capacity_name"}
     - template: cooling-COP
-      args: {"name": "cooling_COP-name"}
+      args: {"name": "cooling_COP_name"}
     - template: heating-COP
-      args: {"name": "heating_COP-name"}
+      args: {"name": "heating_COP_name"}
 
 tstat:
   body: >
@@ -89,23 +90,23 @@ tstat:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name a s223:Thermostat ;
-      s223:hasProperty p:stage_count-name ;
-      s223:hasProperty p:setpoint_deadband-name ;
-      s223:hasProperty p:tolerance-name ;
-      s223:hasProperty p:active-name ;
-      s223:hasProperty p:resolution-name ;
+      s223:hasProperty p:stage_count_name ;
+      s223:hasProperty p:setpoint_deadband_name ;
+      s223:hasProperty p:tolerance_name ;
+      s223:hasProperty p:active_name ;
+      s223:hasProperty p:resolution_name ;
       .
   dependencies:
     - template: tstat-stage_count
-      args: {"name": "stage_count-name"}
+      args: {"name": "stage_count_name"}
     - template: tstat-deadband
-      args: {"name": "setpoint_deadband-name"}
+      args: {"name": "setpoint_deadband_name"}
     - template: tstat-tolerance
-      args: {"name": "tolerance-name"}
+      args: {"name": "tolerance_name"}
     - template: tstat-active
-      args: {"name": "active-name"}
+      args: {"name": "active_name"}
     - template: tstat-resolution
-      args: {"name": "resolution-name"}
+      args: {"name": "resolution_name"}
 
 # one possible way of doing different types of thermostats without having to redo a lot of things.
 tstat-heating-cooling-occupancy:
@@ -151,20 +152,20 @@ site:
     @prefix hpf: <urn:hpflex#> .
     @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
     p:name a s223:PhysicalSpace ;
-      s223:hasProperty p:timezone-name ;
-      s223:hasProperty p:latitude-name ;
-      s223:hasProperty p:longitude-name ;
-      s223:hasProperty p:noaastation-name ;
+      s223:hasProperty p:timezone_name ;
+      s223:hasProperty p:latitude_name ;
+      s223:hasProperty p:longitude_name ;
+      s223:hasProperty p:noaastation_name ;
       a hpf:Site .
   dependencies:
     - template: timezone
-      args: {"name": "timezone-name"}
+      args: {"name": "timezone_name"}
     - template: latitude
-      args: {"name": "latitude-name"}
+      args: {"name": "latitude_name"}
     - template: longitude
-      args: {"name": "longitude-name"}
+      args: {"name": "longitude_name"}
     - template: noaastation
-      args: {"name": "noaastation-name"}
+      args: {"name": "noaastation_name"}
 
 air-bidirectional-cp:
   body: >

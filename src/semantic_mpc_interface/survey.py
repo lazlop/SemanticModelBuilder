@@ -129,7 +129,7 @@ class Survey:
                     print('removing dependency: ', dependency.template.name)
                     template.remove_dependency(dependency.template)
             self.template_dict[file_name] = template.inline_dependencies()
-        self.param_mapping, self.variatic_params = self._simplify_parameters(self.template_dict)
+        self.param_mapping, self.variable_params = self._simplify_parameters(self.template_dict)
         for file_name, template in self.template_dict.items():
             file = self._create_csv(file_name, template)
             self.template_csvs[file_name] = file
@@ -137,31 +137,32 @@ class Survey:
     def _simplify_parameters(self, template_dict):
         # describe changes to template parameters made before generating the csv
         param_mapping = {}
-        variatic_params = {}
+        variable_params = {}
         # Temporary bug fix
         remove_optionals = {}
         for name, template in template_dict.items():
             template = template
             params = template.all_parameters
             # Getting the stuff before -name-value (could change to 1 if I just want to get rid of -value)
-            values = {param.rsplit('-',2)[0]:param for param in params if '-value' in param}
+            values = {param.rsplit('_name-value',2)[0]:param for param in params if '-value' in param}
             print('values:', values.values())
             # have to change since value just appended to name now
-            value_names = {param: f"<name>-{param}" for param in params if (param.endswith('-name')) and (param + '-value' in values.values())}
+            # TODO: Change this as part of bigger variable in name change
+            value_names = {param: f"<name>-{param}" for param in params if (param.endswith('_name')) and (param + '-value' in values.values())}
             print('values names:', value_names)
             # entities = [param for param in params if ('-name' in param) and (param not in value_names)]
-            # variatic_params[template.name] = entities + value_names
-            variatic_params[template.name] = value_names
+            # variable_params[template.name] = entities + value_names
+            variable_params[template.name] = value_names
             param_mapping[template.name] = values
-        return param_mapping, variatic_params
+        return param_mapping, variable_params
     # TODO: buildingmotif feature improvement - mapper for columns to namespaces/literals
     def read_csv(self, serialize = True):
         for filename, template in self.template_dict.items():
-            def fill_variatic_params(filename, variatic_params):
+            def fill_variable_params(filename, variable_params):
                 df = pd.read_csv(filename)
                 
-                # For each variatic parameter key, create a new column
-                for param_key, param_template in variatic_params.items():
+                # For each variable parameter key, create a new column
+                for param_key, param_template in variable_params.items():
                     # The param_key becomes the column name
                     column_name = param_key
                     
@@ -202,7 +203,7 @@ class Survey:
                     df[column_name] = new_column_values
                 
                 print(f"Expanded CSV shape: {df.shape}")
-                print(f"New columns added: {list(variatic_params.keys())}")
+                print(f"New columns added: {list(variable_params.keys())}")
                 
                 csv_string = df.to_csv(index=False)
                 return csv_string
@@ -232,7 +233,7 @@ class Survey:
                     graph.remove(triple)
 
             file = str(self.base_dir / filename) + ".csv"
-            csv_string = fill_variatic_params(file, self.variatic_params[template.name])
+            csv_string = fill_variable_params(file, self.variable_params[template.name])
             csv_in = CSVIngress(data = csv_string)
             ingress = TemplateIngress(template, mapper, csv_in)
             #NOTE: Ingress puts everything into the given namespace, will have to change unit namespaces manually 
@@ -249,7 +250,7 @@ class Survey:
         file = str(self.base_dir / file_name) + ".csv"
         template.generate_csv(file)
         mapping = self.param_mapping[template.name]
-        remove_params = self.variatic_params[template.name]
+        remove_params = self.variable_params[template.name]
         self._edit_cols(file, mapping, remove_params)
         return file 
 
@@ -375,7 +376,7 @@ class HPFlexSurvey(Survey):
         config = {
             "site_id": self.site_id,
             "hvac_type": self.hvac_type,
-            "variatic_params": self.variatic_params,
+            "variable_params": self.variable_params,
             "param_mapping": self.param_mapping,
             "hvacs_feed_hvacs": hvacs_feed_hvacs,
             "hvacs_feed_zones": hvacs_feed_zones,
@@ -433,16 +434,16 @@ class HPFlexSurvey(Survey):
             # Start with empty row
             row = {col: '' for col in columns}
 
-            if 'tstat-name' in columns:
-                row['tstat-name'] = f"tstat_{zone_name}"
+            if 'tstat_name' in columns:
+                row['tstat_name'] = f"tstat_{zone_name}"
 
             hvacs = config['hvacs_feed_zones']
             for hvac_name, hvac_zone_names in hvacs.items():
                 if not isinstance(hvac_zone_names, list):
                     raise TypeError(f"Expected hvac_zone_names {hvac_zone_names} to be a list, instead {type(hvac_zone_names)}")
                 if zone_name in hvac_zone_names:
-                    if 'hvac-name' in columns:
-                        row['hvac-name'] = hvac_name
+                    if 'hvac_name' in columns:
+                        row['hvac_name'] = hvac_name
             if 'name' in columns:
                 row['name'] = zone_name
 
@@ -450,24 +451,24 @@ class HPFlexSurvey(Survey):
                 if i>0:
                     extra_row = {col: '' for col in columns}
                     extra_row['name'] = zone_name
-                    if 'space-name' in columns:
-                        extra_row['space-name'] = space_name
+                    if 'space_name' in columns:
+                        extra_row['space_name'] = space_name
                     extra_rows.append(extra_row)
                 else:
-                    if 'space-name' in columns:
-                        row['space-name'] = space_name
+                    if 'space_name' in columns:
+                        row['space_name'] = space_name
 
             windows = config['zones_contain_windows'][zone_name]
             for window_name in windows:
                 if i>0:
                     extra_row = {col: '' for col in columns}
                     extra_row['name'] = zone_name
-                    if 'window-name' in columns:
-                        extra_row['window-name'] = window_name
+                    if 'window_name' in columns:
+                        extra_row['window_name'] = window_name
                     extra_rows.append(extra_row)
                 else:
-                    if 'window-name' in columns:
-                        row['window-name'] = window_name
+                    if 'window_name' in columns:
+                        row['window_name'] = window_name
 
             new_rows.append(row)
         new_rows = new_rows + extra_rows
@@ -491,8 +492,8 @@ class HPFlexSurvey(Survey):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = space_name
-                if 'area-name-unit' in columns:
-                    row['area-name-unit'] = self.default_area_unit
+                if 'area_name-unit' in columns:
+                    row['area_name-unit'] = self.default_area_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -515,12 +516,12 @@ class HPFlexSurvey(Survey):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = window_name
-                if 'area-name-unit' in columns:
-                    row['area-name-unit'] = self.default_area_unit
-                if 'tilt-name-unit' in columns:
-                    row['tilt-name-unit'] = self.default_angle_unit
-                if 'azimuth-name-unit' in columns:
-                    row['azimuth-name-unit'] = self.default_angle_unit
+                if 'area_name-unit' in columns:
+                    row['area_name-unit'] = self.default_area_unit
+                if 'tilt_name-unit' in columns:
+                    row['tilt_name-unit'] = self.default_angle_unit
+                if 'azimuth_name-unit' in columns:
+                    row['azimuth_name-unit'] = self.default_angle_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -544,14 +545,14 @@ class HPFlexSurvey(Survey):
             row['name'] = hvac_name
             
             # Set default units for the newly parameterized units
-            if 'cooling_COP-name-unit' in columns:
-                row['cooling_COP-name-unit'] = self.default_cop_unit
-            if 'heating_COP-name-unit' in columns:
-                row['heating_COP-name-unit'] = self.default_cop_unit
-            if 'cooling_capacity-name-unit' in columns:
-                row['cooling_capacity-name-unit'] = self.default_power_unit
-            if 'heating_capacity-name-unit' in columns:
-                row['heating_capacity-name-unit'] = self.default_power_unit
+            if 'cooling_COP_name-unit' in columns:
+                row['cooling_COP_name-unit'] = self.default_cop_unit
+            if 'heating_COP_name-unit' in columns:
+                row['heating_COP_name-unit'] = self.default_cop_unit
+            if 'cooling_capacity_name-unit' in columns:
+                row['cooling_capacity_name-unit'] = self.default_power_unit
+            if 'heating_capacity_name-unit' in columns:
+                row['heating_capacity_name-unit'] = self.default_power_unit
                 
             new_rows.append(row)
         
@@ -576,12 +577,12 @@ class HPFlexSurvey(Survey):
                 # Only set the values we want to prefill
                 row['name'] = f"tstat_{zone_name}"
                 # Set temperature unit columns if they exist
-                if 'setpoint_deadband-name-unit' in columns:
-                    row['setpoint_deadband-name-unit'] = self.default_temperature_unit
-                if 'tolerance-name-unit' in columns:
-                    row['tolerance-name-unit'] = self.default_temperature_unit
-                if 'resolution-name-unit' in columns:
-                    row['resolution-name-unit'] = self.default_temperature_unit
+                if 'setpoint_deadband_name-unit' in columns:
+                    row['setpoint_deadband_name-unit'] = self.default_temperature_unit
+                if 'tolerance_name-unit' in columns:
+                    row['tolerance_name-unit'] = self.default_temperature_unit
+                if 'resolution_name-unit' in columns:
+                    row['resolution_name-unit'] = self.default_temperature_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data

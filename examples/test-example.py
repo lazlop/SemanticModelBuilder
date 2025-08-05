@@ -6,7 +6,8 @@ from semantic_mpc_interface import (
     get_thermostat_data,
     HPFlexSurvey,
     convert_units,
-    SHACLHandler
+    SHACLHandler,
+    # add_connection
 )
 from buildingmotif.namespaces import BRICK, RDF
 from buildingmotif import BuildingMOTIF
@@ -55,6 +56,8 @@ prefill_csv_survey('s223_test_site/test_build')
 # Reading csv
 s.read_csv()
 
+# add_connection(s.graph)
+
 # %% [markdown]
 # # Testing SHACL Generation and Validation
 
@@ -63,25 +66,25 @@ og = clone.clone_graph(s.graph)
 
 # %%
 # Create handler
-# handler = SHACLHandler(ontology=ontology)
+handler = SHACLHandler(ontology=ontology)
 
-# # Generate shapes
-# handler.generate_shapes()
+# Generate shapes
+handler.generate_shapes()
 
-# # Save shapes
-# handler.save_shapes('shapes.ttl')
+# Save shapes
+handler.save_shapes('shapes.ttl')
 
-# # Validate a model
-# conforms, results_graph, results_text = handler.validate_model(s.graph)
+# Validate a model
+conforms, results_graph, results_text = handler.validate_model(s.graph)
 
-# s.graph.serialize('test-s223-model-reasoned.ttl', format = 'ttl')
-# if not conforms:
-#     print("Validation failed:")
-#     print(results_text)
+s.graph.serialize('test-s223-model-reasoned.ttl', format = 'ttl')
+if not conforms:
+    print("Validation failed:")
+    print(results_text)
 
-# # %%
-# # lots of new inferred information
-# (s.graph-og).print()
+# %%
+# lots of new inferred information
+(s.graph-og).print()
 
 # %% [markdown]
 # # Testing get Metadata

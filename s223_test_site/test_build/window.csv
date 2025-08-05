@@ -1,8 +1,8 @@
-name,area,tilt,azimuth-name-unit,area-name-unit,azimuth,tilt-name-unit
-window_1_1,1.0,1.0,Degree,FT2,1.0,Degree
-window_1_2,2.0,2.0,Degree,FT2,2.0,Degree
-window_2_1,3.0,3.0,Degree,FT2,3.0,Degree
-window_2_2,4.0,4.0,Degree,FT2,4.0,Degree
-window_3_1,5.0,5.0,Degree,FT2,5.0,Degree
-window_3_2,6.0,6.0,Degree,FT2,6.0,Degree
-window_3_3,7.0,7.0,Degree,FT2,7.0,Degree
+name,azimuth,area_name-unit,tilt_name-unit,azimuth_name-unit,area,tilt
+window_1_1,1.0,FT2,Degree,Degree,1.0,1.0
+window_1_2,2.0,FT2,Degree,Degree,2.0,2.0
+window_2_1,3.0,FT2,Degree,Degree,3.0,3.0
+window_2_2,4.0,FT2,Degree,Degree,4.0,4.0
+window_3_1,5.0,FT2,Degree,Degree,5.0,5.0
+window_3_2,6.0,FT2,Degree,Degree,6.0,6.0
+window_3_3,7.0,FT2,Degree,Degree,7.0,7.0

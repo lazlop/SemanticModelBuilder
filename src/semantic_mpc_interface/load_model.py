@@ -161,7 +161,8 @@ class LoadModel:
                 value_data = df[value_col].iloc[0]
                 # Only create attribute if the _name column contains actual numeric/meaningful data
                 # Skip if it contains URI strings
-                if not str(value_data).startswith('urn:') and not '-name' in str(value_data):
+                # not sure if second part of if statement is important
+                if not str(value_data).startswith('urn:') and not '_name' in str(value_data):
                     try:
                         # Try to convert to number to verify it's meaningful data
                         float(value_data)
@@ -310,7 +311,7 @@ class LoadModel:
         
         return list(containers.values())
 
-    def _get_objects_generalized(self, template_name: str = 'hvac-zone'):
+    def _get_objects(self, template_name: str = 'hvac-zone'):
         """
         Generalized function to get objects from any template.
         """
@@ -320,9 +321,9 @@ class LoadModel:
         
         template_inlined = template.inline_dependencies()
         query = self._get_query(template_inlined.body)
-        print(query)
+        
         df = query_to_df(query, self.g, prefixed=False)
-        print(df)
+        
         objects = self._dataframe_to_objects_generalized(df, template_name)
         return objects
 
@@ -341,7 +342,7 @@ class LoadModel:
         
         for result_key, template_name in template_dict.items():
             try:
-                objects = self._get_objects_generalized(template_name)
+                objects = self._get_objects(template_name)
                 results[result_key] = objects
             except Exception as e:
                 print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
@@ -349,7 +350,7 @@ class LoadModel:
         
         return results
 
-    def get_all_building_objects(self, convert_to_si_units = True):
+    def get_all_building_objects(self):
         """
         Get all building objects including site and hvac zones.
         Returns a dictionary with object types as keys.

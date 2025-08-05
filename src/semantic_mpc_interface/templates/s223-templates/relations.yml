@@ -86,3 +86,28 @@ air-bidirectional-connected-to:
     p:target s223:connectedTo p:name .
     p:name s223:connectedTo p:target .
   
+# should consider implementation as optional in air-connected-to
+# TODO: Add ability to remove optional dependencies before generating SHACL or filling template 
+# NOTE: Deep nesting of dependencies makes naming and tracking parameters confusing. This is why its important to keep relationships simple
+# NOTE: I'd prefer to handle all metadata creation in one process, but will need to improve arg mapping of inputs to outputs. 
+air-connected-to-complete:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name s223:connectedTo p:target .
+    p:name s223:cnx p:from-cp .
+    p:from-cp s223:cnx p:connection .
+    p:connection s223:cnx p:to-cp .
+    p:to-cp s223:cnx p:target .
+  dependencies:
+    - template: connection
+      args: {'name': 'connection'}
+    - template: air-outlet-cp
+      args: {'name': "from-cp"}
+    - template: air-inlet-cp
+      args: {'name': "to-cp"}

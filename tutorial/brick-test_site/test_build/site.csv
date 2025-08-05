@@ -1,2 +1,2 @@
-name,timezone,latitude,longitude,noaastation
+name,latitude,longitude,timezone,noaastation
 brick-test_site,1.0,1.0,1.0,1.0
