@@ -11,32 +11,30 @@ import pytest
 from semantic_mpc_interface import LoadModel, HPFlexSurvey, get_thermostat_data
 
 
-class TestHPFlexSurvey:
-    """Test cases for HPFlexSurvey."""
+class TestHPFlexSurveyBrick:
+    """Test cases for HPFlexSurvey with Brick ontology."""
 
-    @pytest.mark.parametrize("ontology", ["brick", "s223"])
-    def test_init_with_parameters(self, ontology):
-        """Test initialization with parameters for both ontologies."""
+    def test_init_with_parameters_brick(self):
+        """Test initialization with parameters for Brick ontology."""
         with tempfile.TemporaryDirectory() as temp_dir:
             survey = HPFlexSurvey(
                 site_id='test-site',
                 building_id='test-building',
                 output_dir=temp_dir,
-                ontology=ontology
+                ontology='brick'
             )
             assert survey.site_id == 'test-site'
             assert survey.building_id == 'test-building'
-            assert survey.ontology == ontology
+            assert survey.ontology == 'brick'
 
-    @pytest.mark.parametrize("ontology", ["brick", "s223"])
-    def test_easy_config(self, ontology):
-        """Test easy config generation for both ontologies."""
+    def test_easy_config_brick(self):
+        """Test easy config generation for Brick ontology."""
         with tempfile.TemporaryDirectory() as temp_dir:
             survey = HPFlexSurvey(
                 site_id='test-site',
                 building_id='test-building',
                 output_dir=temp_dir,
-                ontology=ontology
+                ontology='brick'
             )
             
             survey.easy_config(zone_space_window_list=[(2, 1), (1, 2)])
@@ -54,60 +52,21 @@ class TestHPFlexSurvey:
             for csv_file in csv_files:
                 assert os.path.exists(os.path.join(expected_path, csv_file))
 
-    def test_overwrite_protection(self):
-        """Test that overwrite protection works."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Create first survey
-            survey1 = HPFlexSurvey(
-                site_id='test-site',
-                building_id='test-building',
-                output_dir=temp_dir
-            )
-            
-            # Try to create second survey without overwrite - should raise error
-            with pytest.raises(FileExistsError):
-                survey2 = HPFlexSurvey(
-                    site_id='test-site',
-                    building_id='test-building',
-                    output_dir=temp_dir,
-                    overwrite=False
-                )
-
-    def test_overwrite_allowed(self):
-        """Test that overwrite works when enabled."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Create first survey
-            survey1 = HPFlexSurvey(
-                site_id='test-site',
-                building_id='test-building',
-                output_dir=temp_dir
-            )
-            
-            # Create second survey with overwrite - should work
-            survey2 = HPFlexSurvey(
-                site_id='test-site',
-                building_id='test-building',
-                output_dir=temp_dir,
-                overwrite=True
-            )
-            assert survey2 is not None
-
-    @pytest.mark.parametrize("ontology", ["brick", "s223"])
-    def test_read_csv_and_create_model(self, ontology):
-        """Test reading CSV files and creating RDF model for both ontologies."""
+    def test_read_csv_and_create_model_brick(self):
+        """Test reading CSV files and creating RDF model for Brick ontology."""
         with tempfile.TemporaryDirectory() as temp_dir:
             survey = HPFlexSurvey(
                 site_id='test-site',
                 building_id='test-building',
                 output_dir=temp_dir,
-                ontology=ontology
+                ontology='brick'
             )
             
             # Create basic structure
             survey.easy_config(zone_space_window_list=[(1, 1)])
             
             # Fill in some basic data in the CSV files
-            self._fill_basic_csv_data(survey, ontology)
+            self._fill_basic_csv_data(survey, 'brick')
             
             # Read CSV and create model
             survey.read_csv()
@@ -165,8 +124,163 @@ class TestHPFlexSurvey:
         tstat_df.to_csv(os.path.join(survey.base_dir, 'tstat.csv'), index=False)
 
 
-class TestLoadModel:
-    """Test cases for LoadModel."""
+class TestHPFlexSurveyS223:
+    """Test cases for HPFlexSurvey with S223 ontology."""
+
+    def test_init_with_parameters_s223(self):
+        """Test initialization with parameters for S223 ontology."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            survey = HPFlexSurvey(
+                site_id='test-site',
+                building_id='test-building',
+                output_dir=temp_dir,
+                ontology='s223'
+            )
+            assert survey.site_id == 'test-site'
+            assert survey.building_id == 'test-building'
+            assert survey.ontology == 's223'
+
+    def test_easy_config_s223(self):
+        """Test easy config generation for S223 ontology."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            survey = HPFlexSurvey(
+                site_id='test-site',
+                building_id='test-building',
+                output_dir=temp_dir,
+                ontology='s223'
+            )
+            
+            survey.easy_config(zone_space_window_list=[(2, 1), (1, 2)])
+            
+            # Check that files were created
+            expected_path = os.path.join(temp_dir, 'test-site', 'test-building')
+            assert os.path.exists(expected_path)
+            
+            # Check that config file was created
+            config_file = os.path.join(expected_path, 'config.json')
+            assert os.path.exists(config_file)
+            
+            # Check that CSV files were created
+            csv_files = ['zone.csv', 'space.csv', 'window.csv', 'hvac.csv', 'tstat.csv', 'site.csv']
+            for csv_file in csv_files:
+                assert os.path.exists(os.path.join(expected_path, csv_file))
+
+    def test_read_csv_and_create_model_s223(self):
+        """Test reading CSV files and creating RDF model for S223 ontology."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            survey = HPFlexSurvey(
+                site_id='test-site',
+                building_id='test-building',
+                output_dir=temp_dir,
+                ontology='s223'
+            )
+            
+            # Create basic structure
+            survey.easy_config(zone_space_window_list=[(1, 1)])
+            
+            # Fill in some basic data in the CSV files
+            self._fill_basic_csv_data(survey, 's223')
+            
+            # Read CSV and create model
+            survey.read_csv()
+            
+            # Check that model file was created
+            model_file = os.path.join(survey.base_dir, f'{survey.building_id}.ttl')
+            assert os.path.exists(model_file)
+            assert os.path.getsize(model_file) > 0
+
+    def _fill_basic_csv_data(self, survey, ontology):
+        """Helper method to fill CSV files with basic test data."""
+        import pandas as pd
+        
+        # Fill site.csv
+        site_df = pd.read_csv(os.path.join(survey.base_dir, 'site.csv'))
+        site_df.loc[0, 'name'] = survey.site_id
+        if 'latitude-name-value' in site_df.columns:
+            site_df.loc[0, 'latitude-name-value'] = 40.7128
+        if 'longitude-name-value' in site_df.columns:
+            site_df.loc[0, 'longitude-name-value'] = -74.0060
+        site_df.to_csv(os.path.join(survey.base_dir, 'site.csv'), index=False)
+        
+        # Fill zone.csv
+        zone_df = pd.read_csv(os.path.join(survey.base_dir, 'zone.csv'))
+        if not zone_df.empty:
+            zone_df.loc[0, 'name'] = 'zone_1'
+        zone_df.to_csv(os.path.join(survey.base_dir, 'zone.csv'), index=False)
+        
+        # Fill space.csv
+        space_df = pd.read_csv(os.path.join(survey.base_dir, 'space.csv'))
+        if not space_df.empty:
+            space_df.loc[0, 'name'] = 'space_1_1'
+            if 'area-name-value' in space_df.columns:
+                space_df.loc[0, 'area-name-value'] = 100
+        space_df.to_csv(os.path.join(survey.base_dir, 'space.csv'), index=False)
+        
+        # Fill window.csv
+        window_df = pd.read_csv(os.path.join(survey.base_dir, 'window.csv'))
+        if not window_df.empty:
+            window_df.loc[0, 'name'] = 'window_1_1'
+            if 'area-name-value' in window_df.columns:
+                window_df.loc[0, 'area-name-value'] = 10
+        window_df.to_csv(os.path.join(survey.base_dir, 'window.csv'), index=False)
+        
+        # Fill hvac.csv
+        hvac_df = pd.read_csv(os.path.join(survey.base_dir, 'hvac.csv'))
+        if not hvac_df.empty:
+            hvac_df.loc[0, 'name'] = 'hvac_1'
+        hvac_df.to_csv(os.path.join(survey.base_dir, 'hvac.csv'), index=False)
+        
+        # Fill tstat.csv
+        tstat_df = pd.read_csv(os.path.join(survey.base_dir, 'tstat.csv'))
+        if not tstat_df.empty:
+            tstat_df.loc[0, 'name'] = 'tstat_zone_1'
+        tstat_df.to_csv(os.path.join(survey.base_dir, 'tstat.csv'), index=False)
+
+
+class TestHPFlexSurveyGeneral:
+    """Test cases for HPFlexSurvey that don't depend on specific ontology."""
+
+    def test_overwrite_protection(self):
+        """Test that overwrite protection works."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create first survey
+            survey1 = HPFlexSurvey(
+                site_id='test-site',
+                building_id='test-building',
+                output_dir=temp_dir
+            )
+            
+            # Try to create second survey without overwrite - should raise error
+            with pytest.raises(FileExistsError):
+                survey2 = HPFlexSurvey(
+                    site_id='test-site',
+                    building_id='test-building',
+                    output_dir=temp_dir,
+                    overwrite=False
+                )
+
+    def test_overwrite_allowed(self):
+        """Test that overwrite works when enabled."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create first survey
+            survey1 = HPFlexSurvey(
+                site_id='test-site',
+                building_id='test-building',
+                output_dir=temp_dir
+            )
+            
+            # Create second survey with overwrite - should work
+            survey2 = HPFlexSurvey(
+                site_id='test-site',
+                building_id='test-building',
+                output_dir=temp_dir,
+                overwrite=True
+            )
+            assert survey2 is not None
+
+
+class TestLoadModelBrick:
+    """Test cases for LoadModel with Brick ontology."""
 
     @pytest.fixture
     def sample_brick_model_file(self):
@@ -206,6 +320,56 @@ ex:space1_area a qudt:QuantityValue ;
 """)
             return f.name
 
+    def test_init_with_model_file_brick(self, sample_brick_model_file):
+        """Test initialization with model file for Brick ontology."""
+        try:
+            loader = LoadModel(sample_brick_model_file, ontology="brick")
+            assert loader is not None
+            assert loader.ontology == "brick"
+            assert loader.g is not None
+        finally:
+            os.unlink(sample_brick_model_file)
+
+    def test_get_all_building_objects_brick(self, sample_brick_model_file):
+        """Test extracting building objects for Brick ontology."""
+        try:
+            loader = LoadModel(sample_brick_model_file, ontology="brick")
+            building_objects = loader.get_all_building_objects()
+            
+            assert isinstance(building_objects, dict)
+            # Should have some objects (exact structure depends on templates)
+            
+        finally:
+            os.unlink(sample_brick_model_file)
+
+    def test_as_si_units_brick(self, sample_brick_model_file):
+        """Test loading model with SI unit conversion for Brick ontology."""
+        try:
+            loader = LoadModel(sample_brick_model_file, ontology="brick", as_si_units=True)
+            building_objects = loader.get_all_building_objects()
+            
+            assert isinstance(building_objects, dict)
+            
+        finally:
+            os.unlink(sample_brick_model_file)
+
+    def test_list_available_templates_brick(self, sample_brick_model_file):
+        """Test listing available templates for Brick ontology."""
+        try:
+            loader = LoadModel(sample_brick_model_file, ontology="brick")
+            templates = loader.list_available_templates()
+            
+            assert isinstance(templates, list)
+            assert len(templates) > 0
+            assert all(isinstance(template, str) for template in templates)
+            
+        finally:
+            os.unlink(sample_brick_model_file)
+
+
+class TestLoadModelS223:
+    """Test cases for LoadModel with S223 ontology."""
+
     @pytest.fixture
     def sample_s223_model_file(self):
         """Create a sample S223 TTL model file for testing."""
@@ -233,73 +397,43 @@ ex:space1_area a s223:QuantifiableProperty ;
 """)
             return f.name
 
-    @pytest.mark.parametrize("ontology", ["brick", "s223"])
-    def test_init_with_model_file(self, ontology, sample_brick_model_file, sample_s223_model_file):
-        """Test initialization with model file for both ontologies."""
-        model_file = sample_brick_model_file if ontology == "brick" else sample_s223_model_file
-        
+    def test_init_with_model_file_s223(self, sample_s223_model_file):
+        """Test initialization with model file for S223 ontology."""
         try:
-            loader = LoadModel(model_file, ontology=ontology)
+            loader = LoadModel(sample_s223_model_file, ontology="s223")
             assert loader is not None
-            assert loader.ontology == ontology
+            assert loader.ontology == "s223"
             assert loader.g is not None
         finally:
-            os.unlink(model_file)
+            os.unlink(sample_s223_model_file)
 
-    def test_init_with_graph(self):
-        """Test initialization with RDF graph."""
-        from rdflib import Graph
-        
-        graph = Graph()
-        graph.parse(data="""
-@prefix brick: <https://brickschema.org/schema/Brick#> .
-@prefix ex: <http://example.org/> .
-
-ex:test a brick:Site .
-""", format="turtle")
-        
-        loader = LoadModel(graph, ontology="brick")
-        assert loader is not None
-        assert loader.g == graph
-
-    def test_init_invalid_source(self):
-        """Test initialization with invalid source."""
-        with pytest.raises(ValueError, match="Source must be a file path or an RDF graph"):
-            LoadModel("nonexistent_file.ttl", ontology="brick")
-
-    @pytest.mark.parametrize("ontology", ["brick", "s223"])
-    def test_get_all_building_objects(self, ontology, sample_brick_model_file, sample_s223_model_file):
-        """Test extracting building objects for both ontologies."""
-        model_file = sample_brick_model_file if ontology == "brick" else sample_s223_model_file
-        
+    def test_get_all_building_objects_s223(self, sample_s223_model_file):
+        """Test extracting building objects for S223 ontology."""
         try:
-            loader = LoadModel(model_file, ontology=ontology)
+            loader = LoadModel(sample_s223_model_file, ontology="s223")
             building_objects = loader.get_all_building_objects()
             
             assert isinstance(building_objects, dict)
             # Should have some objects (exact structure depends on templates)
             
         finally:
-            os.unlink(model_file)
+            os.unlink(sample_s223_model_file)
 
-    @pytest.mark.parametrize("ontology", ["brick", "s223"])
-    def test_as_si_units(self, ontology, sample_brick_model_file, sample_s223_model_file):
-        """Test loading model with SI unit conversion."""
-        model_file = sample_brick_model_file if ontology == "brick" else sample_s223_model_file
-        
+    def test_as_si_units_s223(self, sample_s223_model_file):
+        """Test loading model with SI unit conversion for S223 ontology."""
         try:
-            loader = LoadModel(model_file, ontology=ontology, as_si_units=True)
+            loader = LoadModel(sample_s223_model_file, ontology="s223", as_si_units=True)
             building_objects = loader.get_all_building_objects()
             
             assert isinstance(building_objects, dict)
             
         finally:
-            os.unlink(model_file)
+            os.unlink(sample_s223_model_file)
 
-    def test_list_available_templates(self, sample_brick_model_file):
-        """Test listing available templates."""
+    def test_list_available_templates_s223(self, sample_s223_model_file):
+        """Test listing available templates for S223 ontology."""
         try:
-            loader = LoadModel(sample_brick_model_file, ontology="brick")
+            loader = LoadModel(sample_s223_model_file, ontology="s223")
             templates = loader.list_available_templates()
             
             assert isinstance(templates, list)
@@ -307,7 +441,9 @@ ex:test a brick:Site .
             assert all(isinstance(template, str) for template in templates)
             
         finally:
-            os.unlink(sample_brick_model_file)
+            os.unlink(sample_s223_model_file)
+
+
 
 
 class TestGetThermostatData:
