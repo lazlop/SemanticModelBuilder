@@ -59,15 +59,6 @@ air-connects-to:
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
     p:name brick:feeds p:target .
-  # dependencies:
-  #   - template: air-outlet-connectionpoint
-  #     args: {"name": "outlet_cp"}
-  #   - template: air-inlet-connectionpoint
-  #     args: {"name": "inlet_cp"}
-  #   - template: connection
-  #     args: {"name": "connection"}
-
-# Adding bidirectional connection to match S223
 air-bidirectional-connects-to:
   body: >
     @prefix p: <urn:___param___#> .
@@ -78,10 +69,3 @@ air-bidirectional-connects-to:
     @prefix hpf: <urn:hpflex#> .
     p:name brick:feeds p:target .
     p:target brick:feed p:name .
-  # dependencies:
-  #   - template: air-bidirectional-connectionpoint
-  #     args: {"name": "name_cp"}
-  #   - template: air-bidirectional-connectionpoint
-  #     args: {"name": "target_cp"}
-  #   - template: connection
-  #     args: {"name": "connection"}

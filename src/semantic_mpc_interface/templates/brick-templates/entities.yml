@@ -6,7 +6,6 @@ hvac-zone:
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     p:name a brick:HVAC_Zone .
-  # optional: [has-space,space,has-window,window,has-location,tstat]
   optional: [space-name,window-name,tstat-name,hvac-name]
   dependencies:
     - template: has-space
