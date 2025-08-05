@@ -8,6 +8,8 @@
 @prefix unit: <http://qudt.org/vocab/unit/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+bldg: a owl:Ontology .
+
 bldg:hvac_1 a brick:Packaged_Heat_Pump,
         brick:RTU,
         hpfs:hp-rtu ;
@@ -16,7 +18,7 @@ bldg:hvac_1 a brick:Packaged_Heat_Pump,
     brick:feeds bldg:zone_1 ;
     brick:heatingCapacity bldg:hvac_1-heating_capacity-name ;
     brick:heatingCoefficientOfPerformance bldg:hvac_1-heating_COP-name ;
-    hpfs:air-connects-to bldg:zone_1 .
+    hpfs:air-connected-to bldg:zone_1 .
 
 bldg:hvac_2 a brick:Packaged_Heat_Pump,
         brick:RTU,
@@ -26,7 +28,7 @@ bldg:hvac_2 a brick:Packaged_Heat_Pump,
     brick:feeds bldg:zone_2 ;
     brick:heatingCapacity bldg:hvac_2-heating_capacity-name ;
     brick:heatingCoefficientOfPerformance bldg:hvac_2-heating_COP-name ;
-    hpfs:air-connects-to bldg:zone_2 .
+    hpfs:air-connected-to bldg:zone_2 .
 
 bldg:hvac_3 a brick:Packaged_Heat_Pump,
         brick:RTU,
@@ -36,7 +38,7 @@ bldg:hvac_3 a brick:Packaged_Heat_Pump,
     brick:feeds bldg:zone_3 ;
     brick:heatingCapacity bldg:hvac_3-heating_capacity-name ;
     brick:heatingCoefficientOfPerformance bldg:hvac_3-heating_COP-name ;
-    hpfs:air-connects-to bldg:zone_3 .
+    hpfs:air-connected-to bldg:zone_3 .
 
 bldg:test_site a brick:Site,
         hpfs:site ;
@@ -334,12 +336,6 @@ bldg:tstat_zone_3-tolerance-name a brick:Temperature_Tolerance_Parameter ;
     qudt:isDeltaQuantity true ;
     brick:value "3.0" .
 
-bldg: a owl:Ontology ;
-    brick:feeds bldg:zone_1 ;
-    brick:hasLocation bldg:zone_1 ;
-    hpfs:air-connects-to bldg:zone_1 ;
-    hpfs:has-location bldg:zone_1 .
-
 bldg:space_1_1 a brick:Space,
         hpfs:space ;
     brick:area bldg:space_1_1-area-name .
@@ -380,6 +376,21 @@ bldg:window_3_3 a brick:Window,
     brick:azimuth bldg:window_3_3-azimuth-name ;
     brick:tilt bldg:window_3_3-tilt-name .
 
+bldg:zone_1 a brick:HVAC_Zone,
+        hpfs:hvac-zone ;
+    brick:hasPart bldg:space_1_1,
+        bldg:space_1_2,
+        bldg:window_1_1,
+        bldg:window_1_2 ;
+    hpfs:has-space bldg:space_1_1,
+        bldg:space_1_2,
+        bldg:window_1_1,
+        bldg:window_1_2 ;
+    hpfs:has-window bldg:space_1_1,
+        bldg:space_1_2,
+        bldg:window_1_1,
+        bldg:window_1_2 .
+
 bldg:zone_2 a brick:HVAC_Zone,
         hpfs:hvac-zone ;
     brick:hasPart bldg:space_2_1,
@@ -397,22 +408,4 @@ bldg:zone_3 a brick:HVAC_Zone,
         bldg:window_3_3 ;
     hpfs:has-window bldg:space_3_1,
         bldg:window_3_3 .
-
-bldg:zone_1 a brick:HVAC_Zone,
-        hpfs:hvac-zone ;
-    brick:hasPart bldg:,
-        bldg:space_1_1,
-        bldg:space_1_2,
-        bldg:window_1_1,
-        bldg:window_1_2 ;
-    hpfs:has-space bldg:,
-        bldg:space_1_1,
-        bldg:space_1_2,
-        bldg:window_1_1,
-        bldg:window_1_2 ;
-    hpfs:has-window bldg:,
-        bldg:space_1_1,
-        bldg:space_1_2,
-        bldg:window_1_1,
-        bldg:window_1_2 .
 

@@ -210,7 +210,7 @@ class Survey:
             def mapper(col, map = self.param_mapping[template.name]):
                 return map.get(col,col)
             
-            # NOTE: patch for missing bmotif feature
+            # NOTE: patch for missing bmotif feature, should be able to ingest these as values
             def change_ns(graph):
                 add = []
                 remove = []
@@ -222,6 +222,10 @@ class Survey:
                     if str(o).startswith(str(self.building_ns)):
                         remove.append((s, BRICK.value, o))
                         add.append((s, BRICK.value, Literal(str(o).replace(str(self.building_ns),""))))
+                for s,o in graph.subject_objects(S223.hasValue):
+                    if str(o).startswith(str(self.building_ns)):
+                        remove.append((s, S223.hasValue, o))
+                        add.append((s, S223.hasValue, Literal(str(o).replace(str(self.building_ns),""))))
                 for triple in add:
                     graph.add(triple)
                 for triple in remove:

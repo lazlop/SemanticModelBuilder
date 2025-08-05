@@ -14,6 +14,8 @@ from buildingmotif.dataclasses import Library
 import csv
 from pyshacl.rdfutil import clone
 
+ontology = 's223'
+
 # %% [markdown]
 # # Testing the Model Builder
 # 
@@ -32,7 +34,7 @@ warnings.filterwarnings("ignore")
 
 # %%
 # Creating survey, allow overwrite if there is something already there
-s = HPFlexSurvey('s223_test_site','test_build','.', overwrite=True, ontology='s223')
+s = HPFlexSurvey('s223_test_site','test_build','.', overwrite=True, ontology=ontology)
 
 # Generating a simple building structure that prefills csv files. 
 s.easy_config(zone_space_window_list=[(2,2),(1,2),(1,3)])
@@ -43,6 +45,7 @@ s.easy_config(zone_space_window_list=[(2,2),(1,2),(1,3)])
 # Will just fill the columns programmatically for testing, csv should be filled out otherwise
 import sys
 sys.path.insert(0,'examples')
+# sys.path.insert(0,'../examples')
 from example_prefill_usage import prefill_csv_survey
 
 # %%
@@ -60,32 +63,32 @@ og = clone.clone_graph(s.graph)
 
 # %%
 # Create handler
-handler = SHACLHandler(ontology='s223')
+# handler = SHACLHandler(ontology=ontology)
 
-# Generate shapes
-handler.generate_shapes()
+# # Generate shapes
+# handler.generate_shapes()
 
-# Save shapes
-handler.save_shapes('shapes.ttl')
+# # Save shapes
+# handler.save_shapes('shapes.ttl')
 
-# Validate a model
-conforms, results_graph, results_text = handler.validate_model(s.graph)
+# # Validate a model
+# conforms, results_graph, results_text = handler.validate_model(s.graph)
 
-s.graph.serialize('test-s223-model-reasoned.ttl', format = 'ttl')
-if not conforms:
-    print("Validation failed:")
-    print(results_text)
+# s.graph.serialize('test-s223-model-reasoned.ttl', format = 'ttl')
+# if not conforms:
+#     print("Validation failed:")
+#     print(results_text)
 
-# %%
-# lots of new inferred information
-(s.graph-og).print()
+# # %%
+# # lots of new inferred information
+# (s.graph-og).print()
 
 # %% [markdown]
 # # Testing get Metadata
 
 # %%
 # still working on loader, will clean up class, but functionality about right
-loader = LoadModel("s223_test_site/test_build/test_build.ttl", ontology = 's223')
+loader = LoadModel("s223_test_site/test_build/test_build.ttl", ontology = ontology)
 site_info = loader.get_all_building_objects()
 
 # %%
@@ -112,7 +115,7 @@ print(zone.tstats[0].resolution.is_delta)
 
 # %%
 # optionally just load everything as si 
-si_loader = LoadModel("s223_test_site/test_build/test_build.ttl", ontology = 's223', as_si_units=True)
+si_loader = LoadModel("s223_test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
 site_info = si_loader.get_all_building_objects()
 print(zone.tstats[0].resolution)
 

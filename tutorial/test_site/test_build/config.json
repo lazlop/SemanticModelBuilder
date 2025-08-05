@@ -7,17 +7,17 @@
             "area-name": "<name>-area-name"
         },
         "hp-rtu": {
-            "heating_capacity-name": "<name>-heating_capacity-name",
             "heating_COP-name": "<name>-heating_COP-name",
+            "cooling_capacity-name": "<name>-cooling_capacity-name",
             "cooling_COP-name": "<name>-cooling_COP-name",
-            "cooling_capacity-name": "<name>-cooling_capacity-name"
+            "heating_capacity-name": "<name>-heating_capacity-name"
         },
         "tstat": {
-            "setpoint_deadband-name": "<name>-setpoint_deadband-name",
-            "resolution-name": "<name>-resolution-name",
             "active-name": "<name>-active-name",
             "stage_count-name": "<name>-stage_count-name",
-            "tolerance-name": "<name>-tolerance-name"
+            "resolution-name": "<name>-resolution-name",
+            "tolerance-name": "<name>-tolerance-name",
+            "setpoint_deadband-name": "<name>-setpoint_deadband-name"
         },
         "window": {
             "area-name": "<name>-area-name",
@@ -25,10 +25,10 @@
             "azimuth-name": "<name>-azimuth-name"
         },
         "site": {
-            "timezone-name": "<name>-timezone-name",
-            "longitude-name": "<name>-longitude-name",
+            "noaastation-name": "<name>-noaastation-name",
             "latitude-name": "<name>-latitude-name",
-            "noaastation-name": "<name>-noaastation-name"
+            "longitude-name": "<name>-longitude-name",
+            "timezone-name": "<name>-timezone-name"
         }
     },
     "param_mapping": {
@@ -43,16 +43,16 @@
             "cooling_capacity": "cooling_capacity-name-value"
         },
         "tstat": {
-            "setpoint_deadband": "setpoint_deadband-name-value",
-            "stage_count": "stage_count-name-value",
             "resolution": "resolution-name-value",
-            "tolerance": "tolerance-name-value",
-            "active": "active-name-value"
+            "setpoint_deadband": "setpoint_deadband-name-value",
+            "active": "active-name-value",
+            "stage_count": "stage_count-name-value",
+            "tolerance": "tolerance-name-value"
         },
         "window": {
-            "area": "area-name-value",
+            "tilt": "tilt-name-value",
             "azimuth": "azimuth-name-value",
-            "tilt": "tilt-name-value"
+            "area": "area-name-value"
         },
         "site": {
             "latitude": "latitude-name-value",

@@ -72,7 +72,12 @@ class LoadModel:
         # Initialize BuildingMOTIF components
         self.bm = BuildingMOTIF("sqlite://")
         self.model = Model.create(self.HPF)
-        self.library = Library.load(directory=brick_templates)
+        if ontology == 'brick':
+            self.library = Library.load(directory=brick_templates)
+        elif ontology == 's223':
+            self.library = Library.load(directory=s223_templates)
+        else:
+            raise ValueError('invalid ontology')
 
     def _get_var_name(self, graph, node):
         """Generate variable names for SPARQL queries from RDF nodes."""
@@ -82,7 +87,7 @@ class LoadModel:
         if PARAM == ns:
             q_n = f"?{local}".replace('-','_')
         else:
-            q_n = convert_to_prefixed(node, graph).replace('-','_')
+            q_n = convert_to_prefixed(node, graph) #.replace('-','_')
         return q_n
 
     def _make_where(self, graph):
@@ -91,7 +96,7 @@ class LoadModel:
         for s, p, o in graph.triples((None, None, None)):
             qs = self._get_var_name(graph, s)
             qo = self._get_var_name(graph, o)
-            qp = convert_to_prefixed(p, graph).replace('-','_')
+            qp = convert_to_prefixed(p, graph) #.replace('-','_')
             where.append(f"{qs} {qp} {qo} .")
         return "\n".join(where)
 
@@ -101,53 +106,6 @@ class LoadModel:
         prefixes = get_prefixes(graph)
         query = f"""{prefixes}\nSELECT DISTINCT * WHERE {{ {where} }}"""
         return query
-
-    def _extract_attributes_from_template(self, template_name: str) -> Dict[str, str]:
-        """
-        Extract attribute information from a template by analyzing its dependencies.
-        Returns a dictionary mapping attribute names to their types.
-        """
-        template = self.library.get_template_by_name(template_name)
-        if not template:
-            return {}
-        
-        attributes = {}
-        
-        # Get the template with inlined dependencies to see all attributes
-        inlined = template.inline_dependencies()
-        
-        # Parse the RDF graph to find properties
-        for s, p, o in inlined.body.triples((None, None, None)):
-            # Look for properties that connect the main entity to values
-            predicate_str = str(p)
-            object_str = str(o)
-            
-            # Skip namespace declarations and type assertions
-            if 'type' in predicate_str.lower() or predicate_str.endswith('#type'):
-                continue
-                
-            # Look for brick properties that indicate attributes
-            if 'brick' in predicate_str and ('area' in predicate_str.lower() or 
-                                            'azimuth' in predicate_str.lower() or 
-                                            'tilt' in predicate_str.lower() or
-                                            'capacity' in predicate_str.lower() or
-                                            'coefficient' in predicate_str.lower() or
-                                            'point' in predicate_str.lower() or
-                                            'location' in predicate_str.lower() or
-                                            'part' in predicate_str.lower()):
-                
-                # Extract attribute name from the object (parameter name)
-                if 'param' in object_str:
-                    attr_name = object_str.split('#')[-1] if '#' in object_str else object_str.split('/')[-1]
-                    attr_name = attr_name.replace('-', '_')
-                    
-                    # Determine if this is a Value type or simple type
-                    if any(val_type in predicate_str.lower() for val_type in ['area', 'azimuth', 'tilt', 'capacity', 'coefficient']):
-                        attributes[attr_name] = 'Value'
-                    else:
-                        attributes[attr_name] = 'str'
-        
-        return attributes
 
     def _create_dynamic_class(self, class_name: str, attributes: Dict[str, str]) -> Type:
         """
@@ -293,7 +251,7 @@ class LoadModel:
                     entity_types.add(col)
         
         # Remove the main entity from the list if it's there
-        main_entity_name = template_name.replace('-', '_')
+        main_entity_name = template_name #.replace('-', '_')
         entity_types.discard(main_entity_name)
         entity_types.discard('name')
         
