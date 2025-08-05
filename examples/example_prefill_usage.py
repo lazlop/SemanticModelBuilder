@@ -66,8 +66,9 @@ def _fill_all_empty_columns(template_csvs):
     """
     
     for template_name, csv_file in template_csvs.items():
-        # skipping zone
+        # Handle zone template with special logic
         if template_name == 'zone':
+            _fill_zone_template(csv_file)
             continue
         try:
             # Read the CSV file
@@ -115,6 +116,82 @@ def _fill_all_empty_columns(template_csvs):
                 
         except Exception as e:
             print(f"Error processing {template_name}.csv: {e}")
+
+
+def _fill_zone_template(csv_file):
+    """
+    Fill zone template with special logic for all columns.
+    For rows where any columns are empty but other columns are filled,
+    and the zone name matches another row with filled values,
+    duplicate those values to the empty rows. Ensures no empty columns remain.
+    
+    Args:
+        csv_file (str): Path to the zone CSV file
+    """
+    try:
+        # Read the CSV file
+        df = pd.read_csv(csv_file)
+        
+        # Track changes
+        filled_cells = 0
+        
+        # Check if name column exists
+        if 'name' not in df.columns:
+            print("Zone template missing 'name' column")
+            return
+        
+        # Group by zone name to find reference values
+        zone_groups = df.groupby('name')
+        
+        for zone_name, group in zone_groups:
+            # Create a reference dictionary to store the best values for each column
+            reference_values = {}
+            
+            # For each column (except name), find the best reference value
+            for col in df.columns:
+                if col == 'name':
+                    continue
+                
+                # Find rows with filled values for this column
+                filled_mask = (
+                    group[col].notna() & 
+                    (group[col].astype(str).str.strip() != '') &
+                    (group[col].astype(str).str.strip() != 'nan')
+                )
+                
+                filled_values = group[filled_mask][col]
+                if len(filled_values) > 0:
+                    # Use the first non-empty value as reference
+                    reference_values[col] = filled_values.iloc[0]
+            
+            # Now fill empty cells for this zone using reference values
+            for idx in group.index:
+                for col in df.columns:
+                    if col == 'name':
+                        continue
+                    
+                    # Check if this cell is empty
+                    current_value = df.at[idx, col]
+                    is_empty = (
+                        pd.isna(current_value) or 
+                        str(current_value).strip() == '' or 
+                        str(current_value).strip().lower() == 'nan'
+                    )
+                    
+                    # If empty and we have a reference value, fill it
+                    if is_empty and col in reference_values:
+                        df.at[idx, col] = reference_values[col]
+                        filled_cells += 1
+        
+        # Save the updated CSV only if changes were made
+        if filled_cells > 0:
+            df.to_csv(csv_file, index=False)
+            print(f"Filled {filled_cells} empty cells in zone.csv")
+        else:
+            print("No empty cells found to fill in zone.csv")
+            
+    except Exception as e:
+        print(f"Error processing zone.csv: {e}")
             
 
 def main():

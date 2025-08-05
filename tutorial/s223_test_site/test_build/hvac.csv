@@ -1,0 +1,4 @@
+name,cooling_capacity,cooling_COP-name-unit,cooling_COP,heating_capacity,heating_capacity-name-unit,heating_COP,cooling_capacity-name-unit,heating_COP-name-unit
+hvac_1,1.0,UNITLESS,1.0,1.0,BTU_IT-PER-HR,1.0,BTU_IT-PER-HR,UNITLESS
+hvac_2,2.0,UNITLESS,2.0,2.0,BTU_IT-PER-HR,2.0,BTU_IT-PER-HR,UNITLESS
+hvac_3,3.0,UNITLESS,3.0,3.0,BTU_IT-PER-HR,3.0,BTU_IT-PER-HR,UNITLESS
