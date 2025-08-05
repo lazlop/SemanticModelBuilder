@@ -1,4 +1,0 @@
-name,setpoint_deadband-name-unit,resolution,setpoint_deadband,active,tolerance-name-unit,resolution-name-unit,stage_count,tolerance
-tstat_zone_1,DEG_F,1.0,1.0,1.0,DEG_F,DEG_F,1.0,1.0
-tstat_zone_2,DEG_F,2.0,2.0,2.0,DEG_F,DEG_F,2.0,2.0
-tstat_zone_3,DEG_F,3.0,3.0,3.0,DEG_F,DEG_F,3.0,3.0
