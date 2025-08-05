@@ -51,7 +51,7 @@ def test_s223_prefill():
     
     # Compare with brick version
     print("\nComparing with brick version:")
-    brick_base_dir = Path("test_site/test_build")
+    brick_base_dir = Path("tutorial/test_site/test_build")
     
     for csv_file in ["zone.csv", "hvac.csv"]:
         s223_file = base_dir / csv_file

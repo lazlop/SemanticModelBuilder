@@ -166,11 +166,13 @@ bldg:space_3_1-area-name qudt:hasQuantityKind quantitykind:Area ;
     qudt:hasUnit unit:FT2 ;
     brick:value "4.0" .
 
-bldg:test_site-latitude-name qudt:hasQuantityKind quantitykind:Latitude ;
+bldg:test_site-latitude-name a hpflex:Latitude ;
+    qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
     qudt:hasUnit unit:Degree ;
     brick:value "1.0" .
 
-bldg:test_site-longitude-name qudt:hasQuantityKind quantitykind:Longitude ;
+bldg:test_site-longitude-name a hpflex:Longitude ;
+    qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
     qudt:hasUnit unit:Degree ;
     brick:value "1.0" .
 

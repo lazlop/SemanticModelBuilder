@@ -9,11 +9,11 @@ install:  ## Install the package
 install-dev:  ## Install the package with development dependencies
 	pip install -e .[dev,docs]
 
-test:  ## Run tests  --log-cli-level=CRITICAL
-	pytest  --show-capture=no --disable-warnings -v --tb=short
+test:  ## Run tests from tests directory
+	pytest tests/ --show-capture=no --disable-warnings -v --tb=short
 
-test-cov:  ## Run tests with coverage
-	pytest --cov=src/semantic_mpc_interface --cov-report=html --cov-report=term-missing
+# test-cov:  ## Run tests with coverage (requires pytest-cov)
+# 	pytest tests/ --cov=src/semantic_mpc_interface --cov-report=html --cov-report=term-missing
 
 lint:  ## Run linting
 	flake8 src/ tests/

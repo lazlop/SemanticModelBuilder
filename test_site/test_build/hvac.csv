@@ -1,4 +1,0 @@
-name,heating_COP,cooling_COP,cooling_capacity,heating_capacity
-hvac_1,1.0,1.0,1.0,1.0
-hvac_2,2.0,2.0,2.0,2.0
-hvac_3,3.0,3.0,3.0,3.0
