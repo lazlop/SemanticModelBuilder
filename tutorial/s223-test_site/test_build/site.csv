@@ -1,2 +1,2 @@
-name,longitude,noaastation,latitude,timezone
+name,noaastation,timezone,longitude,latitude
 tutorial/s223-test_site,1.0,1.0,1.0,1.0

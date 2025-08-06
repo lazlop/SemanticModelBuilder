@@ -1,6 +1,7 @@
 from typing import Optional
 
 import pandas as pd
+import yaml
 from rdflib import Graph, Literal, URIRef
 
 from .namespaces import *
@@ -105,3 +106,28 @@ def add_brick_inverse_relations(g):
             g.add((o, inverse_pairs[p], s))
 
     return g
+
+def get_template_types(ontology):
+    if ontology == 's223':
+        templates = s223_templates
+    elif ontology == 'brick':
+        templates = brick_templates
+    else:
+        raise ValueError(f"Unsupported ontology: {ontology}")
+
+    # Load values.yml and entities.yml files
+    values_file = f"{templates}/values.yml"
+    entities_file = f"{templates}/entities.yml"
+    
+    # Read and parse YAML files
+    with open(values_file, 'r') as f:
+        values_data = yaml.safe_load(f)
+    
+    with open(entities_file, 'r') as f:
+        entities_data = yaml.safe_load(f)
+    
+    # Extract template types (keys from the YAML dictionaries)
+    value_templates = list(values_data.keys()) if values_data else []
+    entity_templates = list(entities_data.keys()) if entities_data else []
+    
+    return value_templates, entity_templates

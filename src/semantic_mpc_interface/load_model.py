@@ -232,7 +232,7 @@ class LoadModel:
         
         # Get the main entity name (usually the first column or 'name')
         main_entity_col = 'name' if 'name' in df.columns else df.columns[0]
-        #TODO: Fix the query generation. Should get all this info in one query probably
+        #TODO: Fix the query generation. Should get all this info in one query 
         
         # Identify all entity types in the dataframe by looking at column patterns
         entity_types = set()
@@ -259,36 +259,70 @@ class LoadModel:
   
         entity_types = {}
         attr_types = {}
+        entity_class_relation = {}
         row = df.iloc[0]
         # NOTE: Tried using rdflib instead of SPARQL, still got a little complicated
-        for col, value in row.items():
-        # Main entity uses name
-            for p, o in self.g.predicate_objects(value):
-                if p == A and (self.g.compute_qname(o)[1]) == URIRef(HPFS):
-                    entity_type = get_uri_name(self.g,o)
-                    for p2, o2 in self.g.predicate_objects(value):
-                        if p == HPFS['has-point']:
-                            entity_types[col] = entity_type
-                            for p3, o3 in self.g.predicate_objects(o2):
-                                if p3 == A and (self.g.compute_qname(o3)[1]) == URIRef(HPFS):
-                                    attr_type = get_uri_name(self.g,o3)
-                                    print(attr_type)
-                                    if col not in attr_types.keys():
-                                        attr_types[col] = []
-                                    attr_types[col].append(attr_type)
-                    
+        # TODO: Have a more structured/queryiable categorization of entities/value templates. Maybe add superclasses for hpfs:entity and hpfs:value
+        value_templates,entity_templates = get_template_types(ontology=self.ontology)
 
-        # Create classes for each entity type
-        entity_classes = {}
-        for col, entity_type in entity_types.items():
-            # Get attributes for this entity type from the dataframe
-            # TODO: Not everything attribute may be a value, can exapnd this to include one for misc
-            print(attr_types[col])
-            attrs = {attr: 'Value' for attr in attr_types[col]}
+        # get all the entity types
+        for col, value in row.items():
+            for p, entity_class in self.g.predicate_objects(value):
+                if p == A and (self.g.compute_qname(entity_class)[1]) == URIRef(HPFS):
+                    entity_type = get_uri_name(self.g,entity_class)
+                    if entity_type in entity_templates:
+                        entity_types[col] = entity_type
             
-            entity_classes[entity_type] = self._create_dynamic_class(
-                entity_type.capitalize(), attrs
-            )
+        # get values of entity types 
+        for col, entity_type in entity_types.items():
+            for entity in self.g.subjects(A, HPFS[entity_type]):
+                for has_point, point in self.g.predicate_objects(entity):
+                    if has_point == HPFS['has-point']:
+                        for p, point_class in self.g.predicate_objects(point):
+                            if p == A and (self.g.compute_qname(point_class)[1]) == URIRef(HPFS):
+                                attr_type = get_uri_name(self.g,point_class)
+                                if attr_type not in value_templates:
+                                    print(f'attribute {attr_type} not an expected value')
+                                    continue
+                                if entity_type not in attr_types.keys():
+                                    attr_types[entity_type] = []
+                                attr_types[entity_type].append(attr_type)
+        
+        # Get entity relations of entity types
+        for col, entity_type in entity_types.items():
+            other_types = [HPFS[ec] for ec in entity_types.values() if ec != entity_type]
+            for entity_s in self.g.subjects(A, HPFS[entity_type]):
+                for p, other_entity in self.g.predicate_objects(entity_s):
+                    for other_entity_type in self.g.objects(other_entity, A):
+                        if other_entity_type in other_types:
+                            print(other_entity_type)
+                            entity_class_relation[entity_type] = get_uri_name(self.g,other_entity_type)
+
+        # # Create classes for each entity type
+        # # NOTE: all stuff that I would use b-schema for
+        # entity_classes = {}
+        # entity_class_relation = {}
+        # for col, entity_type in entity_types.items():
+        #     # Get attributes for this entity type from the dataframe
+        #     # TODO: Not everything attribute may be a value, can exapnd this to include one for misc
+        #     print(attr_types[col])
+        #     attrs = {attr: 'Value' for attr in attr_types[col]}
+            
+        #     entity_classes[entity_type] = self._create_dynamic_class(
+        #         entity_type.capitalize(), attrs
+        #     )
+        #     # get relationship between entity classes
+        #     # TODO: Add predicates to query in the make_where
+        #     for entity_s in self.g.subjects(A, HPFS[entity_type]):
+        #         other_types = [HPFS[ec] for ec in entity_types.values() if ec != entity_type]
+        #         for p, other_entity in self.g.predicate_objects(entity_s):
+        #             for other_entity_type in self.g.objects(other_entity, A):
+        #                 if other_entity_type in other_types:
+        #                     print(other_entity_type)
+        #                     entity_class_relation[entity_type] = get_uri_name(self.g,o2)
+
+
+
         main_entity_name = template_name
         
         # Create container class
@@ -310,6 +344,7 @@ class LoadModel:
             container = containers[container_name]
             
             # Create entities for each type
+            # TODO: Make all brick values that aren't points EntityPropertyValues 
             for entity_type in entity_types:
                 entity_name_col = f"{entity_type}_name" if f"{entity_type}_name" in df.columns else entity_type
                 

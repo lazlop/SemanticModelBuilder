@@ -1,108 +1,51 @@
-#!/usr/bin/env python3
-"""
-Example usage of the CSV prefilling functionality
-"""
+# %%
+# import sys
+# sys.path.insert(0, '..')
+from semantic_mpc_interface import (
+    LoadModel,
+    get_thermostat_data,
+    HPFlexSurvey,
+    convert_units,
+    SHACLHandler,
+    # add_connection
+)
+from buildingmotif.namespaces import BRICK, RDF
+from buildingmotif import BuildingMOTIF
+from buildingmotif.dataclasses import Library
+import csv
+from pyshacl.rdfutil import clone
 
-import sys
-from pathlib import Path
+ontology = 's223'
 
-# Add the src directory to the Python path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+# %%
+# still working on loader, will clean up class, but functionality about right
+loader = LoadModel(f'tutorial/{ontology}-test_site/test_build/reasoned.ttl', ontology = ontology)
+site_info = loader.get_all_building_objects()
 
-from semantic_mpc_interface.survey import Survey
+# %%
+print(site_info)
 
-def example_usage():
-    """Example of how to use the CSV prefilling functionality"""
-    
-    print("=== CSV Prefilling Functionality Example ===\n")
-    
-    # Example 1: Using the easy_config method (automatically prefills)
-    print("1. Using easy_config method (automatically prefills CSVs):")
-    print("-" * 50)
-    
-    generator1 = Survey(
-        site_id="example_site",
-        building_id="building_1",
-        output_dir="example_output",
-        system_of_units="IP",
-        overwrite=True
-    )
-    
-    # Define building structure: 3 zones with different numbers of spaces and windows
-    zone_space_window_list = [
-        (2, 2),  # zone_1: 2 spaces, 2 windows
-        (1, 2),  # zone_2: 1 space, 2 windows  
-        (1, 3)   # zone_3: 1 space, 3 windows
-    ]
-    
-    generator1.easy_config(zone_space_window_list)
-    print(f"Generated and prefilled CSVs in: {generator1.base_dir}\n")
-    
-    # Example 2: Manual configuration and prefilling
-    print("2. Manual configuration and prefilling:")
-    print("-" * 50)
-    
-    generator2 = Survey(
-        site_id="manual_site",
-        building_id="building_2", 
-        output_dir="manual_output",
-        system_of_units="SI",  # Using metric units
-        overwrite=True
-    )
-    
-    # Manual configuration
-    config = {
-        'site_id': 'manual_site',
-        'hvac_type': 'hp-rtu',
-        'hvacs_feed_hvacs': {},
-        'hvacs_feed_zones': {
-            'main_hvac': ['north_zone', 'south_zone'],
-            'aux_hvac': ['east_zone']
-        },
-        'zones_contain_spaces': {
-            'north_zone': ['office_1', 'office_2', 'conference_room'],
-            'south_zone': ['lobby', 'reception'],
-            'east_zone': ['storage']
-        },
-        'zones_contain_windows': {
-            'north_zone': ['north_window_1', 'north_window_2'],
-            'south_zone': ['south_window_1', 'south_window_2', 'south_window_3'],
-            'east_zone': ['east_window_1']
-        }
-    }
-    
-    generator2._building_structure(
-        config['hvacs_feed_hvacs'],
-        config['hvacs_feed_zones'],
-        config['zones_contain_spaces'],
-        config['zones_contain_windows']
-    )
-    
-    print(f"Generated and prefilled CSVs in: {generator2.base_dir}\n")
-    
-    # Example 3: Prefilling from existing config file
-    print("3. Prefilling from existing config file:")
-    print("-" * 50)
-    
-    # Use the config from the first example
-    generator3 = Survey(
-        site_id="example_site",
-        building_id="building_1",
-        output_dir="example_output",
-        system_of_units="IP",
-        overwrite=False  # Don't overwrite, just work with existing
-    )
-    
-    # Prefill from the existing config
-    generator3.prefill_from_config()
-    
-    print("\n=== Summary ===")
-    print("The CSV prefilling functionality provides:")
-    print("• Automatic population of entity names based on building structure")
-    print("• Default unit assignments (IP or SI)")
-    print("• Empty value fields ready for user input")
-    print("• Support for spaces, windows, HVAC units, and thermostats")
-    print("• Ability to re-prefill from saved configuration files")
+# %%
+zone = site_info['zones'][0]
+print(zone)
 
-if __name__ == "__main__":
-    example_usage()
+# %%
+zone.windows
+
+# %%
+zone.windows[0].area.name
+
+# %%
+zone.tstats[0]
+
+# %%
+print(zone.tstats[0].resolution)
+zone.tstats[0].resolution.convert_to_si()
+print(zone.tstats[0].resolution)
+print(zone.tstats[0].resolution.is_delta)
+
+# %%
+# optionally just load everything as si 
+si_loader = LoadModel(f"tutorial/{ontology}-test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
+site_info = si_loader.get_all_building_objects()
+print(zone.tstats[0].resolution)
