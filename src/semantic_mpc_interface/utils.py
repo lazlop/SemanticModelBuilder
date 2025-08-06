@@ -72,3 +72,36 @@ def create_uri_name_from_uris(graph, ns, uri_lst, suffix: Optional[str] = ""):
     new_uri = get_unique_uri(graph, ns[f"{'_'.join(node_names)}{suffix}"])
     graph.add((new_uri, RDFS.label, Literal(get_uri_name(graph, new_uri))))
     return new_uri
+
+def add_brick_inverse_relations(g):
+    # Dictionary of relationships and their inverses
+    inverse_pairs = {
+        BRICK.isFedBy: BRICK.feeds,
+        BRICK.feeds: BRICK.isFedBy,
+        BRICK.hasPart: BRICK.isPartOf,
+        BRICK.isPartOf: BRICK.hasPart,
+        BRICK.hasPoint: BRICK.isPointOf,
+        BRICK.isPointOf: BRICK.hasPoint,
+        BRICK.hasLocation: BRICK.isLocationOf,
+        BRICK.isLocationOf: BRICK.hasLocation,
+        BRICK.controls: BRICK.isControlledBy,
+        BRICK.isControlledBy: BRICK.controls,
+        BRICK.affects: BRICK.isAffectedBy,
+        BRICK.isAffectedBy: BRICK.affects,
+        BRICK.hasInput: BRICK.isInputOf,
+        BRICK.isInputOf: BRICK.hasInput,
+        BRICK.hasOutput: BRICK.isOutputOf,
+        BRICK.isOutputOf: BRICK.hasOutput,
+        BRICK.measures: BRICK.isMeasuredBy,
+        BRICK.isMeasuredBy: BRICK.measures,
+        BRICK.regulates: BRICK.isRegulatedBy,
+        BRICK.isRegulatedBy: BRICK.regulates,
+        BRICK.hasSubject: BRICK.isSubjectOf,
+        BRICK.isSubjectOf: BRICK.hasSubject,
+    }
+    # For each relationship in the graph, add its inverse
+    for s, p, o in g:
+        if p in inverse_pairs:
+            g.add((o, inverse_pairs[p], s))
+
+    return g

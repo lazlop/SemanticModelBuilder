@@ -19,6 +19,7 @@ dependencies = [
     "ipykernel>=6.29.5",
     "grafanalib>=0.7.1",
     "oxrdflib>=0.4.0",
+    "brick-tq-shacl>=0.3.4",
 ]
 
 [project.optional-dependencies]

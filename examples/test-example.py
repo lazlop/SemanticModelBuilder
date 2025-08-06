@@ -75,12 +75,13 @@ handler.generate_shapes()
 handler.save_shapes('shapes.ttl')
 
 # Validate a model
-conforms, results_graph, results_text = handler.validate_model(s.graph)
+validation_result = handler.validate_model(s.graph)
+# conforms, results_graph, results_text
 
 s.graph.serialize('test-s223-model-reasoned.ttl', format = 'ttl')
-if not conforms:
+if not validation_result.valid:
     print("Validation failed:")
-    print(results_text)
+    print(validation_result.report_string)
 
 # %%
 # lots of new inferred information

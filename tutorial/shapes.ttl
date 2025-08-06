@@ -289,8 +289,8 @@ hpfs:has-spaceAnnotationRule a sh:SPARQLRule ;
                 }
                 WHERE {
 	?name <http://data.ashrae.org/standard223#contains> ?target . 
-	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#PhysicalSpace> . 
+	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 }""" .
 
 hpfs:has-windowAnnotationRule a sh:SPARQLRule ;
@@ -299,9 +299,9 @@ hpfs:has-windowAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-window> ?target .
                 }
                 WHERE {
+	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Window> . 
 	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
 	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
-	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Window> . 
 }""" .
 
 hpfs:hp-rtuAnnotationRule a sh:TripleRule ;

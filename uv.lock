@@ -231,6 +231,18 @@ wheels = [
 ]
 
 [[package]]
+name = "brick-tq-shacl"
+version = "0.3.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "rdflib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/30/5c/59c0d747942f1077494fe881fd92e6affb52b9d175e81257ff33d2be5f36/brick_tq_shacl-0.3.4.tar.gz", hash = "sha256:229ebab84e1fb38f45d8496c89cc02789f13b68788868c4d70c2e39d88b55c0b", size = 28075476 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1b/7b/bbd772a558eca3dd8abb3c1e8fda1932428ef584ebe5f35c4ad347064779/brick_tq_shacl-0.3.4-py3-none-any.whl", hash = "sha256:6cdbbeda99efadc74f2db7aa3603f28be3b0389be70767a7b4115340b982ce4d", size = 28104909 },
+]
+
+[[package]]
 name = "buildingmotif"
 version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2646,6 +2658,7 @@ name = "semantic-mpc-interface"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "brick-tq-shacl" },
     { name = "buildingmotif" },
     { name = "grafanalib" },
     { name = "ipykernel", version = "6.29.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -2687,6 +2700,7 @@ grafana = [
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0" },
+    { name = "brick-tq-shacl", specifier = ">=0.3.4" },
     { name = "buildingmotif", specifier = ">=0.3.0" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "grafanalib", specifier = ">=0.7.1" },

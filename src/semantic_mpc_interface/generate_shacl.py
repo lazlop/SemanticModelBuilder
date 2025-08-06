@@ -7,7 +7,7 @@ from buildingmotif import BuildingMOTIF, get_building_motif
 from buildingmotif.dataclasses import Library, Model
 from pyshacl import validate
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-
+from brick_tq_shacl.topquadrant_shacl import infer
 from .namespaces import *
 from .utils import *
 
@@ -50,6 +50,8 @@ class SHACLHandler:
             print("BuildingMOTIF does not exist, instantiating:", e)
             self.bm = BuildingMOTIF("sqlite://")
             self.template_library = Library.load(directory=str(self.template_dir))
+        
+        self.model = Model.create(self.ontology_ns)
 
     def _get_template_types(self, g):
         """Parse the RDF template body and extract type information"""
@@ -291,7 +293,8 @@ class SHACLHandler:
                 (HPFS[f"{template_name}AnnotationRule"], SH.condition, shape_uri)
             )
 
-    def validate_model(self, data_graph, shapes_graph=None, inference="rdfs"):
+
+    def infer(self, data_graph, shapes_graph=None, use_ontology = False):
         """Validate a data graph against SHACL shapes
 
         Args:
@@ -309,15 +312,37 @@ class SHACLHandler:
                     "No shapes graph available. Generate shapes first or provide a shapes graph."
                 )
             shapes_graph = self.shapes_graph
+        
+        if use_ontology:
+            raise Exception("Ontology inference not yet implemented")
+        
+        return infer(data_graph, shapes_graph)
 
-        return validate(
-            data_graph,
-            shacl_graph=shapes_graph,
-            advanced=True,
-            allow_warnings=False,
-            inplace=True,
-            iterate_rules=True,
-        )
+    def validate_model(self, data_graph, shapes_graph=None, use_ontology = False):
+        """Validate a data graph against SHACL shapes
+
+        Args:
+            data_graph: The RDF graph to validate
+            shapes_graph: Optional SHACL shapes graph. If None, uses previously generated shapes
+            inference: Reasoning to apply ('none', 'rdfs', 'owlrl', etc.)
+
+        Returns:
+            tuple: (conforms, results_graph, results_text)
+        """
+        # TODO: generic validation output is so verbose that it's useless. Need to use the results to provide a better validation report
+        if shapes_graph is None:
+            if self.shapes_graph is None:
+                raise ValueError(
+                    "No shapes graph available. Generate shapes first or provide a shapes graph."
+                )
+            shapes_graph = Library.load(ontology_graph=self.shapes_graph)
+        
+        if use_ontology:
+            raise Exception("Ontology validation not yet implemented")
+
+        self.model.add_graph(data_graph)
+        
+        return self.model.validate([shapes_graph.get_shape_collection()])
 
     def save_shapes(self, filename, format="turtle"):
         """Save the SHACL shapes graph to a file
