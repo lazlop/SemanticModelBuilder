@@ -144,14 +144,13 @@ class Survey:
             template = template
             params = template.all_parameters
             # Getting the stuff before -name-value (could change to 1 if I just want to get rid of -value)
-            values = {param.rsplit('_name-value',2)[0]:param for param in params if '-value' in param}
+            values = {param.rsplit('-value',2)[0]:param for param in params if '-value' in param}
             print('values:', values.values())
             # have to change since value just appended to name now
             # TODO: Change this as part of bigger variable in name change
-            value_names = {param: f"<name>-{param}" for param in params if (param.endswith('_name')) and (param + '-value' in values.values())}
-            print('values names:', value_names)
-            # entities = [param for param in params if ('-name' in param) and (param not in value_names)]
-            # variable_params[template.name] = entities + value_names
+            value_names = {param: f"<name>-{param}" for param in params if (param + '-value' in values.values())}
+            value_name_mapping = {f"{param}-name":param for param in value_names.keys()}
+            values.update(value_name_mapping)
             variable_params[template.name] = value_names
             param_mapping[template.name] = values
         return param_mapping, variable_params
@@ -160,6 +159,8 @@ class Survey:
         for filename, template in self.template_dict.items():
             def fill_variable_params(filename, variable_params):
                 df = pd.read_csv(filename)
+                # have to rename columns here if I want ot allow something to be renamed to a mapped name
+                df.rename(columns = self.param_mapping[template.name], inplace=True)
                 
                 # For each variable parameter key, create a new column
                 for param_key, param_template in variable_params.items():
@@ -207,9 +208,6 @@ class Survey:
                 
                 csv_string = df.to_csv(index=False)
                 return csv_string
-
-            def mapper(col, map = self.param_mapping[template.name]):
-                return map.get(col,col)
             
             # NOTE: patch for missing bmotif feature, should be able to ingest these as values
             def change_ns(graph):
@@ -231,11 +229,18 @@ class Survey:
                     graph.add(triple)
                 for triple in remove:
                     graph.remove(triple)
+            # NOTE: unfilled parameters just get added as namespace - will delete
+            def delete_optional_params(graph):
+                remove = []
+                for p,o in graph.predicate_objects(self.building_ns):
+                    remove.append((self.building_ns, p, o))
+                for triple in remove:
+                    graph.remove(triple)
 
             file = str(self.base_dir / filename) + ".csv"
             csv_string = fill_variable_params(file, self.variable_params[template.name])
             csv_in = CSVIngress(data = csv_string)
-            ingress = TemplateIngress(template, mapper, csv_in)
+            ingress = TemplateIngress(template, None, csv_in)
             #NOTE: Ingress puts everything into the given namespace, will have to change unit namespaces manually 
             graph = ingress.graph(self.building_ns)
             change_ns(graph)
@@ -257,10 +262,10 @@ class Survey:
     def _edit_cols(self, file, mapping, remove_params, first_col='name'):
         """Edit column names in CSV file"""
         df = pd.read_csv(file)
+        new_cols = [col for col in df.columns if col not in remove_params]
         param_to_new_name = {v:k for k,v in mapping.items()}
-        new_cols = [param_to_new_name.get(first_col, first_col)] + [param_to_new_name.get(col, col) for col in df.columns if col != first_col]
-        new_cols = [col for col in new_cols if col not in remove_params]
-        df = pd.DataFrame(columns = new_cols)
+        renamed_cols = [param_to_new_name.get(first_col, first_col)] + [param_to_new_name.get(col, col) for col in new_cols if col != first_col]
+        df = pd.DataFrame(columns = renamed_cols)
         df.to_csv(file, index=False)
 
     def _create_point_list(self):
@@ -434,16 +439,16 @@ class HPFlexSurvey(Survey):
             # Start with empty row
             row = {col: '' for col in columns}
 
-            if 'tstat_name' in columns:
-                row['tstat_name'] = f"tstat_{zone_name}"
+            if 'tstat' in columns:
+                row['tstat'] = f"tstat_{zone_name}"
 
             hvacs = config['hvacs_feed_zones']
             for hvac_name, hvac_zone_names in hvacs.items():
                 if not isinstance(hvac_zone_names, list):
                     raise TypeError(f"Expected hvac_zone_names {hvac_zone_names} to be a list, instead {type(hvac_zone_names)}")
                 if zone_name in hvac_zone_names:
-                    if 'hvac_name' in columns:
-                        row['hvac_name'] = hvac_name
+                    if 'hvac' in columns:
+                        row['hvac'] = hvac_name
             if 'name' in columns:
                 row['name'] = zone_name
 
@@ -451,24 +456,24 @@ class HPFlexSurvey(Survey):
                 if i>0:
                     extra_row = {col: '' for col in columns}
                     extra_row['name'] = zone_name
-                    if 'space_name' in columns:
-                        extra_row['space_name'] = space_name
+                    if 'space' in columns:
+                        extra_row['space'] = space_name
                     extra_rows.append(extra_row)
                 else:
-                    if 'space_name' in columns:
-                        row['space_name'] = space_name
+                    if 'space' in columns:
+                        row['space'] = space_name
 
             windows = config['zones_contain_windows'][zone_name]
             for window_name in windows:
                 if i>0:
                     extra_row = {col: '' for col in columns}
                     extra_row['name'] = zone_name
-                    if 'window_name' in columns:
-                        extra_row['window_name'] = window_name
+                    if 'window' in columns:
+                        extra_row['window'] = window_name
                     extra_rows.append(extra_row)
                 else:
-                    if 'window_name' in columns:
-                        row['window_name'] = window_name
+                    if 'window' in columns:
+                        row['window'] = window_name
 
             new_rows.append(row)
         new_rows = new_rows + extra_rows
@@ -492,8 +497,8 @@ class HPFlexSurvey(Survey):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = space_name
-                if 'area_name-unit' in columns:
-                    row['area_name-unit'] = self.default_area_unit
+                if 'area-unit' in columns:
+                    row['area-unit'] = self.default_area_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -516,12 +521,12 @@ class HPFlexSurvey(Survey):
                 row = {col: '' for col in columns}
                 # Only set the values we want to prefill
                 row['name'] = window_name
-                if 'area_name-unit' in columns:
-                    row['area_name-unit'] = self.default_area_unit
-                if 'tilt_name-unit' in columns:
-                    row['tilt_name-unit'] = self.default_angle_unit
-                if 'azimuth_name-unit' in columns:
-                    row['azimuth_name-unit'] = self.default_angle_unit
+                if 'area-unit' in columns:
+                    row['area-unit'] = self.default_area_unit
+                if 'tilt-unit' in columns:
+                    row['tilt-unit'] = self.default_angle_unit
+                if 'azimuth-unit' in columns:
+                    row['azimuth-unit'] = self.default_angle_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data
@@ -545,14 +550,14 @@ class HPFlexSurvey(Survey):
             row['name'] = hvac_name
             
             # Set default units for the newly parameterized units
-            if 'cooling_COP_name-unit' in columns:
-                row['cooling_COP_name-unit'] = self.default_cop_unit
-            if 'heating_COP_name-unit' in columns:
-                row['heating_COP_name-unit'] = self.default_cop_unit
-            if 'cooling_capacity_name-unit' in columns:
-                row['cooling_capacity_name-unit'] = self.default_power_unit
-            if 'heating_capacity_name-unit' in columns:
-                row['heating_capacity_name-unit'] = self.default_power_unit
+            if 'cooling_COP-unit' in columns:
+                row['cooling_COP-unit'] = self.default_cop_unit
+            if 'heating_COP-unit' in columns:
+                row['heating_COP-unit'] = self.default_cop_unit
+            if 'cooling_capacity-unit' in columns:
+                row['cooling_capacity-unit'] = self.default_power_unit
+            if 'heating_capacity-unit' in columns:
+                row['heating_capacity-unit'] = self.default_power_unit
                 
             new_rows.append(row)
         
@@ -577,12 +582,12 @@ class HPFlexSurvey(Survey):
                 # Only set the values we want to prefill
                 row['name'] = f"tstat_{zone_name}"
                 # Set temperature unit columns if they exist
-                if 'setpoint_deadband_name-unit' in columns:
-                    row['setpoint_deadband_name-unit'] = self.default_temperature_unit
-                if 'tolerance_name-unit' in columns:
-                    row['tolerance_name-unit'] = self.default_temperature_unit
-                if 'resolution_name-unit' in columns:
-                    row['resolution_name-unit'] = self.default_temperature_unit
+                if 'setpoint_deadband-unit' in columns:
+                    row['setpoint_deadband-unit'] = self.default_temperature_unit
+                if 'tolerance-unit' in columns:
+                    row['tolerance-unit'] = self.default_temperature_unit
+                if 'resolution-unit' in columns:
+                    row['resolution-unit'] = self.default_temperature_unit
                 new_rows.append(row)
         
         # Create new dataframe with prefilled data

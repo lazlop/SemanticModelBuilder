@@ -89,17 +89,9 @@ hpfs:window a s223:Class,
     sh:property hpfs:window_hasProperty,
         hpfs:window_noAspects .
 
-hpfs:air-bidirectional-connected-toAnnotation a sh:NodeShape ;
-    sh:rule hpfs:air-bidirectional-connected-toAnnotationRule ;
-    sh:targetSubjectsOf s223:connectedTo .
-
 hpfs:air-bidirectional-cpAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-bidirectional-cpAnnotationRule ;
     sh:targetClass s223:BidirectionalConnectionPoint .
-
-hpfs:air-connected-to-completeAnnotation a sh:NodeShape ;
-    sh:rule hpfs:air-connected-to-completeAnnotationRule ;
-    sh:targetSubjectsOf s223:connectedTo .
 
 hpfs:air-connected-toAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-connected-toAnnotationRule ;
@@ -112,14 +104,6 @@ hpfs:air-inlet-cpAnnotation a sh:NodeShape ;
 hpfs:air-outlet-cpAnnotation a sh:NodeShape ;
     sh:rule hpfs:air-outlet-cpAnnotationRule ;
     sh:targetClass s223:OutletConnectionPoint .
-
-hpfs:cnx2Annotation a sh:NodeShape ;
-    sh:rule hpfs:cnx2AnnotationRule ;
-    sh:targetSubjectsOf s223:cnx2 .
-
-hpfs:cnxAnnotation a sh:NodeShape ;
-    sh:rule hpfs:cnxAnnotationRule ;
-    sh:targetSubjectsOf s223:cnx .
 
 hpfs:connectionAnnotation a sh:NodeShape ;
     sh:rule hpfs:connectionAnnotationRule ;
@@ -173,16 +157,6 @@ hpfs:windowAnnotation a sh:NodeShape ;
     sh:rule hpfs:windowAnnotationRule ;
     sh:targetClass s223:Window .
 
-hpfs:air-bidirectional-connected-toAnnotationRule a sh:SPARQLRule ;
-    sh:construct """
-                CONSTRUCT {
-                    ?name <urn:hpflex/shapes#air-bidirectional-connected-to> ?target .
-                }
-                WHERE {
-	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
-	?target <http://data.ashrae.org/standard223#connectedTo> ?name . 
-}""" .
-
 hpfs:air-bidirectional-cpAnnotationRule a sh:TripleRule ;
     sh:condition hpfs:air-bidirectional-cp ;
     sh:object hpfs:air-bidirectional-cp ;
@@ -208,27 +182,6 @@ hpfs:air-bidirectional-cp_noAspects rdfs:label "air-bidirectional-cp_noAspects" 
     sh:maxCount 0 ;
     sh:minCount 0 ;
     sh:path s223:hasAspect .
-
-hpfs:air-connected-to-completeAnnotationRule a sh:SPARQLRule ;
-    sh:construct """
-                CONSTRUCT {
-                    ?name <urn:hpflex/shapes#air-connected-to-complete> ?target .
-                }
-                WHERE {
-	?connection <http://data.ashrae.org/standard223#cnx> ?to_cp . 
-	?connection_EXTRA_MAPPING <http://data.ashrae.org/standard223#cnx2> ?connection_EXTRA_MAPPING_target . 
-	?connection_EXTRA_MAPPING <http://data.ashrae.org/standard223#cnx> ?connection_EXTRA_MAPPING_target . 
-	?from_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-	?connection <http://data.ashrae.org/standard223#cnx2> ?connection_target . 
-	?to_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#InletConnectionPoint> . 
-	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
-	?from_cp <http://data.ashrae.org/standard223#cnx> ?connection . 
-	?from_cp <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#OutletConnectionPoint> . 
-	?to_cp <http://data.ashrae.org/standard223#cnx> ?target . 
-	?connection <http://data.ashrae.org/standard223#cnx> ?connection_target . 
-	?name <http://data.ashrae.org/standard223#cnx> ?from_cp . 
-	?to_cp <http://data.ashrae.org/standard223#hasMedium> <http://data.ashrae.org/standard223#Medium-Air> . 
-}""" .
 
 hpfs:air-connected-toAnnotationRule a sh:SPARQLRule ;
     sh:construct """
@@ -291,25 +244,6 @@ hpfs:air-outlet-cp_noAspects rdfs:label "air-outlet-cp_noAspects" ;
     sh:minCount 0 ;
     sh:path s223:hasAspect .
 
-hpfs:cnx2AnnotationRule a sh:SPARQLRule ;
-    sh:construct """
-                CONSTRUCT {
-                    ?name <urn:hpflex/shapes#cnx2> ?target .
-                }
-                WHERE {
-	?name <http://data.ashrae.org/standard223#cnx2> ?target . 
-}""" .
-
-hpfs:cnxAnnotationRule a sh:SPARQLRule ;
-    sh:construct """
-                CONSTRUCT {
-                    ?name <urn:hpflex/shapes#cnx> ?target .
-                }
-                WHERE {
-	?name <http://data.ashrae.org/standard223#cnx2> ?target . 
-	?name <http://data.ashrae.org/standard223#cnx> ?target . 
-}""" .
-
 hpfs:connectionAnnotationRule a sh:TripleRule ;
     sh:condition hpfs:connection ;
     sh:object hpfs:connection ;
@@ -354,8 +288,8 @@ hpfs:has-spaceAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-space> ?target .
                 }
                 WHERE {
-	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 	?name <http://data.ashrae.org/standard223#contains> ?target . 
+	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#PhysicalSpace> . 
 }""" .
 
@@ -365,9 +299,9 @@ hpfs:has-windowAnnotationRule a sh:SPARQLRule ;
                     ?name <urn:hpflex/shapes#has-window> ?target .
                 }
                 WHERE {
+	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
 	?name <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#DomainSpace> . 
 	?target <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.ashrae.org/standard223#Window> . 
-	?name <http://data.ashrae.org/standard223#connectedTo> ?target . 
 }""" .
 
 hpfs:hp-rtuAnnotationRule a sh:TripleRule ;
