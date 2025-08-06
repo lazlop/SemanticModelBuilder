@@ -162,22 +162,21 @@ class LoadModel:
                 # Only create attribute if the _name column contains actual numeric/meaningful data
                 # Skip if it contains URI strings
                 # not sure if second part of if statement is important
-                if not str(value_data).startswith('urn:') and not '_name' in str(value_data):
-                    try:
-                        # Try to convert to number to verify it's meaningful data
-                        float(value_data)
-                        unit_data = df[unit_col].iloc[0] if unit_col in df.columns and pd.notna(df[unit_col].iloc[0]) else None
-                        # get is delta
-                        is_delta = self._is_delta_quantity(name_data)
-                        value_obj = Value(value=value_data, unit=unit_data, is_delta = is_delta, name=name_data)
-                        if self.as_si_units:
-                            value_obj.convert_to_si()
-                        # Use clean attribute name (remove redundant prefixes and suffixes)
-                        clean_attr_name = attr_base.replace('name_', '').replace('_name', '')
-                        attributes[clean_attr_name] = value_obj
-                    except (ValueError, TypeError):
-                        # Skip non-numeric data in _name columns
-                        pass
+                try:
+                    # Try to convert to number to verify it's meaningful data
+                    float(value_data)
+                    unit_data = df[unit_col].iloc[0] if unit_col in df.columns and pd.notna(df[unit_col].iloc[0]) else None
+                    # get is delta
+                    is_delta = self._is_delta_quantity(name_data)
+                    value_obj = Value(value=value_data, unit=unit_data, is_delta = is_delta, name=name_data)
+                    if self.as_si_units:
+                        value_obj.convert_to_si()
+                    # Use clean attribute name (remove redundant prefixes and suffixes)
+                    clean_attr_name = attr_base.replace('name_', '').replace('_name', '')
+                    attributes[clean_attr_name] = value_obj
+                except (ValueError, TypeError):
+                    # Skip non-numeric data in _name columns
+                    pass
             
         # Also look for simple string attributes (columns that end with the entity name)
         for col in df.columns:
@@ -233,6 +232,7 @@ class LoadModel:
         
         # Get the main entity name (usually the first column or 'name')
         main_entity_col = 'name' if 'name' in df.columns else df.columns[0]
+        #TODO: Fix the query generation. Should get all this info in one query probably
         
         # Identify all entity types in the dataframe by looking at column patterns
         entity_types = set()
@@ -255,18 +255,41 @@ class LoadModel:
         main_entity_name = template_name #.replace('-', '_')
         entity_types.discard(main_entity_name)
         entity_types.discard('name')
-        
+
+  
+        entity_types = {}
+        attr_types = {}
+        row = df.iloc[0]
+        # NOTE: Tried using rdflib instead of SPARQL, still got a little complicated
+        for col, value in row.items():
+        # Main entity uses name
+            for p, o in self.g.predicate_objects(value):
+                if p == A and (self.g.compute_qname(o)[1]) == URIRef(HPFS):
+                    entity_type = get_uri_name(self.g,o)
+                    for p2, o2 in self.g.predicate_objects(value):
+                        if p == HPFS['has-point']:
+                            entity_types[col] = entity_type
+                            for p3, o3 in self.g.predicate_objects(o2):
+                                if p3 == A and (self.g.compute_qname(o3)[1]) == URIRef(HPFS):
+                                    attr_type = get_uri_name(self.g,o3)
+                                    print(attr_type)
+                                    if col not in attr_types.keys():
+                                        attr_types[col] = []
+                                    attr_types[col].append(attr_type)
+                    
+
         # Create classes for each entity type
         entity_classes = {}
-        for entity_type in entity_types:
+        for col, entity_type in entity_types.items():
             # Get attributes for this entity type from the dataframe
-            sample_attributes = self._identify_entity_attributes(df, entity_type)
-            attr_types = {attr: 'Value' if isinstance(val, Value) else 'str' 
-                         for attr, val in sample_attributes.items()}
+            # TODO: Not everything attribute may be a value, can exapnd this to include one for misc
+            print(attr_types[col])
+            attrs = {attr: 'Value' for attr in attr_types[col]}
             
             entity_classes[entity_type] = self._create_dynamic_class(
-                entity_type.capitalize(), attr_types
+                entity_type.capitalize(), attrs
             )
+        main_entity_name = template_name
         
         # Create container class
         container_class = self._create_container_class(

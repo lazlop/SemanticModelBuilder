@@ -1,4 +1,4 @@
-name,heating_COP,cooling_COP-unit,cooling_COP,heating_COP-unit,cooling_capacity-unit,cooling_capacity,heating_capacity-unit,heating_capacity
-hvac_1,1.0,UNITLESS,1.0,UNITLESS,BTU_IT-PER-HR,1.0,BTU_IT-PER-HR,1.0
-hvac_2,2.0,UNITLESS,2.0,UNITLESS,BTU_IT-PER-HR,2.0,BTU_IT-PER-HR,2.0
-hvac_3,3.0,UNITLESS,3.0,UNITLESS,BTU_IT-PER-HR,3.0,BTU_IT-PER-HR,3.0
+name,cooling_COP-unit,cooling_capacity-unit,cooling_COP,heating_COP-unit,heating_capacity-unit,heating_COP,heating_capacity,cooling_capacity
+hvac_1,UNITLESS,BTU_IT-PER-HR,1.0,UNITLESS,BTU_IT-PER-HR,1.0,1.0,1.0
+hvac_2,UNITLESS,BTU_IT-PER-HR,2.0,UNITLESS,BTU_IT-PER-HR,2.0,2.0,2.0
+hvac_3,UNITLESS,BTU_IT-PER-HR,3.0,UNITLESS,BTU_IT-PER-HR,3.0,3.0,3.0

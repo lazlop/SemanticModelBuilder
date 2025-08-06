@@ -35,7 +35,7 @@ warnings.filterwarnings("ignore")
 
 # %%
 # Creating survey, allow overwrite if there is something already there
-s = HPFlexSurvey('s223_test_site','test_build','.', overwrite=True, ontology=ontology)
+s = HPFlexSurvey(f'tutorial/{ontology}-test_site','test_build','.', overwrite=True, ontology=ontology)
 
 # Generating a simple building structure that prefills csv files. 
 s.easy_config(zone_space_window_list=[(2,2),(1,2),(1,3)])
@@ -50,7 +50,7 @@ sys.path.insert(0,'examples')
 from example_prefill_usage import prefill_csv_survey
 
 # %%
-prefill_csv_survey('s223_test_site/test_build')
+prefill_csv_survey(f'tutorial/{ontology}-test_site/test_build')
 
 # %%
 # Reading csv
@@ -62,9 +62,6 @@ s.read_csv()
 # # Testing SHACL Generation and Validation
 
 # %%
-og = clone.clone_graph(s.graph)
-
-# %%
 # Create handler
 handler = SHACLHandler(ontology=ontology)
 
@@ -74,25 +71,19 @@ handler.generate_shapes()
 # Save shapes
 handler.save_shapes('shapes.ttl')
 
-# Validate a model
-validation_result = handler.validate_model(s.graph)
-# conforms, results_graph, results_text
+# Run inference on model
+inferred_graph = handler.infer(s.graph)
 
-s.graph.serialize('test-s223-model-reasoned.ttl', format = 'ttl')
-if not validation_result.valid:
-    print("Validation failed:")
-    print(validation_result.report_string)
-
-# %%
-# lots of new inferred information
-(s.graph-og).print()
-
+inferred_graph.serialize(f'tutorial/{ontology}-test_site/test_build/reasoned.ttl', format = 'ttl')
+# if not validation_result.valid:
+#     print("Validation failed:")
+#     print(validation_result.report_string)
 # %% [markdown]
 # # Testing get Metadata
 
 # %%
 # still working on loader, will clean up class, but functionality about right
-loader = LoadModel("s223_test_site/test_build/test_build.ttl", ontology = ontology)
+loader = LoadModel(f'tutorial/{ontology}-test_site/test_build/reasoned.ttl', ontology = ontology)
 site_info = loader.get_all_building_objects()
 
 # %%
@@ -119,7 +110,7 @@ print(zone.tstats[0].resolution.is_delta)
 
 # %%
 # optionally just load everything as si 
-si_loader = LoadModel("s223_test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
+si_loader = LoadModel(f"tutorial/{ontology}-test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
 site_info = si_loader.get_all_building_objects()
 print(zone.tstats[0].resolution)
 
