@@ -5,7 +5,6 @@ from .load_model import LoadModel, get_thermostat_data
 from .parse_points import add_points
 from .unit_conversion import *
 from .utils import *
-from .inference import *
 
 __version__ = "0.1.0"
 __author__ = "Lazlo Paul"
