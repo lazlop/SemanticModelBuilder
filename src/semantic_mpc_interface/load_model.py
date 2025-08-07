@@ -137,21 +137,21 @@ class LoadModel:
                 if attr_name != 'name':
                     setattr(self, attr_name, kwargs.get(attr_name))
             for entity_type in contained_types:
-                setattr(self, f"{entity_type}", [])
+                setattr(self, f"{entity_type}s", [])
         
         def __repr__(self):
             attr_strs = [f"{attr}={getattr(self, attr, None)}" for attr in attributes.keys() if attr != 'name']
             counts = []
             for entity_type in contained_types:
-                attr_name = f"{entity_type}"
+                attr_name = f"{entity_type}s"
                 count = len(getattr(self, attr_name, []))
-                counts.append(f"{entity_type}={count}")
+                counts.append(f"{entity_type}s={count}")
 
             return f"{class_name}(name='{self.name}', {', '.join(attr_strs)}, {', '.join(counts)})"
         
         def create_add_method(entity_type):
             def add_method(self, entity):
-                attr_name = f"{entity_type}"
+                attr_name = f"{entity_type}s"
                 getattr(self, attr_name).append(entity)
             return add_method
         
@@ -168,92 +168,6 @@ class LoadModel:
         cls = type(class_name, (), methods)
         
         return cls
-    
-    # def _create_container_class(self, container_name: str, contained_types: List[str]) -> Type:
-    #     """
-    #     Create a container class (like Zone) that can hold multiple types of entities.
-    #     """
-    #     def __init__(self, name: str):
-    #         self.name = name
-    #         for entity_type in contained_types:
-    #             setattr(self, f"{entity_type}s", [])
-        
-    #     def __repr__(self):
-    #         counts = []
-    #         for entity_type in contained_types:
-    #             attr_name = f"{entity_type}s"
-    #             count = len(getattr(self, attr_name, []))
-    #             counts.append(f"{entity_type}s={count}")
-    #         return f"{container_name}(name='{self.name}', {', '.join(counts)})"
-        
-    #     # Add methods to add entities
-    #     def create_add_method(entity_type):
-    #         def add_method(self, entity):
-    #             attr_name = f"{entity_type}s"
-    #             getattr(self, attr_name).append(entity)
-    #         return add_method
-        
-    #     methods = {'__init__': __init__, '__repr__': __repr__}
-    #     for entity_type in contained_types:
-    #         methods[f"add_{entity_type}"] = create_add_method(entity_type)
-        
-    #     cls = type(container_name, (), methods)
-    #     return cls
-    
-    def _identify_entity_attributes(self, df: pd.DataFrame, entity_name: str) -> Dict[str, Any]:
-        """
-        Identify attributes for an entity based on column patterns in the dataframe.
-        Added delta quantity after the fact - fairly disconnected
-        """
-        attributes = {}
-        
-        # Look for columns that match the pattern: {entity_name}_{attribute}_{type}
-        pattern = rf"{re.escape(entity_name)}_(.+?)_(value|unit|name)$"
-        
-        attribute_bases = set()
-        for col in df.columns:
-            match = re.match(pattern, col)
-            if match:
-                attr_base = match.group(1)
-                attribute_bases.add(attr_base)
-        
-        # For each attribute base, try to create a Value object
-        for attr_base in attribute_bases:
-            name_col = f"{entity_name}_{attr_base}"
-            value_col = f"{entity_name}_{attr_base}_value"
-            unit_col = f"{entity_name}_{attr_base}_unit"
-            
-            # Check if we have meaningful data in the _name column (prefer this)
-            # TODO: This code never seems to be run, only backup code is. Should double check why. 
-            if name_col in df.columns and not df.empty and pd.notna(df[name_col].iloc[0]):
-                name_data = df[name_col].iloc[0]
-                value_data = df[value_col].iloc[0]
-                # Only create attribute if the _name column contains actual numeric/meaningful data
-                # Skip if it contains URI strings
-                # not sure if second part of if statement is important
-                try:
-                    # Try to convert to number to verify it's meaningful data
-                    float(value_data)
-                    unit_data = df[unit_col].iloc[0] if unit_col in df.columns and pd.notna(df[unit_col].iloc[0]) else None
-                    # get is delta
-                    is_delta = self._is_delta_quantity(name_data)
-                    value_obj = Value(value=value_data, unit=unit_data, is_delta = is_delta, name=name_data)
-                    if self.as_si_units:
-                        value_obj.convert_to_si()
-                    # Use clean attribute name (remove redundant prefixes and suffixes)
-                    clean_attr_name = attr_base.replace('name_', '').replace('_name', '')
-                    attributes[clean_attr_name] = value_obj
-                except (ValueError, TypeError):
-                    # Skip non-numeric data in _name columns
-                    pass
-            
-        # Also look for simple string attributes (columns that end with the entity name)
-        for col in df.columns:
-            if col == entity_name and col not in attributes:
-                if not df.empty:
-                    attributes[col] = df[col].iloc[0]
-        
-        return attributes
 
     def _is_delta_quantity(self, uri):
         is_delta = self.g.value(URIRef(uri), QUDT["isDeltaQuantity"])
@@ -352,42 +266,6 @@ class LoadModel:
                 entities.remove(entity_types[main_entity_col])
         if len(entity_class_relation) > 0:
             entity_class_relation[entity_types[main_entity_col]] += reverse_related_to
-        # # Create classes for each entity type
-        # # NOTE: all stuff that I would use b-schema for
-        # entity_classes = {}
-        # entity_class_relation = {}
-        # for col, entity_type in entity_types.items():
-        #     # Get attributes for this entity type from the dataframe
-        #     # TODO: Not everything attribute may be a value, can exapnd this to include one for misc
-        #     print(attr_types[col])
-        #     attrs = {attr: 'Value' for attr in attr_types[col]}
-            
-        #     entity_classes[entity_type] = self._create_dynamic_class(
-        #         entity_type, attrs
-        #     )
-        #     # get relationship between entity classes
-        #     # TODO: Add predicates to query in the make_where
-        #     for entity_s in self.g.subjects(A, HPFS[entity_type]):
-        #         other_types = [HPFS[ec] for ec in entity_types.values() if ec != entity_type]
-        #         for p, other_entity in self.g.predicate_objects(entity_s):
-        #             for other_entity_type in self.g.objects(other_entity, A):
-        #                 if other_entity_type in other_types:
-        #                     print(other_entity_type)
-        #                     entity_class_relation[entity_type] = get_uri_name(self.g,o2)
-
-
-        # NOTE: make template names and semantics more tightly connected
-        # get related entities (direction of relation doesn't matter)
-        related_entities = entity_entity_cols[main_entity_col]
-        
-        # Create container class
-        # TODO: Check if this is needed
-        # container_class = self._create_dynamic_class(
-        #     template_name.replace('_', ''), 
-        #     contained_types = [et for et in related_entities],
-        #     attributes = {}
-        # )
-
         # TODO: deal with underscores vs. dashes more consistently
         entity_classes = {}
         for entity_type, attrs in attr_types.items():
@@ -456,9 +334,8 @@ class LoadModel:
                     entity = row_entities[entity_col]
                     for related_entity_col in related_entities_cols:
                         related_entity = row_entities[related_entity_col]
-                        existing_entities = vars(entity).get(entity_types[related_entity_col].replace('-','_'), [])
+                        existing_entities = vars(entity).get(entity_types[related_entity_col].replace('-','_') + 's', [])
                         if related_entity in existing_entities:
-                            print(related_entity, 'ALREADY PRESENT')
                             continue
                         else:
                             add_method_name = f"add_{entity_types[related_entity_col].replace('-','_')}"
@@ -466,7 +343,7 @@ class LoadModel:
                             add_method(related_entity)
         
             assemble_objects(container_skeleton)
-        return containers
+        return list(containers.values())
 
     def _get_objects(self, template_name: str = 'hvac-zone'):
         """
