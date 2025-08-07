@@ -22,6 +22,24 @@ UNIT_CONVERSIONS = {
     UNIT['BTU_IT-PER-HR']:UNIT['KiloW'],
 }
 
+def build_tree(graph):
+    def dfs(node, visited):
+        if node in visited:
+            return {}  # Prevent cycles
+        visited.add(node)
+        children = graph.get(node, [])
+        return {child: dfs(child, visited.copy()) for child in children}
+
+    # Determine root nodes (not referenced as values)
+    all_nodes = set(graph.keys())
+    referenced = {child for children in graph.values() for child in children}
+    roots = all_nodes - referenced
+
+    tree = {}
+    for root in roots:
+        tree[root] = dfs(root, set())
+    return tree
+
 # TODO: Still in vibe coded state - should clean up and generalize a little
 class Value:
     def __init__(self, value, unit, is_delta = False, name=None):
@@ -51,6 +69,7 @@ class LoadModel:
     def __init__(self, source: Union[str, Graph], ontology: str, template_dict = {
             'sites': 'site',
             'zones': 'hvac-zone',}, as_si_units = False):
+        #TODO: Consider changing to just template list. Renaming of templates is not important nor consistent
         if os.path.isfile(source):
             self.g = Graph(store = 'Oxigraph')
             self.g.parse(source)
@@ -300,8 +319,6 @@ class LoadModel:
                                 entity_class_relation[entity_type] = []
                             if get_uri_name(self.g,other_entity_type) not in entity_class_relation[entity_type]:
                                 entity_class_relation[entity_type].append(get_uri_name(self.g,other_entity_type))
-
-        print(entity_types)
         # get entity_col to value_cols and entity_col to entity_col
         for col, entity_type in entity_types.items():
             entity_attr_cols[col] = []
@@ -316,15 +333,25 @@ class LoadModel:
                     entity_entity_cols[col].append(other_entity_col)
 
         # will have to reshape entity_entity_cols since that follows triple in graph, and I don't care about direction of relations
+        # Should probably do for types too
         reverse_related_to = []
+        reverse_related_to_types = []
         for entity, entities in entity_entity_cols.items():
             if main_entity_col in entities:
                 reverse_related_to.append(entity)
                 entities.remove(main_entity_col)
+                reverse_related_to_types.append(entity_templates)
         entity_entity_cols[main_entity_col] += reverse_related_to
 
-        print(entity_attr_cols)
-        print(entity_entity_cols)
+        # Should probably do for types too
+        # TODO: Use less dictionaries - decide which are necessary
+        reverse_related_to = []
+        for entity, entities in entity_class_relation.items():
+            if entity_types[main_entity_col] in entities:
+                reverse_related_to.append(entity)
+                entities.remove(entity_types[main_entity_col])
+        if len(entity_class_relation) > 0:
+            entity_class_relation[entity_types[main_entity_col]] += reverse_related_to
         # # Create classes for each entity type
         # # NOTE: all stuff that I would use b-schema for
         # entity_classes = {}
@@ -355,33 +382,37 @@ class LoadModel:
         
         # Create container class
         # TODO: Check if this is needed
-        container_class = self._create_dynamic_class(
-            template_name.replace('_', ''), 
-            contained_types = [et for et in related_entities],
-            attributes = {}
-        )
+        # container_class = self._create_dynamic_class(
+        #     template_name.replace('_', ''), 
+        #     contained_types = [et for et in related_entities],
+        #     attributes = {}
+        # )
 
+        # TODO: deal with underscores vs. dashes more consistently
         entity_classes = {}
         for entity_type, attrs in attr_types.items():
+            contained_types = entity_class_relation[entity_type] if entity_type in entity_class_relation.keys() else []
             entity_classes[entity_type] = self._create_dynamic_class(
-                entity_type, contained_types=[],attributes = {attr: 'Value' for attr in attrs}
+                entity_type.replace('-','_'), contained_types=contained_types,attributes = {attr.replace('-','_'): 'Value' for attr in attrs}
             )
+        for entity_type, contained_types in entity_class_relation.items():
+            if entity_type in entity_classes.keys():
+                continue
+            contained_types = entity_class_relation[entity_type] if entity_type in entity_class_relation.keys() else []
+            contained_types = [c.replace('-','_') for c in contained_types]
+            entity_classes[entity_type] = self._create_dynamic_class(
+                entity_type.replace('-','_'), contained_types=contained_types, attributes = {}
+            )            
+        
+        container_class = entity_classes[entity_types[main_entity_col]]
 
-        completed_entities = []
+        # # TODO: Delete if unused
+        # completed_entities = {}
+        entity_dict = {}
         containers = {}
         for _, row in df.iterrows():
-            container_name = row[main_entity_col]
-            
-            # Create container if it doesn't exist
-            if container_name not in containers:
-                containers[container_name] = container_class(container_name)
-            
-            container = containers[container_name]
-
-            row_entities = []
+            row_entities = {}
             for col, val in row.items():
-                if col in completed_entities:
-                    continue
                 if col in entity_types.keys():
                     # class name
                     class_name = entity_types[col]
@@ -391,7 +422,7 @@ class LoadModel:
                     entity_cols = entity_entity_cols[col]
                     # related attr_cols
                     attr_cols = entity_attr_cols[col]
-                    attrs = []
+                    attrs = {}
                     for attr_col in attr_cols:
                         attr_class_name = value_types[attr_col]
                         attr_value = row[attr_col + '_value']
@@ -401,52 +432,41 @@ class LoadModel:
                         attr = Value(value=attr_value, unit=attr_unit, is_delta = is_delta, name=attr_name)
                         if self.as_si_units:
                             attr.convert_to_si()
-                        attrs.append(attr)
+                        # TODO: Will cause issue if there are multiple identical properties on a class. May need to change
+                        attrs[attr_class_name.replace('-','_')] = attr
                     entity_class = entity_classes[class_name]
-                    entity = entity_class(name=entity_name, **{attr.name:attr for attr in attrs})
-                    row_entities.append(entity)
-            print(row_entities)
-            if col not in completed_entities: 
-                add_method = getattr(container, f"add_{entity_type}")
-                add_method(entity)
-
-                completed_entities.append(col)
-
-            # container_name = row[main_entity_col]
+                    if entity_name not in entity_dict.keys():
+                        entity = entity_class(name=entity_name, **attrs)
+                        entity_dict[entity_name] = entity
+                    else:
+                        entity = entity_dict[entity_name]
+                    row_entities[col] = entity
             
-            # # Create container if it doesn't exist
-            # if container_name not in containers:
-            #     containers[container_name] = container_class(container_name)
+            # TODO: Consider how generalizable this approach is, creating the classes above and relating here
+            container_name = row[main_entity_col]
             
-            # container = containers[container_name]
-            
-            # # Create entities for each type
-            # # TODO: Make all brick values that aren't points EntityPropertyValues 
-            # for col, entity_type in entity_types.items():
-            #     entity_name_col = {v:k for k,v in entity_types.items()}.get(entity_type)
-                
-            #     if entity_name_col in row and pd.notna(row[entity_name_col]):
-            #         entity_name = row[entity_name_col]
-                    
-            #         # Get attributes for this entity
-            #         entity_attributes = attr_types[entity_type]
-                    
-            #         #TODO: Check if this is needed
-            #         # Remove 'name' from entity_attributes to avoid conflict with positional name parameter
-            #         filtered_attributes = {k: v for k, v in entity_attributes.items() if k != 'name'}
-                    
-            #         # Create entity instance
-            #         entity_class = entity_classes[entity_type]
-            #         entity = entity_class(name=entity_name, **filtered_attributes)
-                    
-            #         # Add to container (check for duplicates)
-            #         entities_list = getattr(container, f"{entity_type}s")
-            #         if not any(e.name == entity.name for e in entities_list):
-            #             add_method = getattr(container, f"add_{entity_type}")
-            #             add_method(entity)
+            # Create container if it doesn't exist
+            if container_name not in containers:
+                containers[container_name] = entity_dict[container_name] 
 
-        print(containers)
-        return list(containers.values())
+            container_skeleton = build_tree(entity_entity_cols)
+            def assemble_objects(tree):
+                for entity_col, related_entities_cols in tree.items():
+                    assemble_objects(related_entities_cols)
+                    entity = row_entities[entity_col]
+                    for related_entity_col in related_entities_cols:
+                        related_entity = row_entities[related_entity_col]
+                        existing_entities = vars(entity).get(entity_types[related_entity_col].replace('-','_'), [])
+                        if related_entity in existing_entities:
+                            print(related_entity, 'ALREADY PRESENT')
+                            continue
+                        else:
+                            add_method_name = f"add_{entity_types[related_entity_col].replace('-','_')}"
+                            add_method = getattr(entity, add_method_name)
+                            add_method(related_entity)
+        
+            assemble_objects(container_skeleton)
+        return containers
 
     def _get_objects(self, template_name: str = 'hvac-zone'):
         """
