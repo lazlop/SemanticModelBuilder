@@ -308,7 +308,7 @@ class LoadModel:
                     if not any(e.name == entity.name for e in entities_list):
                         add_method = getattr(container, f"add_{entity_type}")
                         add_method(entity)
-        
+            
         return list(containers.values())
 
     def _get_objects(self, template_name: str = 'hvac-zone'):
