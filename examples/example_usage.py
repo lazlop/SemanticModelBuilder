@@ -26,26 +26,26 @@ site_info = loader.get_all_building_objects()
 print(site_info)
 
 # %%
-zone = site_info['zones'][0]
+zone = site_info['zones'][-1]
 print(zone)
 
 # %%
-zone.windows
+print(zone.spaces[0].area)
 
 # %%
-zone.windows[0].area.name
+# zone.windows[0].area.name
 
-# %%
-zone.tstats[0]
+# # %%
+# zone.tstats[0]
 
-# %%
-print(zone.tstats[0].resolution)
-zone.tstats[0].resolution.convert_to_si()
-print(zone.tstats[0].resolution)
-print(zone.tstats[0].resolution.is_delta)
+# # %%
+# print(zone.tstats[0].resolution)
+# zone.tstats[0].resolution.convert_to_si()
+# print(zone.tstats[0].resolution)
+# print(zone.tstats[0].resolution.is_delta)
 
-# %%
-# optionally just load everything as si 
-si_loader = LoadModel(f"tutorial/{ontology}-test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
-site_info = si_loader.get_all_building_objects()
-print(zone.tstats[0].resolution)
+# # %%
+# # optionally just load everything as si 
+# si_loader = LoadModel(f"tutorial/{ontology}-test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
+# site_info = si_loader.get_all_building_objects()
+# print(zone.tstats[0].resolution)

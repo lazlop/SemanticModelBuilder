@@ -1,5 +1,5 @@
 name,area-unit,area
-space_1_1,FT2,
-space_1_2,FT2,
-space_2_1,FT2,
-space_3_1,FT2,
+space_1_1,FT2,1.0
+space_1_2,FT2,2.0
+space_2_1,FT2,3.0
+space_3_1,FT2,4.0
