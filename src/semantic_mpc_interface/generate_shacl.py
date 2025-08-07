@@ -249,6 +249,7 @@ class SHACLHandler:
                     self.shapes_graph, HPFS, [shape_uri, p]
                 )
                 self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
                 self.shapes_graph.add((prop_shape, SH.minCount, Literal(count)))
                 self.shapes_graph.add((prop_shape, SH.maxCount, Literal(count)))
                 self.shapes_graph.add((prop_shape, SH.path, p))
@@ -257,6 +258,7 @@ class SHACLHandler:
                     self.shapes_graph, HPFS, [shape_uri], "_noAspects"
                 )
                 self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
                 self.shapes_graph.add((prop_shape, SH.minCount, Literal(0)))
                 self.shapes_graph.add((prop_shape, SH.maxCount, Literal(0)))
                 self.shapes_graph.add((prop_shape, SH.path, S223.hasAspect))

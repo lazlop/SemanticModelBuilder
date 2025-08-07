@@ -1,8 +1,8 @@
 from typing import Optional
-
+from collections import Counter
 import pandas as pd
 import yaml
-from rdflib import Graph, Literal, URIRef
+from rdflib import Graph, Literal, URIRef, BNode
 
 from .namespaces import *
 
@@ -131,3 +131,39 @@ def get_template_types(ontology):
     entity_templates = list(entities_data.keys()) if entities_data else []
     
     return value_templates, entity_templates
+
+def inline_shapes(g: Graph):
+    # 1. Get all entities defined in this graph (subject of rdf:type)
+    defined_entities = set(s for s, p, o in g.triples((None, RDF.type, None)) if isinstance(s, URIRef))
+
+    # 2. Count object references (excluding literals)
+    object_counter = Counter()
+    for s, p, o in g:
+        if isinstance(o, URIRef):
+            object_counter[o] += 1
+
+    # 3. Find single-use, defined entities
+    candidates = {uri for uri in defined_entities if object_counter[uri] == 1}
+
+    # 4. Map for URIRef -> BNode replacement
+    uri_to_bnode = {}
+    new_g = Graph()
+    for prefix, ns in g.namespaces():
+        new_g.bind(prefix, ns)
+
+    # 5. Build the mapping for nodes to be replaced
+    for s, p, o in g:
+        if isinstance(o, URIRef) and o in candidates:
+            if o not in uri_to_bnode:
+                uri_to_bnode[o] = BNode()
+
+    # 6. Rewrite the graph with substitutions
+    for s, p, o in g:
+        # Replace object if needed
+        if isinstance(o, URIRef) and o in uri_to_bnode:
+            o = uri_to_bnode[o]
+        # Replace subject if needed (very rare, but possible)
+        if isinstance(s, URIRef) and s in uri_to_bnode:
+            s = uri_to_bnode[s]
+        new_g.add((s, p, o))
+    return new_g

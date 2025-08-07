@@ -1,5 +1,5 @@
 {
-    "site_id": "s223-test_site",
+    "site_id": "s223-example",
     "hvac_type": "hp-rtu",
     "variable_params": {
         "hvac-zone": {},
