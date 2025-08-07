@@ -9,6 +9,18 @@ has-point:
     @prefix hpf: <urn:hpflex#> .
     p:name s223:hasProperty p:target.
 
+#TODO: Use for alignment with brick templates
+has-value:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name s223:hasValue p:target.
+
 has-reference:
   body: >
     @prefix p: <urn:___param___#> .

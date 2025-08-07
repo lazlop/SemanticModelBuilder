@@ -109,6 +109,8 @@ class LoadModel:
             q_n = convert_to_prefixed(node, graph) #.replace('-','_')
         return q_n
 
+    # TODO: Doing some unnecessary querying that I then re-query. can optimize
+    # TODO: May be good to use additional results from templates to make sure I'm returning all entities
     def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
         where = []
@@ -173,6 +175,17 @@ class LoadModel:
         is_delta = self.g.value(URIRef(uri), QUDT["isDeltaQuantity"])
         return bool(is_delta)
         # return True if is_delta == URIRef('true') else False
+
+    def _get_unit(self, uri):
+        unit = self.g.value(URIRef(uri), QUDT["hasUnit"])
+        return unit
+    
+    # TODO: use has-value template
+    def _get_value(self, uri):
+        if self.ontology == 's223': 
+            return self.g.value(URIRef(uri), S223['hasValue'])
+        else:
+            raise ValueError('Ontology not implemented')
 
     def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):
         """
@@ -301,10 +314,11 @@ class LoadModel:
                     # related attr_cols
                     attr_cols = entity_attr_cols[col]
                     attrs = {}
+                    # TODO: Relying on naming convention in template, use hasUnit and hasValue/value instead. 
                     for attr_col in attr_cols:
                         attr_class_name = value_types[attr_col]
-                        attr_value = row[attr_col + '_value']
-                        attr_unit = row.get(attr_col + '_unit', None)
+                        attr_value = self._get_value(row[attr_col])
+                        attr_unit = self._get_unit(row[attr_col])
                         attr_name = row[attr_col]
                         is_delta = self._is_delta_quantity(attr_name)
                         attr = Value(value=attr_value, unit=attr_unit, is_delta = is_delta, name=attr_name)
