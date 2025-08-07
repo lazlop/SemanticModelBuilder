@@ -107,7 +107,7 @@ class LoadModel:
         query = f"""{prefixes}\nSELECT DISTINCT * WHERE {{ {where} }}"""
         return query
 
-    def _create_dynamic_class(self, class_name: str, attributes: Dict[str, str]) -> Type:
+    def _create_dynamic_class(self, class_name: str, contained_types: List[str], attributes: Dict[str, str]) -> Type:
         """
         Dynamically create a class with the specified attributes.
         """
@@ -117,20 +117,70 @@ class LoadModel:
                 # Skip 'name' attribute to avoid conflict with the positional name parameter
                 if attr_name != 'name':
                     setattr(self, attr_name, kwargs.get(attr_name))
+            for entity_type in contained_types:
+                setattr(self, f"{entity_type}", [])
         
         def __repr__(self):
             attr_strs = [f"{attr}={getattr(self, attr, None)}" for attr in attributes.keys() if attr != 'name']
-            return f"{class_name}(name='{self.name}', {', '.join(attr_strs)})"
+            counts = []
+            for entity_type in contained_types:
+                attr_name = f"{entity_type}"
+                count = len(getattr(self, attr_name, []))
+                counts.append(f"{entity_type}={count}")
+
+            return f"{class_name}(name='{self.name}', {', '.join(attr_strs)}, {', '.join(counts)})"
         
-        # Create the class dynamically
-        cls = type(class_name, (), {
+        def create_add_method(entity_type):
+            def add_method(self, entity):
+                attr_name = f"{entity_type}"
+                getattr(self, attr_name).append(entity)
+            return add_method
+        
+        methods = {
             '__init__': __init__,
             '__repr__': __repr__,
             '_attributes': attributes
-        })
+        }
+
+        for entity_type in contained_types:
+            methods[f"add_{entity_type}"] = create_add_method(entity_type)
+        
+        # Create the class dynamically
+        cls = type(class_name, (), methods)
         
         return cls
-
+    
+    # def _create_container_class(self, container_name: str, contained_types: List[str]) -> Type:
+    #     """
+    #     Create a container class (like Zone) that can hold multiple types of entities.
+    #     """
+    #     def __init__(self, name: str):
+    #         self.name = name
+    #         for entity_type in contained_types:
+    #             setattr(self, f"{entity_type}s", [])
+        
+    #     def __repr__(self):
+    #         counts = []
+    #         for entity_type in contained_types:
+    #             attr_name = f"{entity_type}s"
+    #             count = len(getattr(self, attr_name, []))
+    #             counts.append(f"{entity_type}s={count}")
+    #         return f"{container_name}(name='{self.name}', {', '.join(counts)})"
+        
+    #     # Add methods to add entities
+    #     def create_add_method(entity_type):
+    #         def add_method(self, entity):
+    #             attr_name = f"{entity_type}s"
+    #             getattr(self, attr_name).append(entity)
+    #         return add_method
+        
+    #     methods = {'__init__': __init__, '__repr__': __repr__}
+    #     for entity_type in contained_types:
+    #         methods[f"add_{entity_type}"] = create_add_method(entity_type)
+        
+    #     cls = type(container_name, (), methods)
+    #     return cls
+    
     def _identify_entity_attributes(self, df: pd.DataFrame, entity_name: str) -> Dict[str, Any]:
         """
         Identify attributes for an entity based on column patterns in the dataframe.
@@ -186,83 +236,30 @@ class LoadModel:
         
         return attributes
 
-    def _create_container_class(self, container_name: str, contained_types: List[str]) -> Type:
-        """
-        Create a container class (like Zone) that can hold multiple types of entities.
-        """
-        def __init__(self, name: str):
-            self.name = name
-            for entity_type in contained_types:
-                setattr(self, f"{entity_type.lower()}s", [])
-        
-        def __repr__(self):
-            counts = []
-            for entity_type in contained_types:
-                attr_name = f"{entity_type.lower()}s"
-                count = len(getattr(self, attr_name, []))
-                counts.append(f"{entity_type.lower()}s={count}")
-            return f"{container_name}(name='{self.name}', {', '.join(counts)})"
-        
-        # Add methods to add entities
-        def create_add_method(entity_type):
-            def add_method(self, entity):
-                attr_name = f"{entity_type.lower()}s"
-                getattr(self, attr_name).append(entity)
-            return add_method
-        
-        methods = {'__init__': __init__, '__repr__': __repr__}
-        for entity_type in contained_types:
-            methods[f"add_{entity_type.lower()}"] = create_add_method(entity_type)
-        
-        cls = type(container_name, (), methods)
-        return cls
-
     def _is_delta_quantity(self, uri):
         is_delta = self.g.value(URIRef(uri), QUDT["isDeltaQuantity"])
         return bool(is_delta)
         # return True if is_delta == URIRef('true') else False
 
-    def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str):
+    def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):
         """
         Convert dataframe results into objects based on template structure.
         This is a generalized version that works with any template.
         """
         if df.empty:
             return []
-        
-        # Get the main entity name (usually the first column or 'name')
-        main_entity_col = 'name' if 'name' in df.columns else df.columns[0]
-        #TODO: Fix the query generation. Should get all this info in one query 
-        
-        # Identify all entity types in the dataframe by looking at column patterns
-        entity_types = set()
-        for col in df.columns:
-            # Look for patterns like "entity_name" or "entity_name_attribute_type"
-            if '_' in col:
-                parts = col.split('_')
-                if len(parts) >= 2 and parts[-1] in ['name', 'value', 'unit']:
-                    # This might be an entity attribute
-                    if len(parts) == 2:  # entity_name
-                        entity_types.add(parts[0])
-                    elif len(parts) >= 3:  # entity_attribute_type
-                        entity_types.add(parts[0])
-            else:
-                # Simple column name might be an entity
-                if col != main_entity_col:
-                    entity_types.add(col)
-        
-        # Remove the main entity from the list if it's there
-        main_entity_name = template_name #.replace('-', '_')
-        entity_types.discard(main_entity_name)
-        entity_types.discard('name')
-
   
         entity_types = {}
+        value_types = {}
         attr_types = {}
         entity_class_relation = {}
+        # entity column to attribute columns
+        entity_attr_cols = {}
+        entity_entity_cols = {}
         row = df.iloc[0]
         # NOTE: Tried using rdflib instead of SPARQL, still got a little complicated
         # TODO: Have a more structured/queryiable categorization of entities/value templates. Maybe add superclasses for hpfs:entity and hpfs:value
+
         value_templates,entity_templates = get_template_types(ontology=self.ontology)
 
         # get all the entity types
@@ -272,6 +269,8 @@ class LoadModel:
                     entity_type = get_uri_name(self.g,entity_class)
                     if entity_type in entity_templates:
                         entity_types[col] = entity_type
+                    if entity_type in value_templates:
+                        value_types[col] = entity_type
             
         # get values of entity types 
         for col, entity_type in entity_types.items():
@@ -286,18 +285,46 @@ class LoadModel:
                                     continue
                                 if entity_type not in attr_types.keys():
                                     attr_types[entity_type] = []
-                                attr_types[entity_type].append(attr_type)
+                                if attr_type not in attr_types[entity_type]:
+                                    attr_types[entity_type].append(attr_type)
         
         # Get entity relations of entity types
+        # TODO: Check if there is a pythonic way to do this without looping. Maybe just switch to SPARQL
         for col, entity_type in entity_types.items():
             other_types = [HPFS[ec] for ec in entity_types.values() if ec != entity_type]
             for entity_s in self.g.subjects(A, HPFS[entity_type]):
                 for p, other_entity in self.g.predicate_objects(entity_s):
                     for other_entity_type in self.g.objects(other_entity, A):
                         if other_entity_type in other_types:
-                            print(other_entity_type)
-                            entity_class_relation[entity_type] = get_uri_name(self.g,other_entity_type)
+                            if entity_type not in entity_class_relation.keys():
+                                entity_class_relation[entity_type] = []
+                            if get_uri_name(self.g,other_entity_type) not in entity_class_relation[entity_type]:
+                                entity_class_relation[entity_type].append(get_uri_name(self.g,other_entity_type))
 
+        print(entity_types)
+        # get entity_col to value_cols and entity_col to entity_col
+        for col, entity_type in entity_types.items():
+            entity_attr_cols[col] = []
+            entity_entity_cols[col] = []
+            attrs = attr_types.get(entity_type,[])
+            other_entities = entity_class_relation.get(entity_type, [])
+            for attr_col, attr_type in value_types.items():
+                if attr_type in attrs:
+                    entity_attr_cols[col].append(attr_col)
+            for other_entity_col, other_entity_type in entity_types.items():
+                if other_entity_type in other_entities:
+                    entity_entity_cols[col].append(other_entity_col)
+
+        # will have to reshape entity_entity_cols since that follows triple in graph, and I don't care about direction of relations
+        reverse_related_to = []
+        for entity, entities in entity_entity_cols.items():
+            if main_entity_col in entities:
+                reverse_related_to.append(entity)
+                entities.remove(main_entity_col)
+        entity_entity_cols[main_entity_col] += reverse_related_to
+
+        print(entity_attr_cols)
+        print(entity_entity_cols)
         # # Create classes for each entity type
         # # NOTE: all stuff that I would use b-schema for
         # entity_classes = {}
@@ -309,7 +336,7 @@ class LoadModel:
         #     attrs = {attr: 'Value' for attr in attr_types[col]}
             
         #     entity_classes[entity_type] = self._create_dynamic_class(
-        #         entity_type.capitalize(), attrs
+        #         entity_type, attrs
         #     )
         #     # get relationship between entity classes
         #     # TODO: Add predicates to query in the make_where
@@ -322,18 +349,26 @@ class LoadModel:
         #                     entity_class_relation[entity_type] = get_uri_name(self.g,o2)
 
 
-
-        main_entity_name = template_name
+        # NOTE: make template names and semantics more tightly connected
+        # get related entities (direction of relation doesn't matter)
+        related_entities = entity_entity_cols[main_entity_col]
         
         # Create container class
-        container_class = self._create_container_class(
-            main_entity_name.replace('_', '').capitalize(), 
-            [et.capitalize() for et in entity_types]
+        # TODO: Check if this is needed
+        container_class = self._create_dynamic_class(
+            template_name.replace('_', ''), 
+            contained_types = [et for et in related_entities],
+            attributes = {}
         )
-        
-        # Process the dataframe
+
+        entity_classes = {}
+        for entity_type, attrs in attr_types.items():
+            entity_classes[entity_type] = self._create_dynamic_class(
+                entity_type, contained_types=[],attributes = {attr: 'Value' for attr in attrs}
+            )
+
+        completed_entities = []
         containers = {}
-        
         for _, row in df.iterrows():
             container_name = row[main_entity_col]
             
@@ -342,31 +377,75 @@ class LoadModel:
                 containers[container_name] = container_class(container_name)
             
             container = containers[container_name]
+
+            row_entities = []
+            for col, val in row.items():
+                if col in completed_entities:
+                    continue
+                if col in entity_types.keys():
+                    # class name
+                    class_name = entity_types[col]
+                    # col_name 
+                    entity_name = val
+                    # related_entity_cols
+                    entity_cols = entity_entity_cols[col]
+                    # related attr_cols
+                    attr_cols = entity_attr_cols[col]
+                    attrs = []
+                    for attr_col in attr_cols:
+                        attr_class_name = value_types[attr_col]
+                        attr_value = row[attr_col + '_value']
+                        attr_unit = row.get(attr_col + '_unit', None)
+                        attr_name = row[attr_col]
+                        is_delta = self._is_delta_quantity(attr_name)
+                        attr = Value(value=attr_value, unit=attr_unit, is_delta = is_delta, name=attr_name)
+                        if self.as_si_units:
+                            attr.convert_to_si()
+                        attrs.append(attr)
+                    entity_class = entity_classes[class_name]
+                    entity = entity_class(name=entity_name, **{attr.name:attr for attr in attrs})
+                    row_entities.append(entity)
+            print(row_entities)
+            if col not in completed_entities: 
+                add_method = getattr(container, f"add_{entity_type}")
+                add_method(entity)
+
+                completed_entities.append(col)
+
+            # container_name = row[main_entity_col]
             
-            # Create entities for each type
-            # TODO: Make all brick values that aren't points EntityPropertyValues 
-            for entity_type in entity_types:
-                entity_name_col = f"{entity_type}_name" if f"{entity_type}_name" in df.columns else entity_type
+            # # Create container if it doesn't exist
+            # if container_name not in containers:
+            #     containers[container_name] = container_class(container_name)
+            
+            # container = containers[container_name]
+            
+            # # Create entities for each type
+            # # TODO: Make all brick values that aren't points EntityPropertyValues 
+            # for col, entity_type in entity_types.items():
+            #     entity_name_col = {v:k for k,v in entity_types.items()}.get(entity_type)
                 
-                if entity_name_col in row and pd.notna(row[entity_name_col]):
-                    entity_name = row[entity_name_col]
+            #     if entity_name_col in row and pd.notna(row[entity_name_col]):
+            #         entity_name = row[entity_name_col]
                     
-                    # Get attributes for this entity
-                    entity_attributes = self._identify_entity_attributes(pd.DataFrame([row]), entity_type)
+            #         # Get attributes for this entity
+            #         entity_attributes = attr_types[entity_type]
                     
-                    # Remove 'name' from entity_attributes to avoid conflict with positional name parameter
-                    filtered_attributes = {k: v for k, v in entity_attributes.items() if k != 'name'}
+            #         #TODO: Check if this is needed
+            #         # Remove 'name' from entity_attributes to avoid conflict with positional name parameter
+            #         filtered_attributes = {k: v for k, v in entity_attributes.items() if k != 'name'}
                     
-                    # Create entity instance
-                    entity_class = entity_classes[entity_type]
-                    entity = entity_class(name=entity_name, **filtered_attributes)
+            #         # Create entity instance
+            #         entity_class = entity_classes[entity_type]
+            #         entity = entity_class(name=entity_name, **filtered_attributes)
                     
-                    # Add to container (check for duplicates)
-                    entities_list = getattr(container, f"{entity_type}s")
-                    if not any(e.name == entity.name for e in entities_list):
-                        add_method = getattr(container, f"add_{entity_type}")
-                        add_method(entity)
-        
+            #         # Add to container (check for duplicates)
+            #         entities_list = getattr(container, f"{entity_type}s")
+            #         if not any(e.name == entity.name for e in entities_list):
+            #             add_method = getattr(container, f"add_{entity_type}")
+            #             add_method(entity)
+
+        print(containers)
         return list(containers.values())
 
     def _get_objects(self, template_name: str = 'hvac-zone'):
