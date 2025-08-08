@@ -112,7 +112,7 @@ class LoadModel:
     # TODO: Doing some unnecessary querying that I then re-query. can optimize and reduce query size, also make less brittle
     # TODO: May be good to use additional results from templates to make sure I'm returning all entities
     # TODO: SPARQL has issue with enumeration kinds. Either reimplement logic to get correct SPARQL results or use information inferred from SHACL. 
-    # TODO: Going to implement a temporary patch for this - maybe just by adding HPFS classes from templates
+    # TODO: Going to implement a temporary patch for this 
     def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
         where = []
@@ -121,12 +121,21 @@ class LoadModel:
             qs = self._get_var_name(graph, s)
             qo = self._get_var_name(graph, o)
             qp = convert_to_prefixed(p, graph) #.replace('-','_')
-            if p == S223['hasAspect'] and (s not in filters.keys()):
-                aspects = list(graph.objects(s,p))
-                aspects = [self._get_var_name(graph,a) for a in aspects]
-                aspect_var = qs + '_aspects_in'
-                where.append(f"{qs} {qp} {aspect_var} .")
-                filters[s] = f"FILTER({aspect_var} IN ({','.join(aspects)}) ) "
+            #TODO: Might have to do this closed set filter for all aspects, roles, etc. on everything
+            #TODO: Do 223 ontology inferencing before this and change specific property callouts to just o == S223['Property]
+            if p == A and (o == S223['QuantifiableObservableProperty'] or 
+                           o == S223['QuantifiableActuatableProperty'] or
+                           o == S223['EnumeratedObservableProperty'] or 
+                           o == S223['EnumeratedActuatableProperty'] ) and (s not in filters.keys()):
+                aspects = list(graph.objects(s,S223['hasAspect']))
+                if len(aspects) > 0:
+                    aspects = [self._get_var_name(graph,a) for a in aspects]
+                    aspect_var = qs + '_aspects_in'
+                    where.append(f"{qs} <{str(S223['hasAspect'])}> {aspect_var} .")
+                    filters[s] = f"FILTER({aspect_var} IN ({','.join(aspects)}) ) "
+                else:
+                    aspect_var = qs + '_aspects_in'
+                    filters[s] = f"FILTER NOT EXISTS {{ {qs} <{str(S223['hasAspect'])}> {aspect_var} }}"
             where.append(f"{qs} {qp} {qo} .")
         where += list(filters.values())
         return "\n".join(where)
@@ -269,13 +278,12 @@ class LoadModel:
 
         # reshape direction relationships to make direction from main template of focus
         reverse_related_to = []
-        reverse_related_to_types = []
         for entity, entities in entity_entity_cols.items():
             if main_entity_col in entities:
                 reverse_related_to.append(entity)
                 entities.remove(main_entity_col)
-                reverse_related_to_types.append(entity_templates)
-        entity_entity_cols[main_entity_col] += reverse_related_to
+        if len(reverse_related_to) > 0:
+            entity_entity_cols[main_entity_col] += reverse_related_to
 
         # creating type dictionaries to dynamically instantiate classes
         entity_attr_types = { 
@@ -320,9 +328,9 @@ class LoadModel:
                     # col_name 
                     entity_name = val
                     # related_entity_cols
-                    entity_cols = entity_entity_cols[col]
+                    entity_cols = entity_entity_cols[col] if col in entity_entity_cols.keys() else []
                     # related attr_cols
-                    attr_cols = entity_attr_cols[col]
+                    attr_cols = entity_attr_cols[col] if col in entity_attr_cols.keys() else []
                     attrs = {}
                     # TODO: Relying on naming convention in template, use hasUnit and hasValue/value instead. 
                     for attr_col in attr_cols:
@@ -514,10 +522,10 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                     thermostat_data["zone_ids"].append(zone_id)
                     
                     # Process thermostat properties
-                    if hasattr(tstat, 'tolerance') and tstat.tolerance:
-                        tolerance_val = tstat.tolerance.value
-                        thermostat_data["heat_tolerance"].append(-1.0 * tolerance_val)
-                        thermostat_data["cool_tolerance"].append(1.0 * tolerance_val)
+                    if hasattr(tstat, 'tstat_tolerance') and tstat.tstat_tolerance:
+                        tstat_tolerance_val = tstat.tstat_tolerance.value
+                        thermostat_data["heat_tolerance"].append(-1.0 * tstat_tolerance_val)
+                        thermostat_data["cool_tolerance"].append(1.0 * tstat_tolerance_val)
 
                     if hasattr(tstat, 'setpoint_deadband') and tstat.setpoint_deadband:
                         deadband_val = tstat.setpoint_deadband.value 
@@ -531,8 +539,8 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                         stage_count = tstat.stage_count.value
                         thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
                     
-                    if hasattr(tstat, 'resolution') and tstat.resolution:
-                        resolution_val = tstat.resolution.value
+                    if hasattr(tstat, 'resolution') and tstat.tstat_resolution:
+                        resolution_val = tstat.tstat_resolution.value
                         thermostat_data["resolution"].append(resolution_val)
                     
                     # Determine temperature unit from resolution unit

@@ -1,2 +1,2 @@
-name,latitude,noaastation,timezone,longitude
-s223-example,,,,
+name,noaastation,longitude,timezone,latitude
+s223-example,1.0,1.0,1.0,1.0
