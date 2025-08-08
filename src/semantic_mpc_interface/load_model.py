@@ -318,8 +318,6 @@ class LoadModel:
             entity_classes[entity_type] = self._create_dynamic_class(
                 entity_type.replace('-','_'), contained_types=contained_types, attributes = {}
             )            
-        
-        container_class = entity_classes[entity_types[main_entity_col]]
         completed_attributes = []
         entity_dict = {}
         containers = {}
@@ -533,26 +531,26 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                         thermostat_data["heat_tolerance"].append(-1.0 * tstat_tolerance_val)
                         thermostat_data["cool_tolerance"].append(1.0 * tstat_tolerance_val)
 
-                    if hasattr(tstat, 'setpoint_deadband') and tstat.tstat_setpoint_deadband:
+                    if hasattr(tstat, 'tstat_setpoint_deadband') and tstat.tstat_setpoint_deadband:
                         deadband_val = tstat.tstat_setpoint_deadband.value 
                         thermostat_data["setpoint_deadband"].append(deadband_val)
                     
-                    if hasattr(tstat, 'active') and tstat.tstat_active:
+                    if hasattr(tstat, 'tstat_active') and tstat.tstat_active:
                         active_val = tstat.tstat_active.value 
                         thermostat_data["active"].append(bool(active_val))
                     
-                    if hasattr(tstat, 'stage_count') and tstat.tstat_stage_count:
+                    if hasattr(tstat, 'tstat_stage_count') and tstat.tstat_stage_count:
                         stage_count = tstat.tstat_stage_count.value
                         thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
                     
-                    if hasattr(tstat, 'resolution') and tstat.tstat_resolution:
+                    if hasattr(tstat, 'tstat_resolution') and tstat.tstat_resolution:
                         resolution_val = tstat.tstat_resolution.value
                         thermostat_data["resolution"].append(resolution_val)
                     
                     # Determine temperature unit from resolution unit
                     if hasattr(tstat.tstat_resolution, 'unit') and tstat.tstat_resolution.unit:
                         unit_str = str(tstat.tstat_resolution.unit)
-                        thermostat_data["temperature_unit"].append('unit_str')
+                        thermostat_data["temperature_unit"].append(unit_str)
 
                     # Default values for control group and setpoint type
                     thermostat_data["control_group"].append("DEPRECATED")
