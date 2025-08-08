@@ -13,16 +13,16 @@
             "heating_capacity": "<name>-heating_capacity"
         },
         "tstat": {
-            "setpoint_deadband": "<name>-setpoint_deadband",
-            "resolution": "<name>-resolution",
             "tolerance": "<name>-tolerance",
             "stage_count": "<name>-stage_count",
+            "resolution": "<name>-resolution",
+            "setpoint_deadband": "<name>-setpoint_deadband",
             "active": "<name>-active"
         },
         "window": {
-            "tilt": "<name>-tilt",
             "azimuth": "<name>-azimuth",
-            "area": "<name>-area"
+            "area": "<name>-area",
+            "tilt": "<name>-tilt"
         },
         "site": {
             "noaastation": "<name>-noaastation",
@@ -38,39 +38,39 @@
             "area-name": "area"
         },
         "hp-rtu": {
-            "heating_COP": "heating_COP-value",
+            "heating_capacity": "heating_capacity-value",
             "cooling_capacity": "cooling_capacity-value",
             "cooling_COP": "cooling_COP-value",
-            "heating_capacity": "heating_capacity-value",
+            "heating_COP": "heating_COP-value",
             "heating_COP-name": "heating_COP",
             "cooling_capacity-name": "cooling_capacity",
             "cooling_COP-name": "cooling_COP",
             "heating_capacity-name": "heating_capacity"
         },
         "tstat": {
+            "setpoint_deadband": "setpoint_deadband-value",
+            "active": "active-value",
             "resolution": "resolution-value",
             "tolerance": "tolerance-value",
             "stage_count": "stage_count-value",
-            "active": "active-value",
-            "setpoint_deadband": "setpoint_deadband-value",
-            "setpoint_deadband-name": "setpoint_deadband",
-            "resolution-name": "resolution",
             "tolerance-name": "tolerance",
             "stage_count-name": "stage_count",
+            "resolution-name": "resolution",
+            "setpoint_deadband-name": "setpoint_deadband",
             "active-name": "active"
         },
         "window": {
-            "tilt": "tilt-value",
             "area": "area-value",
             "azimuth": "azimuth-value",
-            "tilt-name": "tilt",
+            "tilt": "tilt-value",
             "azimuth-name": "azimuth",
-            "area-name": "area"
+            "area-name": "area",
+            "tilt-name": "tilt"
         },
         "site": {
-            "timezone": "timezone-value",
             "latitude": "latitude-value",
             "noaastation": "noaastation-value",
+            "timezone": "timezone-value",
             "longitude": "longitude-value",
             "noaastation-name": "noaastation",
             "timezone-name": "timezone",

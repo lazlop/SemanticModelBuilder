@@ -39,13 +39,13 @@ zone.windows[0].area.name
 zone.tstats[0]
 
 # %%
-print(zone.tstats[0].resolution)
-zone.tstats[0].resolution.convert_to_si()
-print(zone.tstats[0].resolution)
-print(zone.tstats[0].resolution.is_delta)
+print(zone.tstats[0].tstat_resolution)
+zone.tstats[0].tstat_resolution.convert_to_si()
+print(zone.tstats[0].tstat_resolution)
+print(zone.tstats[0].tstat_resolution.is_delta)
 
 # %%
 # optionally just load everything as si 
 si_loader = LoadModel(f"tutorial/{ontology}-test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
 site_info = si_loader.get_all_building_objects()
-print(zone.tstats[0].resolution)
+print(zone.tstats[0].tstat_resolution)

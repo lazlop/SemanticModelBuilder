@@ -204,73 +204,70 @@ class LoadModel:
         """
         if df.empty:
             return []
-  
-        entity_types = {}
-        value_types = {}
-        attr_types = {}
-        entity_class_relation = {}
-        # entity column to attribute columns
-        entity_attr_cols = {}
-        entity_entity_cols = {}
-        row = df.iloc[0]
-        # NOTE: Tried using rdflib instead of SPARQL, still got a little complicated
-        # TODO: Have a more structured/queryiable categorization of entities/value templates. Maybe add superclasses for hpfs:entity and hpfs:value
-
         value_templates,entity_templates = get_template_types(ontology=self.ontology)
 
+        # Mapping columns to templates (which are also HPFS types)
+        entity_types = {}
+        attr_types = {}
+
+        # Type of entity and types of related attributes
+        entity_attr_types = {}
+        entity_entity_types = {}
+
+        # # May delete, not sure if I need this
+        # entity_class_relation = {}
+        value_templates,entity_templates = get_template_types(ontology='s223')
+
+        # mapping entity cols to related point cols in df
+        entity_attr_cols = {}
+
+        # mapping entity cols to related entity cols in df
+        entity_entity_cols = {}
+        row = df.iloc[0]
         # get all the entity types
-        for col, value in row.items():
-            for p, entity_class in self.g.predicate_objects(value):
-                if p == A and (self.g.compute_qname(entity_class)[1]) == URIRef(HPFS):
-                    entity_type = get_uri_name(self.g,entity_class)
+        for col, entity in row.items():
+            for p, o in self.g.predicate_objects(entity):
+                # o is entity class
+                if p == A and (self.g.compute_qname(o)[1]) == URIRef(HPFS):
+                    entity_type = get_uri_name(self.g,o)
                     if entity_type in entity_templates:
+                        # getting entity types
                         entity_types[col] = entity_type
                     if entity_type in value_templates:
-                        value_types[col] = entity_type
-            
-        # get values of entity types 
-        for col, entity_type in entity_types.items():
-            for entity in self.g.subjects(A, HPFS[entity_type]):
-                for has_point, point in self.g.predicate_objects(entity):
-                    if has_point == HPFS['has-point']:
-                        for p, point_class in self.g.predicate_objects(point):
-                            if p == A and (self.g.compute_qname(point_class)[1]) == URIRef(HPFS):
-                                attr_type = get_uri_name(self.g,point_class)
-                                if attr_type not in value_templates:
-                                    print(f'attribute {attr_type} not an expected value')
-                                    continue
-                                if entity_type not in attr_types.keys():
-                                    attr_types[entity_type] = []
-                                if attr_type not in attr_types[entity_type]:
-                                    attr_types[entity_type].append(attr_type)
-        
-        # Get entity relations of entity types
-        # TODO: Check if there is a pythonic way to do this without looping. Maybe just switch to SPARQL
-        for col, entity_type in entity_types.items():
-            other_types = [HPFS[ec] for ec in entity_types.values() if ec != entity_type]
-            for entity_s in self.g.subjects(A, HPFS[entity_type]):
-                for p, other_entity in self.g.predicate_objects(entity_s):
-                    for other_entity_type in self.g.objects(other_entity, A):
-                        if other_entity_type in other_types:
-                            if entity_type not in entity_class_relation.keys():
-                                entity_class_relation[entity_type] = []
-                            if get_uri_name(self.g,other_entity_type) not in entity_class_relation[entity_type]:
-                                entity_class_relation[entity_type].append(get_uri_name(self.g,other_entity_type))
-        # get entity_col to value_cols and entity_col to entity_col
-        for col, entity_type in entity_types.items():
-            entity_attr_cols[col] = []
-            entity_entity_cols[col] = []
-            attrs = attr_types.get(entity_type,[])
-            other_entities = entity_class_relation.get(entity_type, [])
-            for attr_col, attr_type in value_types.items():
-                if attr_type in attrs:
-                    entity_attr_cols[col].append(attr_col)
-            for other_entity_col, other_entity_type in entity_types.items():
-                if other_entity_type in other_entities:
-                    entity_entity_cols[col].append(other_entity_col)
+                        # getting value types
+                        attr_types[col] = entity_type
+                    continue
+                # o is an attribute of entity
+                if p == HPFS['has-point']:
+                    # getting entity attr cols
+                        if col not in entity_attr_cols.keys():
+                            entity_attr_cols[col] = set()
+                        # Should always be a single value, may have to validate this
+                        col_names = row.index[row == o]
+                        if len(col_names) != 1:
+                            print(f'incorrect amount of columns returned for {o}')
+                        else:
+                            entity_attr_cols[col].add(col_names.values[0])
+                for p2, o2 in self.g.predicate_objects(o):
+                    # getting entity relations if o is another defined entity
+                    if p2 == A and (self.g.compute_qname(o2)[1]) == URIRef(HPFS):
+                        if o2 in [ HPFS[val] for val in entity_templates ]:
+                            if col not in entity_entity_cols:
+                                entity_entity_cols[col] = set()
+                            # no self relations allowed
+                            col_names = row.index[row == o]
+                            if len(col_names) != 1:
+                                print(f'incorrect amount of columns returned for {o}')
+                            else:
+                                col_value = col_names.values[0]
+                                if col_value != col:
+                                    entity_entity_cols[col].add(col_value)
 
-        # will have to reshape entity_entity_cols since that follows triple in graph, and I don't care about direction of relations
-        # Should probably do for types too
+        #change sets to iterables
+        entity_attr_cols = {entity:list(attrs) for entity, attrs in entity_attr_cols.items()}
+        entity_entity_cols = {entity:list(other_entities) for entity, other_entities in entity_entity_cols.items()}
+
+        # reshape direction relationships to make direction from main template of focus
         reverse_related_to = []
         reverse_related_to_types = []
         for entity, entities in entity_entity_cols.items():
@@ -280,26 +277,31 @@ class LoadModel:
                 reverse_related_to_types.append(entity_templates)
         entity_entity_cols[main_entity_col] += reverse_related_to
 
-        # Should probably do for types too
-        # TODO: Use less dictionaries - decide which are necessary
-        reverse_related_to = []
-        for entity, entities in entity_class_relation.items():
-            if entity_types[main_entity_col] in entities:
-                reverse_related_to.append(entity)
-                entities.remove(entity_types[main_entity_col])
-        if len(entity_class_relation) > 0:
-            entity_class_relation[entity_types[main_entity_col]] += reverse_related_to
+        # creating type dictionaries to dynamically instantiate classes
+        entity_attr_types = { 
+            entity_types[entity_col]: [
+                attr_types[val_col] for val_col in val_cols
+            ] 
+            for entity_col, val_cols in entity_attr_cols.items()
+        }
+        entity_entity_types = { 
+            entity_types[entity_col]: [
+                entity_types[other_entity_col] for other_entity_col in other_entity_cols
+            ] 
+            for entity_col, other_entity_cols in entity_entity_cols.items()
+        }
+
         # TODO: deal with underscores vs. dashes more consistently
         entity_classes = {}
-        for entity_type, attrs in attr_types.items():
-            contained_types = entity_class_relation[entity_type] if entity_type in entity_class_relation.keys() else []
+        for entity_type, attrs in entity_attr_types.items():
+            contained_types = entity_entity_types[entity_type] if entity_type in entity_entity_types.keys() else []
+            contained_types = [c.replace('-','_') for c in contained_types]
             entity_classes[entity_type] = self._create_dynamic_class(
                 entity_type.replace('-','_'), contained_types=contained_types,attributes = {attr.replace('-','_'): 'Value' for attr in attrs}
             )
-        for entity_type, contained_types in entity_class_relation.items():
+        for entity_type, contained_types in entity_entity_types.items():
             if entity_type in entity_classes.keys():
                 continue
-            contained_types = entity_class_relation[entity_type] if entity_type in entity_class_relation.keys() else []
             contained_types = [c.replace('-','_') for c in contained_types]
             entity_classes[entity_type] = self._create_dynamic_class(
                 entity_type.replace('-','_'), contained_types=contained_types, attributes = {}
@@ -324,7 +326,7 @@ class LoadModel:
                     attrs = {}
                     # TODO: Relying on naming convention in template, use hasUnit and hasValue/value instead. 
                     for attr_col in attr_cols:
-                        attr_class_name = value_types[attr_col]
+                        attr_class_name = attr_types[attr_col]
                         attr_value = self._get_value(row[attr_col])
                         attr_unit = self._get_unit(row[attr_col])
                         attr_name = row[attr_col]
@@ -369,6 +371,19 @@ class LoadModel:
         
             assemble_objects(container_skeleton)
         return list(containers.values())
+    
+    # temporary
+    def _get_dataframe(self, template_name: str = 'hvac-zone'):
+        template = self.library.get_template_by_name(template_name)
+        if not template:
+            raise ValueError(f"Template '{template_name}' not found")
+        
+        template_inlined = template.inline_dependencies()
+        query = self._get_query(template_inlined.body)
+        
+        df = query_to_df(query, self.g, prefixed=False)
+        
+        return df 
 
     def _get_objects(self, template_name: str = 'hvac-zone'):
         """
