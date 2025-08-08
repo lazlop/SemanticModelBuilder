@@ -59,6 +59,9 @@ class Value:
         return f"Value(value={self.value}, unit='{self.unit}')"
 
     def convert_to_si(self):
+        a = True
+        if self.unit is None: 
+            return
         if URIRef(self.unit) in UNIT_CONVERSIONS.keys():
             new_units = UNIT_CONVERSIONS[URIRef(self.unit)]
             self.value = convert_units((self.value), URIRef(self.unit), URIRef(new_units), self.is_delta)
@@ -83,6 +86,7 @@ class LoadModel:
         self.site = self.g.value(None, RDF.type, BRICK.Site)
         self.ontology = ontology
         self.template_dict = template_dict
+        # TODO: Adjust how we do as_si and as_ip
         self.as_si_units = as_si_units
         # Only one query so far requires loading the ontology to use subClassOf in 223:
         if ontology == "s223":
@@ -423,12 +427,14 @@ class LoadModel:
         results = {}
         
         for result_key, template_name in template_dict.items():
-            try:
-                objects = self._get_objects(template_name)
-                results[result_key] = objects
-            except Exception as e:
-                print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
-                results[result_key] = []
+            # try:
+            #     objects = self._get_objects(template_name)
+            #     results[result_key] = objects
+            # except Exception as e:
+            #     print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
+            #     results[result_key] = []
+            objects = self._get_objects(template_name)
+            results[result_key] = objects
         
         return results
 
@@ -527,16 +533,16 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                         thermostat_data["heat_tolerance"].append(-1.0 * tstat_tolerance_val)
                         thermostat_data["cool_tolerance"].append(1.0 * tstat_tolerance_val)
 
-                    if hasattr(tstat, 'setpoint_deadband') and tstat.setpoint_deadband:
-                        deadband_val = tstat.setpoint_deadband.value 
+                    if hasattr(tstat, 'setpoint_deadband') and tstat.tstat_setpoint_deadband:
+                        deadband_val = tstat.tstat_setpoint_deadband.value 
                         thermostat_data["setpoint_deadband"].append(deadband_val)
                     
-                    if hasattr(tstat, 'active') and tstat.active:
-                        active_val = tstat.active.value 
+                    if hasattr(tstat, 'active') and tstat.tstat_active:
+                        active_val = tstat.tstat_active.value 
                         thermostat_data["active"].append(bool(active_val))
                     
-                    if hasattr(tstat, 'stage_count') and tstat.stage_count:
-                        stage_count = tstat.stage_count.value
+                    if hasattr(tstat, 'stage_count') and tstat.tstat_stage_count:
+                        stage_count = tstat.tstat_stage_count.value
                         thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
                     
                     if hasattr(tstat, 'resolution') and tstat.tstat_resolution:
@@ -544,8 +550,8 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                         thermostat_data["resolution"].append(resolution_val)
                     
                     # Determine temperature unit from resolution unit
-                    if hasattr(tstat.resolution, 'unit') and tstat.resolution.unit:
-                        unit_str = str(tstat.resolution.unit)
+                    if hasattr(tstat.tstat_resolution, 'unit') and tstat.tstat_resolution.unit:
+                        unit_str = str(tstat.tstat_resolution.unit)
                         thermostat_data["temperature_unit"].append('unit_str')
 
                     # Default values for control group and setpoint type
@@ -554,8 +560,8 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                     thermostat_data["setpoint_type"].append("double")  # Default assumption
                     
                     # Process HVAC data
-                    if hasattr(zone, 'hvacs') and zone.hvacs:
-                        hvac = zone.hvacs[0] 
+                    if hasattr(zone, 'hp_rtus') and zone.hp_rtus:
+                        hvac = zone.hp_rtus[0] 
                         # hvac_id = hvac.name.split('#')[-1] if '#' in hvac.name else hvac.name
                         hvac_id = hvac.name
                         thermostat_data["hvacs"].append(hvac_id)
