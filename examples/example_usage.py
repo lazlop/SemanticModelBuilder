@@ -19,7 +19,7 @@ ontology = 's223'
 
 # %%
 # still working on loader, will clean up class, but functionality about right
-loader = LoadModel(f'tutorial/{ontology}-test_site/test_build/reasoned.ttl', ontology = ontology)
+loader = LoadModel(f'../tutorial/{ontology}-test_site/test_build/reasoned.ttl', ontology = ontology)
 site_info = loader.get_all_building_objects()
 
 # %%
@@ -46,6 +46,10 @@ print(zone.tstats[0].resolution.is_delta)
 
 # %%
 # optionally just load everything as si 
-si_loader = LoadModel(f"tutorial/{ontology}-test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
+si_loader = LoadModel(f"../tutorial/{ontology}-test_site/test_build/test_build.ttl", ontology = ontology, as_si_units=True)
 site_info = si_loader.get_all_building_objects()
 print(zone.tstats[0].resolution)
+
+# %%
+get_thermostat_data(si_loader)
+# %%
