@@ -98,27 +98,37 @@ class LoadModel:
         else:
             raise ValueError('invalid ontology')
 
-    def _get_var_name(self, graph, node):
+    def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
         if isinstance(node, Literal):
             return node
         pre, ns, local = graph.compute_qname(node)
-        if PARAM == ns:
+        if (PARAM == ns) or force_as_variable:
             q_n = f"?{local}".replace('-','_')
         else:
             q_n = convert_to_prefixed(node, graph) #.replace('-','_')
         return q_n
-
-    # TODO: Doing some unnecessary querying that I then re-query. can optimize
+    
+    # TODO: Doing some unnecessary querying that I then re-query. can optimize and reduce query size, also make less brittle
     # TODO: May be good to use additional results from templates to make sure I'm returning all entities
+    # TODO: SPARQL has issue with enumeration kinds. Either reimplement logic to get correct SPARQL results or use information inferred from SHACL. 
+    # TODO: Going to implement a temporary patch for this - maybe just by adding HPFS classes from templates
     def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
         where = []
+        filters = {}
         for s, p, o in graph.triples((None, None, None)):
             qs = self._get_var_name(graph, s)
             qo = self._get_var_name(graph, o)
             qp = convert_to_prefixed(p, graph) #.replace('-','_')
+            if p == S223['hasAspect'] and (s not in filters.keys()):
+                aspects = list(graph.objects(s,p))
+                aspects = [self._get_var_name(graph,a) for a in aspects]
+                aspect_var = qs + '_aspects_in'
+                where.append(f"{qs} {qp} {aspect_var} .")
+                filters[s] = f"FILTER({aspect_var} IN ({','.join(aspects)}) ) "
             where.append(f"{qs} {qp} {qo} .")
+        where += list(filters.values())
         return "\n".join(where)
 
     def _get_query(self, graph):
@@ -296,9 +306,7 @@ class LoadModel:
             )            
         
         container_class = entity_classes[entity_types[main_entity_col]]
-
-        # # TODO: Delete if unused
-        # completed_entities = {}
+        completed_attributes = []
         entity_dict = {}
         containers = {}
         for _, row in df.iterrows():
@@ -325,7 +333,10 @@ class LoadModel:
                         if self.as_si_units:
                             attr.convert_to_si()
                         # TODO: Will cause issue if there are multiple identical properties on a class. May need to change
+                        if attr_name in completed_attributes:
+                            continue
                         attrs[attr_class_name.replace('-','_')] = attr
+                        completed_attributes.append(attr_name)
                     entity_class = entity_classes[class_name]
                     if entity_name not in entity_dict.keys():
                         entity = entity_class(name=entity_name, **attrs)
