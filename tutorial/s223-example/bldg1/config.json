@@ -1,5 +1,5 @@
 {
-    "site_id": "s223_test_site",
+    "site_id": "s223-example",
     "hvac_type": "hp-rtu",
     "variable_params": {
         "hvac-zone": {},
@@ -8,14 +8,14 @@
         },
         "hp-rtu": {
             "cooling_capacity": "<name>-cooling_capacity",
-            "heating_COP": "<name>-heating_COP",
             "heating_capacity": "<name>-heating_capacity",
+            "heating_COP": "<name>-heating_COP",
             "cooling_COP": "<name>-cooling_COP"
         },
         "tstat": {
+            "stage_count": "<name>-stage_count",
             "tolerance": "<name>-tolerance",
             "setpoint_deadband": "<name>-setpoint_deadband",
-            "stage_count": "<name>-stage_count",
             "resolution": "<name>-resolution",
             "active": "<name>-active"
         },
@@ -25,10 +25,10 @@
             "area": "<name>-area"
         },
         "site": {
-            "latitude": "<name>-latitude",
+            "noaastation": "<name>-noaastation",
             "timezone": "<name>-timezone",
-            "longitude": "<name>-longitude",
-            "noaastation": "<name>-noaastation"
+            "latitude": "<name>-latitude",
+            "longitude": "<name>-longitude"
         }
     },
     "param_mapping": {
@@ -38,44 +38,44 @@
             "area-name": "area"
         },
         "hp-rtu": {
-            "cooling_capacity": "cooling_capacity-value",
-            "heating_capacity": "heating_capacity-value",
-            "heating_COP": "heating_COP-value",
             "cooling_COP": "cooling_COP-value",
+            "cooling_capacity": "cooling_capacity-value",
+            "heating_COP": "heating_COP-value",
+            "heating_capacity": "heating_capacity-value",
             "cooling_capacity-name": "cooling_capacity",
-            "heating_COP-name": "heating_COP",
             "heating_capacity-name": "heating_capacity",
+            "heating_COP-name": "heating_COP",
             "cooling_COP-name": "cooling_COP"
         },
         "tstat": {
-            "tolerance": "tolerance-value",
-            "active": "active-value",
-            "stage_count": "stage_count-value",
             "resolution": "resolution-value",
+            "stage_count": "stage_count-value",
+            "active": "active-value",
             "setpoint_deadband": "setpoint_deadband-value",
+            "tolerance": "tolerance-value",
+            "stage_count-name": "stage_count",
             "tolerance-name": "tolerance",
             "setpoint_deadband-name": "setpoint_deadband",
-            "stage_count-name": "stage_count",
             "resolution-name": "resolution",
             "active-name": "active"
         },
         "window": {
+            "azimuth": "azimuth-value",
             "tilt": "tilt-value",
             "area": "area-value",
-            "azimuth": "azimuth-value",
             "tilt-name": "tilt",
             "azimuth-name": "azimuth",
             "area-name": "area"
         },
         "site": {
-            "longitude": "longitude-value",
             "noaastation": "noaastation-value",
+            "longitude": "longitude-value",
             "timezone": "timezone-value",
             "latitude": "latitude-value",
-            "latitude-name": "latitude",
+            "noaastation-name": "noaastation",
             "timezone-name": "timezone",
-            "longitude-name": "longitude",
-            "noaastation-name": "noaastation"
+            "latitude-name": "latitude",
+            "longitude-name": "longitude"
         }
     },
     "hvacs_feed_hvacs": {},

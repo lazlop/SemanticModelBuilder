@@ -220,7 +220,6 @@ development_files/
 
 # Generated files
 *.ttl
-*.rdf
 survey_*.json
 responses_*.json
 dashboard_*.json

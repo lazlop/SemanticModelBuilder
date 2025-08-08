@@ -1,7 +1,8 @@
 from typing import Optional
-
+from collections import Counter
 import pandas as pd
-from rdflib import Graph, Literal, URIRef
+import yaml
+from rdflib import Graph, Literal, URIRef, BNode
 
 from .namespaces import *
 
@@ -105,3 +106,64 @@ def add_brick_inverse_relations(g):
             g.add((o, inverse_pairs[p], s))
 
     return g
+
+def get_template_types(ontology):
+    if ontology == 's223':
+        templates = s223_templates
+    elif ontology == 'brick':
+        templates = brick_templates
+    else:
+        raise ValueError(f"Unsupported ontology: {ontology}")
+
+    # Load values.yml and entities.yml files
+    values_file = f"{templates}/values.yml"
+    entities_file = f"{templates}/entities.yml"
+    
+    # Read and parse YAML files
+    with open(values_file, 'r') as f:
+        values_data = yaml.safe_load(f)
+    
+    with open(entities_file, 'r') as f:
+        entities_data = yaml.safe_load(f)
+    
+    # Extract template types (keys from the YAML dictionaries)
+    value_templates = list(values_data.keys()) if values_data else []
+    entity_templates = list(entities_data.keys()) if entities_data else []
+    
+    return value_templates, entity_templates
+
+def inline_shapes(g: Graph):
+    # 1. Get all entities defined in this graph (subject of rdf:type)
+    defined_entities = set(s for s, p, o in g.triples((None, RDF.type, None)) if isinstance(s, URIRef))
+
+    # 2. Count object references (excluding literals)
+    object_counter = Counter()
+    for s, p, o in g:
+        if isinstance(o, URIRef):
+            object_counter[o] += 1
+
+    # 3. Find single-use, defined entities
+    candidates = {uri for uri in defined_entities if object_counter[uri] == 1}
+
+    # 4. Map for URIRef -> BNode replacement
+    uri_to_bnode = {}
+    new_g = Graph()
+    for prefix, ns in g.namespaces():
+        new_g.bind(prefix, ns)
+
+    # 5. Build the mapping for nodes to be replaced
+    for s, p, o in g:
+        if isinstance(o, URIRef) and o in candidates:
+            if o not in uri_to_bnode:
+                uri_to_bnode[o] = BNode()
+
+    # 6. Rewrite the graph with substitutions
+    for s, p, o in g:
+        # Replace object if needed
+        if isinstance(o, URIRef) and o in uri_to_bnode:
+            o = uri_to_bnode[o]
+        # Replace subject if needed (very rare, but possible)
+        if isinstance(s, URIRef) and s in uri_to_bnode:
+            s = uri_to_bnode[s]
+        new_g.add((s, p, o))
+    return new_g

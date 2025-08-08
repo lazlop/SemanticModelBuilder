@@ -22,6 +22,24 @@ UNIT_CONVERSIONS = {
     UNIT['BTU_IT-PER-HR']:UNIT['KiloW'],
 }
 
+def build_tree(graph):
+    def dfs(node, visited):
+        if node in visited:
+            return {}  # Prevent cycles
+        visited.add(node)
+        children = graph.get(node, [])
+        return {child: dfs(child, visited.copy()) for child in children}
+
+    # Determine root nodes (not referenced as values)
+    all_nodes = set(graph.keys())
+    referenced = {child for children in graph.values() for child in children}
+    roots = all_nodes - referenced
+
+    tree = {}
+    for root in roots:
+        tree[root] = dfs(root, set())
+    return tree
+
 # TODO: Still in vibe coded state - should clean up and generalize a little
 class Value:
     def __init__(self, value, unit, is_delta = False, name=None):
@@ -41,6 +59,9 @@ class Value:
         return f"Value(value={self.value}, unit='{self.unit}')"
 
     def convert_to_si(self):
+        a = True
+        if self.unit is None: 
+            return
         if URIRef(self.unit) in UNIT_CONVERSIONS.keys():
             new_units = UNIT_CONVERSIONS[URIRef(self.unit)]
             self.value = convert_units((self.value), URIRef(self.unit), URIRef(new_units), self.is_delta)
@@ -51,6 +72,7 @@ class LoadModel:
     def __init__(self, source: Union[str, Graph], ontology: str, template_dict = {
             'sites': 'site',
             'zones': 'hvac-zone',}, as_si_units = False):
+        #TODO: Consider changing to just template list. Renaming of templates is not important nor consistent
         if os.path.isfile(source):
             self.g = Graph(store = 'Oxigraph')
             self.g.parse(source)
@@ -64,6 +86,7 @@ class LoadModel:
         self.site = self.g.value(None, RDF.type, BRICK.Site)
         self.ontology = ontology
         self.template_dict = template_dict
+        # TODO: Adjust how we do as_si and as_ip
         self.as_si_units = as_si_units
         # Only one query so far requires loading the ontology to use subClassOf in 223:
         if ontology == "s223":
@@ -79,25 +102,46 @@ class LoadModel:
         else:
             raise ValueError('invalid ontology')
 
-    def _get_var_name(self, graph, node):
+    def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
         if isinstance(node, Literal):
             return node
         pre, ns, local = graph.compute_qname(node)
-        if PARAM == ns:
+        if (PARAM == ns) or force_as_variable:
             q_n = f"?{local}".replace('-','_')
         else:
             q_n = convert_to_prefixed(node, graph) #.replace('-','_')
         return q_n
-
+    
+    # TODO: Doing some unnecessary querying that I then re-query. can optimize and reduce query size, also make less brittle
+    # TODO: May be good to use additional results from templates to make sure I'm returning all entities
+    # TODO: SPARQL has issue with enumeration kinds. Either reimplement logic to get correct SPARQL results or use information inferred from SHACL. 
+    # TODO: Going to implement a temporary patch for this 
     def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
         where = []
+        filters = {}
         for s, p, o in graph.triples((None, None, None)):
             qs = self._get_var_name(graph, s)
             qo = self._get_var_name(graph, o)
             qp = convert_to_prefixed(p, graph) #.replace('-','_')
+            #TODO: Might have to do this closed set filter for all aspects, roles, etc. on everything
+            #TODO: Do 223 ontology inferencing before this and change specific property callouts to just o == S223['Property]
+            if p == A and (o == S223['QuantifiableObservableProperty'] or 
+                           o == S223['QuantifiableActuatableProperty'] or
+                           o == S223['EnumeratedObservableProperty'] or 
+                           o == S223['EnumeratedActuatableProperty'] ) and (s not in filters.keys()):
+                aspects = list(graph.objects(s,S223['hasAspect']))
+                if len(aspects) > 0:
+                    aspects = [self._get_var_name(graph,a) for a in aspects]
+                    aspect_var = qs + '_aspects_in'
+                    where.append(f"{qs} <{str(S223['hasAspect'])}> {aspect_var} .")
+                    filters[s] = f"FILTER({aspect_var} IN ({','.join(aspects)}) ) "
+                else:
+                    aspect_var = qs + '_aspects_in'
+                    filters[s] = f"FILTER NOT EXISTS {{ {qs} <{str(S223['hasAspect'])}> {aspect_var} }}"
             where.append(f"{qs} {qp} {qo} .")
+        where += list(filters.values())
         return "\n".join(where)
 
     def _get_query(self, graph):
@@ -107,7 +151,7 @@ class LoadModel:
         query = f"""{prefixes}\nSELECT DISTINCT * WHERE {{ {where} }}"""
         return query
 
-    def _create_dynamic_class(self, class_name: str, attributes: Dict[str, str]) -> Type:
+    def _create_dynamic_class(self, class_name: str, contained_types: List[str], attributes: Dict[str, str]) -> Type:
         """
         Dynamically create a class with the specified attributes.
         """
@@ -117,105 +161,37 @@ class LoadModel:
                 # Skip 'name' attribute to avoid conflict with the positional name parameter
                 if attr_name != 'name':
                     setattr(self, attr_name, kwargs.get(attr_name))
+            for entity_type in contained_types:
+                setattr(self, f"{entity_type}s", [])
         
         def __repr__(self):
             attr_strs = [f"{attr}={getattr(self, attr, None)}" for attr in attributes.keys() if attr != 'name']
-            return f"{class_name}(name='{self.name}', {', '.join(attr_strs)})"
-        
-        # Create the class dynamically
-        cls = type(class_name, (), {
-            '__init__': __init__,
-            '__repr__': __repr__,
-            '_attributes': attributes
-        })
-        
-        return cls
-
-    def _identify_entity_attributes(self, df: pd.DataFrame, entity_name: str) -> Dict[str, Any]:
-        """
-        Identify attributes for an entity based on column patterns in the dataframe.
-        Added delta quantity after the fact - fairly disconnected
-        """
-        attributes = {}
-        
-        # Look for columns that match the pattern: {entity_name}_{attribute}_{type}
-        pattern = rf"{re.escape(entity_name)}_(.+?)_(value|unit|name)$"
-        
-        attribute_bases = set()
-        for col in df.columns:
-            match = re.match(pattern, col)
-            if match:
-                attr_base = match.group(1)
-                attribute_bases.add(attr_base)
-        
-        # For each attribute base, try to create a Value object
-        for attr_base in attribute_bases:
-            name_col = f"{entity_name}_{attr_base}"
-            value_col = f"{entity_name}_{attr_base}_value"
-            unit_col = f"{entity_name}_{attr_base}_unit"
-            
-            # Check if we have meaningful data in the _name column (prefer this)
-            # TODO: This code never seems to be run, only backup code is. Should double check why. 
-            if name_col in df.columns and not df.empty and pd.notna(df[name_col].iloc[0]):
-                name_data = df[name_col].iloc[0]
-                value_data = df[value_col].iloc[0]
-                # Only create attribute if the _name column contains actual numeric/meaningful data
-                # Skip if it contains URI strings
-                # not sure if second part of if statement is important
-                if not str(value_data).startswith('urn:') and not '_name' in str(value_data):
-                    try:
-                        # Try to convert to number to verify it's meaningful data
-                        float(value_data)
-                        unit_data = df[unit_col].iloc[0] if unit_col in df.columns and pd.notna(df[unit_col].iloc[0]) else None
-                        # get is delta
-                        is_delta = self._is_delta_quantity(name_data)
-                        value_obj = Value(value=value_data, unit=unit_data, is_delta = is_delta, name=name_data)
-                        if self.as_si_units:
-                            value_obj.convert_to_si()
-                        # Use clean attribute name (remove redundant prefixes and suffixes)
-                        clean_attr_name = attr_base.replace('name_', '').replace('_name', '')
-                        attributes[clean_attr_name] = value_obj
-                    except (ValueError, TypeError):
-                        # Skip non-numeric data in _name columns
-                        pass
-            
-        # Also look for simple string attributes (columns that end with the entity name)
-        for col in df.columns:
-            if col == entity_name and col not in attributes:
-                if not df.empty:
-                    attributes[col] = df[col].iloc[0]
-        
-        return attributes
-
-    def _create_container_class(self, container_name: str, contained_types: List[str]) -> Type:
-        """
-        Create a container class (like Zone) that can hold multiple types of entities.
-        """
-        def __init__(self, name: str):
-            self.name = name
-            for entity_type in contained_types:
-                setattr(self, f"{entity_type.lower()}s", [])
-        
-        def __repr__(self):
             counts = []
             for entity_type in contained_types:
-                attr_name = f"{entity_type.lower()}s"
+                attr_name = f"{entity_type}s"
                 count = len(getattr(self, attr_name, []))
-                counts.append(f"{entity_type.lower()}s={count}")
-            return f"{container_name}(name='{self.name}', {', '.join(counts)})"
+                counts.append(f"{entity_type}s={count}")
+
+            return f"{class_name}(name='{self.name}', {', '.join(attr_strs)}, {', '.join(counts)})"
         
-        # Add methods to add entities
         def create_add_method(entity_type):
             def add_method(self, entity):
-                attr_name = f"{entity_type.lower()}s"
+                attr_name = f"{entity_type}s"
                 getattr(self, attr_name).append(entity)
             return add_method
         
-        methods = {'__init__': __init__, '__repr__': __repr__}
+        methods = {
+            '__init__': __init__,
+            '__repr__': __repr__,
+            '_attributes': attributes
+        }
+
         for entity_type in contained_types:
-            methods[f"add_{entity_type.lower()}"] = create_add_method(entity_type)
+            methods[f"add_{entity_type}"] = create_add_method(entity_type)
         
-        cls = type(container_name, (), methods)
+        # Create the class dynamically
+        cls = type(class_name, (), methods)
+        
         return cls
 
     def _is_delta_quantity(self, uri):
@@ -223,93 +199,201 @@ class LoadModel:
         return bool(is_delta)
         # return True if is_delta == URIRef('true') else False
 
-    def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str):
+    def _get_unit(self, uri):
+        unit = self.g.value(URIRef(uri), QUDT["hasUnit"])
+        return unit
+    
+    # TODO: use has-value template
+    def _get_value(self, uri):
+        if self.ontology == 's223': 
+            return self.g.value(URIRef(uri), S223['hasValue'])
+        else:
+            raise ValueError('Ontology not implemented')
+
+    def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):
         """
         Convert dataframe results into objects based on template structure.
         This is a generalized version that works with any template.
         """
         if df.empty:
             return []
-        
-        # Get the main entity name (usually the first column or 'name')
-        main_entity_col = 'name' if 'name' in df.columns else df.columns[0]
-        
-        # Identify all entity types in the dataframe by looking at column patterns
-        entity_types = set()
-        for col in df.columns:
-            # Look for patterns like "entity_name" or "entity_name_attribute_type"
-            if '_' in col:
-                parts = col.split('_')
-                if len(parts) >= 2 and parts[-1] in ['name', 'value', 'unit']:
-                    # This might be an entity attribute
-                    if len(parts) == 2:  # entity_name
-                        entity_types.add(parts[0])
-                    elif len(parts) >= 3:  # entity_attribute_type
-                        entity_types.add(parts[0])
-            else:
-                # Simple column name might be an entity
-                if col != main_entity_col:
-                    entity_types.add(col)
-        
-        # Remove the main entity from the list if it's there
-        main_entity_name = template_name #.replace('-', '_')
-        entity_types.discard(main_entity_name)
-        entity_types.discard('name')
-        
-        # Create classes for each entity type
+        value_templates,entity_templates = get_template_types(ontology=self.ontology)
+
+        # Mapping columns to templates (which are also HPFS types)
+        entity_types = {}
+        attr_types = {}
+
+        # Type of entity and types of related attributes
+        entity_attr_types = {}
+        entity_entity_types = {}
+
+        # # May delete, not sure if I need this
+        # entity_class_relation = {}
+        value_templates,entity_templates = get_template_types(ontology='s223')
+
+        # mapping entity cols to related point cols in df
+        entity_attr_cols = {}
+
+        # mapping entity cols to related entity cols in df
+        entity_entity_cols = {}
+        row = df.iloc[0]
+        # get all the entity types
+        for col, entity in row.items():
+            for p, o in self.g.predicate_objects(entity):
+                # o is entity class
+                if p == A and (self.g.compute_qname(o)[1]) == URIRef(HPFS):
+                    entity_type = get_uri_name(self.g,o)
+                    if entity_type in entity_templates:
+                        # getting entity types
+                        entity_types[col] = entity_type
+                    if entity_type in value_templates:
+                        # getting value types
+                        attr_types[col] = entity_type
+                    continue
+                # o is an attribute of entity
+                if p == HPFS['has-point']:
+                    # getting entity attr cols
+                        if col not in entity_attr_cols.keys():
+                            entity_attr_cols[col] = set()
+                        # Should always be a single value, may have to validate this
+                        col_names = row.index[row == o]
+                        if len(col_names) != 1:
+                            print(f'incorrect amount of columns returned for {o}')
+                        else:
+                            entity_attr_cols[col].add(col_names.values[0])
+                for p2, o2 in self.g.predicate_objects(o):
+                    # getting entity relations if o is another defined entity
+                    if p2 == A and (self.g.compute_qname(o2)[1]) == URIRef(HPFS):
+                        if o2 in [ HPFS[val] for val in entity_templates ]:
+                            if col not in entity_entity_cols:
+                                entity_entity_cols[col] = set()
+                            # no self relations allowed
+                            col_names = row.index[row == o]
+                            if len(col_names) != 1:
+                                print(f'incorrect amount of columns returned for {o}')
+                            else:
+                                col_value = col_names.values[0]
+                                if col_value != col:
+                                    entity_entity_cols[col].add(col_value)
+
+        #change sets to iterables
+        entity_attr_cols = {entity:list(attrs) for entity, attrs in entity_attr_cols.items()}
+        entity_entity_cols = {entity:list(other_entities) for entity, other_entities in entity_entity_cols.items()}
+
+        # reshape direction relationships to make direction from main template of focus
+        reverse_related_to = []
+        for entity, entities in entity_entity_cols.items():
+            if main_entity_col in entities:
+                reverse_related_to.append(entity)
+                entities.remove(main_entity_col)
+        if len(reverse_related_to) > 0:
+            entity_entity_cols[main_entity_col] += reverse_related_to
+
+        # creating type dictionaries to dynamically instantiate classes
+        entity_attr_types = { 
+            entity_types[entity_col]: [
+                attr_types[val_col] for val_col in val_cols
+            ] 
+            for entity_col, val_cols in entity_attr_cols.items()
+        }
+        entity_entity_types = { 
+            entity_types[entity_col]: [
+                entity_types[other_entity_col] for other_entity_col in other_entity_cols
+            ] 
+            for entity_col, other_entity_cols in entity_entity_cols.items()
+        }
+
+        # TODO: deal with underscores vs. dashes more consistently
         entity_classes = {}
-        for entity_type in entity_types:
-            # Get attributes for this entity type from the dataframe
-            sample_attributes = self._identify_entity_attributes(df, entity_type)
-            attr_types = {attr: 'Value' if isinstance(val, Value) else 'str' 
-                         for attr, val in sample_attributes.items()}
-            
+        for entity_type, attrs in entity_attr_types.items():
+            contained_types = entity_entity_types[entity_type] if entity_type in entity_entity_types.keys() else []
+            contained_types = [c.replace('-','_') for c in contained_types]
             entity_classes[entity_type] = self._create_dynamic_class(
-                entity_type.capitalize(), attr_types
+                entity_type.replace('-','_'), contained_types=contained_types,attributes = {attr.replace('-','_'): 'Value' for attr in attrs}
             )
-        
-        # Create container class
-        container_class = self._create_container_class(
-            main_entity_name.replace('_', '').capitalize(), 
-            [et.capitalize() for et in entity_types]
-        )
-        
-        # Process the dataframe
+        for entity_type, contained_types in entity_entity_types.items():
+            if entity_type in entity_classes.keys():
+                continue
+            contained_types = [c.replace('-','_') for c in contained_types]
+            entity_classes[entity_type] = self._create_dynamic_class(
+                entity_type.replace('-','_'), contained_types=contained_types, attributes = {}
+            )            
+        completed_attributes = []
+        entity_dict = {}
         containers = {}
-        
         for _, row in df.iterrows():
+            row_entities = {}
+            for col, val in row.items():
+                if col in entity_types.keys():
+                    # class name
+                    class_name = entity_types[col]
+                    # col_name 
+                    entity_name = val
+                    # related_entity_cols
+                    entity_cols = entity_entity_cols[col] if col in entity_entity_cols.keys() else []
+                    # related attr_cols
+                    attr_cols = entity_attr_cols[col] if col in entity_attr_cols.keys() else []
+                    attrs = {}
+                    # TODO: Relying on naming convention in template, use hasUnit and hasValue/value instead. 
+                    for attr_col in attr_cols:
+                        attr_class_name = attr_types[attr_col]
+                        attr_value = self._get_value(row[attr_col])
+                        attr_unit = self._get_unit(row[attr_col])
+                        attr_name = row[attr_col]
+                        is_delta = self._is_delta_quantity(attr_name)
+                        attr = Value(value=attr_value, unit=attr_unit, is_delta = is_delta, name=attr_name)
+                        if self.as_si_units:
+                            attr.convert_to_si()
+                        # TODO: Will cause issue if there are multiple identical properties on a class. May need to change
+                        if attr_name in completed_attributes:
+                            continue
+                        attrs[attr_class_name.replace('-','_')] = attr
+                        completed_attributes.append(attr_name)
+                    entity_class = entity_classes[class_name]
+                    if entity_name not in entity_dict.keys():
+                        entity = entity_class(name=entity_name, **attrs)
+                        entity_dict[entity_name] = entity
+                    else:
+                        entity = entity_dict[entity_name]
+                    row_entities[col] = entity
+            
+            # TODO: Consider how generalizable this approach is, creating the classes above and relating here
             container_name = row[main_entity_col]
             
             # Create container if it doesn't exist
             if container_name not in containers:
-                containers[container_name] = container_class(container_name)
-            
-            container = containers[container_name]
-            
-            # Create entities for each type
-            for entity_type in entity_types:
-                entity_name_col = f"{entity_type}_name" if f"{entity_type}_name" in df.columns else entity_type
-                
-                if entity_name_col in row and pd.notna(row[entity_name_col]):
-                    entity_name = row[entity_name_col]
-                    
-                    # Get attributes for this entity
-                    entity_attributes = self._identify_entity_attributes(pd.DataFrame([row]), entity_type)
-                    
-                    # Remove 'name' from entity_attributes to avoid conflict with positional name parameter
-                    filtered_attributes = {k: v for k, v in entity_attributes.items() if k != 'name'}
-                    
-                    # Create entity instance
-                    entity_class = entity_classes[entity_type]
-                    entity = entity_class(name=entity_name, **filtered_attributes)
-                    
-                    # Add to container (check for duplicates)
-                    entities_list = getattr(container, f"{entity_type}s")
-                    if not any(e.name == entity.name for e in entities_list):
-                        add_method = getattr(container, f"add_{entity_type}")
-                        add_method(entity)
-            
+                containers[container_name] = entity_dict[container_name] 
+
+            container_skeleton = build_tree(entity_entity_cols)
+            def assemble_objects(tree):
+                for entity_col, related_entities_cols in tree.items():
+                    assemble_objects(related_entities_cols)
+                    entity = row_entities[entity_col]
+                    for related_entity_col in related_entities_cols:
+                        related_entity = row_entities[related_entity_col]
+                        existing_entities = vars(entity).get(entity_types[related_entity_col].replace('-','_') + 's', [])
+                        if related_entity in existing_entities:
+                            continue
+                        else:
+                            add_method_name = f"add_{entity_types[related_entity_col].replace('-','_')}"
+                            add_method = getattr(entity, add_method_name)
+                            add_method(related_entity)
+        
+            assemble_objects(container_skeleton)
         return list(containers.values())
+    
+    # temporary
+    def _get_dataframe(self, template_name: str = 'hvac-zone'):
+        template = self.library.get_template_by_name(template_name)
+        if not template:
+            raise ValueError(f"Template '{template_name}' not found")
+        
+        template_inlined = template.inline_dependencies()
+        query = self._get_query(template_inlined.body)
+        
+        df = query_to_df(query, self.g, prefixed=False)
+        
+        return df 
 
     def _get_objects(self, template_name: str = 'hvac-zone'):
         """
@@ -341,12 +425,14 @@ class LoadModel:
         results = {}
         
         for result_key, template_name in template_dict.items():
-            try:
-                objects = self._get_objects(template_name)
-                results[result_key] = objects
-            except Exception as e:
-                print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
-                results[result_key] = []
+            # try:
+            #     objects = self._get_objects(template_name)
+            #     results[result_key] = objects
+            # except Exception as e:
+            #     print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
+            #     results[result_key] = []
+            objects = self._get_objects(template_name)
+            results[result_key] = objects
         
         return results
 
@@ -440,31 +526,31 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                     thermostat_data["zone_ids"].append(zone_id)
                     
                     # Process thermostat properties
-                    if hasattr(tstat, 'tolerance') and tstat.tolerance:
-                        tolerance_val = tstat.tolerance.value
-                        thermostat_data["heat_tolerance"].append(-1.0 * tolerance_val)
-                        thermostat_data["cool_tolerance"].append(1.0 * tolerance_val)
+                    if hasattr(tstat, 'tstat_tolerance') and tstat.tstat_tolerance:
+                        tstat_tolerance_val = tstat.tstat_tolerance.value
+                        thermostat_data["heat_tolerance"].append(-1.0 * tstat_tolerance_val)
+                        thermostat_data["cool_tolerance"].append(1.0 * tstat_tolerance_val)
 
-                    if hasattr(tstat, 'setpoint_deadband') and tstat.setpoint_deadband:
-                        deadband_val = tstat.setpoint_deadband.value 
+                    if hasattr(tstat, 'tstat_setpoint_deadband') and tstat.tstat_setpoint_deadband:
+                        deadband_val = tstat.tstat_setpoint_deadband.value 
                         thermostat_data["setpoint_deadband"].append(deadband_val)
                     
-                    if hasattr(tstat, 'active') and tstat.active:
-                        active_val = tstat.active.value 
+                    if hasattr(tstat, 'tstat_active') and tstat.tstat_active:
+                        active_val = tstat.tstat_active.value 
                         thermostat_data["active"].append(bool(active_val))
                     
-                    if hasattr(tstat, 'stage_count') and tstat.stage_count:
-                        stage_count = tstat.stage_count.value
+                    if hasattr(tstat, 'tstat_stage_count') and tstat.tstat_stage_count:
+                        stage_count = tstat.tstat_stage_count.value
                         thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
                     
-                    if hasattr(tstat, 'resolution') and tstat.resolution:
-                        resolution_val = tstat.resolution.value
+                    if hasattr(tstat, 'tstat_resolution') and tstat.tstat_resolution:
+                        resolution_val = tstat.tstat_resolution.value
                         thermostat_data["resolution"].append(resolution_val)
                     
                     # Determine temperature unit from resolution unit
-                    if hasattr(tstat.resolution, 'unit') and tstat.resolution.unit:
-                        unit_str = str(tstat.resolution.unit)
-                        thermostat_data["temperature_unit"].append('unit_str')
+                    if hasattr(tstat.tstat_resolution, 'unit') and tstat.tstat_resolution.unit:
+                        unit_str = str(tstat.tstat_resolution.unit)
+                        thermostat_data["temperature_unit"].append(unit_str)
 
                     # Default values for control group and setpoint type
                     thermostat_data["control_group"].append("DEPRECATED")
@@ -472,8 +558,8 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
                     thermostat_data["setpoint_type"].append("double")  # Default assumption
                     
                     # Process HVAC data
-                    if hasattr(zone, 'hvacs') and zone.hvacs:
-                        hvac = zone.hvacs[0] 
+                    if hasattr(zone, 'hp_rtus') and zone.hp_rtus:
+                        hvac = zone.hp_rtus[0] 
                         # hvac_id = hvac.name.split('#')[-1] if '#' in hvac.name else hvac.name
                         hvac_id = hvac.name
                         thermostat_data["hvacs"].append(hvac_id)

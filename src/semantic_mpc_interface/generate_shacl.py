@@ -82,17 +82,17 @@ class SHACLHandler:
             templates = yaml.safe_load(f)
         self.entity_templates_names = list(templates.keys())
 
-        # with open(self.value_templates, "r") as f:
-        #     templates = yaml.safe_load(f)
-        # self.value_templates_names = list(templates.keys())
+        with open(self.value_templates, "r") as f:
+            templates = yaml.safe_load(f)
+        self.value_templates_names = list(templates.keys())
 
         with open(self.relations_templates, "r") as f:
             templates = yaml.safe_load(f)
         self.relations_templates_names = list(templates.keys())
 
         self._generate_shapes(templates_file=self.entity_templates)
-        # TODO: brick entity properties do not have a type... 
-        # self._generate_shapes(templates_file=self.value_templates)
+        # TODO: brick entity properties do not have a type...  should probably just add a type to the templates
+        self._generate_shapes(templates_file=self.value_templates)
         self._generate_relation_inference(templates_file=self.relations_templates)
 
     def _parse_template(self, template_data):
@@ -249,6 +249,7 @@ class SHACLHandler:
                     self.shapes_graph, HPFS, [shape_uri, p]
                 )
                 self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
                 self.shapes_graph.add((prop_shape, SH.minCount, Literal(count)))
                 self.shapes_graph.add((prop_shape, SH.maxCount, Literal(count)))
                 self.shapes_graph.add((prop_shape, SH.path, p))
@@ -257,6 +258,7 @@ class SHACLHandler:
                     self.shapes_graph, HPFS, [shape_uri], "_noAspects"
                 )
                 self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
                 self.shapes_graph.add((prop_shape, SH.minCount, Literal(0)))
                 self.shapes_graph.add((prop_shape, SH.maxCount, Literal(0)))
                 self.shapes_graph.add((prop_shape, SH.path, S223.hasAspect))
