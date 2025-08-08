@@ -30,6 +30,7 @@ def build_tree(graph):
         children = graph.get(node, [])
         return {child: dfs(child, visited.copy()) for child in children}
 
+    # Determine root nodes (not referenced as values)
     all_nodes = set(graph.keys())
     referenced = {child for children in graph.values() for child in children}
     roots = all_nodes - referenced
@@ -58,6 +59,9 @@ class Value:
         return f"Value(value={self.value}, unit='{self.unit}')"
 
     def convert_to_si(self):
+        a = True
+        if self.unit is None: 
+            return
         if URIRef(self.unit) in UNIT_CONVERSIONS.keys():
             new_units = UNIT_CONVERSIONS[URIRef(self.unit)]
             self.value = convert_units((self.value), URIRef(self.unit), URIRef(new_units), self.is_delta)
@@ -82,6 +86,7 @@ class LoadModel:
         self.site = self.g.value(None, RDF.type, BRICK.Site)
         self.ontology = ontology
         self.template_dict = template_dict
+        # TODO: Adjust how we do as_si and as_ip
         self.as_si_units = as_si_units
         # Only one query so far requires loading the ontology to use subClassOf in 223:
         if ontology == "s223":
@@ -97,27 +102,46 @@ class LoadModel:
         else:
             raise ValueError('invalid ontology')
 
-    def _get_var_name(self, graph, node):
+    def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
         if isinstance(node, Literal):
             return node
         pre, ns, local = graph.compute_qname(node)
-        if PARAM == ns:
+        if (PARAM == ns) or force_as_variable:
             q_n = f"?{local}".replace('-','_')
         else:
             q_n = convert_to_prefixed(node, graph) #.replace('-','_')
         return q_n
-
-    # TODO: Doing some unnecessary querying that I then re-query. can optimize
+    
+    # TODO: Doing some unnecessary querying that I then re-query. can optimize and reduce query size, also make less brittle
     # TODO: May be good to use additional results from templates to make sure I'm returning all entities
+    # TODO: SPARQL has issue with enumeration kinds. Either reimplement logic to get correct SPARQL results or use information inferred from SHACL. 
+    # TODO: Going to implement a temporary patch for this 
     def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
         where = []
+        filters = {}
         for s, p, o in graph.triples((None, None, None)):
             qs = self._get_var_name(graph, s)
             qo = self._get_var_name(graph, o)
             qp = convert_to_prefixed(p, graph) #.replace('-','_')
+            #TODO: Might have to do this closed set filter for all aspects, roles, etc. on everything
+            #TODO: Do 223 ontology inferencing before this and change specific property callouts to just o == S223['Property]
+            if p == A and (o == S223['QuantifiableObservableProperty'] or 
+                           o == S223['QuantifiableActuatableProperty'] or
+                           o == S223['EnumeratedObservableProperty'] or 
+                           o == S223['EnumeratedActuatableProperty'] ) and (s not in filters.keys()):
+                aspects = list(graph.objects(s,S223['hasAspect']))
+                if len(aspects) > 0:
+                    aspects = [self._get_var_name(graph,a) for a in aspects]
+                    aspect_var = qs + '_aspects_in'
+                    where.append(f"{qs} <{str(S223['hasAspect'])}> {aspect_var} .")
+                    filters[s] = f"FILTER({aspect_var} IN ({','.join(aspects)}) ) "
+                else:
+                    aspect_var = qs + '_aspects_in'
+                    filters[s] = f"FILTER NOT EXISTS {{ {qs} <{str(S223['hasAspect'])}> {aspect_var} }}"
             where.append(f"{qs} {qp} {qo} .")
+        where += list(filters.values())
         return "\n".join(where)
 
     def _get_query(self, graph):
@@ -186,106 +210,6 @@ class LoadModel:
         else:
             raise ValueError('Ontology not implemented')
 
-    def _extract_entity_and_value_types(self, row: pd.Series) -> tuple:
-        """Extract entity and value types from a dataframe row."""
-        entity_types = {}
-        value_types = {}
-        value_templates, entity_templates = get_template_types(ontology=self.ontology)
-        
-        for col, value in row.items():
-            for p, entity_class in self.g.predicate_objects(value):
-                if p == A and (self.g.compute_qname(entity_class)[1]) == URIRef(HPFS):
-                    entity_type = get_uri_name(self.g, entity_class)
-                    if entity_type in entity_templates:
-                        entity_types[col] = entity_type
-                    if entity_type in value_templates:
-                        value_types[col] = entity_type
-        
-        return entity_types, value_types, value_templates, entity_templates
-
-    def _build_attribute_mappings(self, entity_types: Dict, value_templates: List) -> Dict:
-        """Build mappings between entity types and their attributes."""
-        attr_types = {}
-        
-        for col, entity_type in entity_types.items():
-            for entity in self.g.subjects(A, HPFS[entity_type]):
-                for has_point, point in self.g.predicate_objects(entity):
-                    if has_point == HPFS['has-point']:
-                        for p, point_class in self.g.predicate_objects(point):
-                            if p == A and (self.g.compute_qname(point_class)[1]) == URIRef(HPFS):
-                                attr_type = get_uri_name(self.g, point_class)
-                                if attr_type not in value_templates:
-                                    print(f'attribute {attr_type} not an expected value')
-                                    continue
-                                if entity_type not in attr_types:
-                                    attr_types[entity_type] = []
-                                if attr_type not in attr_types[entity_type]:
-                                    attr_types[entity_type].append(attr_type)
-        
-        return attr_types
-
-    def _build_entity_relationships(self, entity_types: Dict) -> Dict:
-        """Build relationships between entity types."""
-        entity_class_relation = {}
-        
-        for col, entity_type in entity_types.items():
-            other_types = [HPFS[ec] for ec in entity_types.values() if ec != entity_type]
-            for entity_s in self.g.subjects(A, HPFS[entity_type]):
-                for p, other_entity in self.g.predicate_objects(entity_s):
-                    for other_entity_type in self.g.objects(other_entity, A):
-                        if other_entity_type in other_types:
-                            if entity_type not in entity_class_relation:
-                                entity_class_relation[entity_type] = []
-                            other_entity_name = get_uri_name(self.g, other_entity_type)
-                            if other_entity_name not in entity_class_relation[entity_type]:
-                                entity_class_relation[entity_type].append(other_entity_name)
-        
-        return entity_class_relation
-
-    def _build_column_mappings(self, entity_types: Dict, value_types: Dict, 
-                              attr_types: Dict, entity_class_relation: Dict) -> tuple:
-        """Build mappings between columns and their relationships."""
-        entity_attr_cols = {}
-        entity_entity_cols = {}
-        
-        for col, entity_type in entity_types.items():
-            entity_attr_cols[col] = []
-            entity_entity_cols[col] = []
-            attrs = attr_types.get(entity_type, [])
-            other_entities = entity_class_relation.get(entity_type, [])
-            
-            # Map attribute columns
-            for attr_col, attr_type in value_types.items():
-                if attr_type in attrs:
-                    entity_attr_cols[col].append(attr_col)
-            
-            # Map entity columns
-            for other_entity_col, other_entity_type in entity_types.items():
-                if other_entity_type in other_entities:
-                    entity_entity_cols[col].append(other_entity_col)
-        
-        return entity_attr_cols, entity_entity_cols
-
-    def _reshape_entity_relationships(self, entity_entity_cols: Dict, entity_class_relation: Dict, 
-                                    entity_types: Dict, main_entity_col: str):
-        """Reshape entity relationships to handle bidirectional relations."""
-        # Handle bidirectional relations for entity columns
-        reverse_related_to = []
-        for entity, entities in entity_entity_cols.items():
-            if main_entity_col in entities:
-                reverse_related_to.append(entity)
-                entities.remove(main_entity_col)
-        entity_entity_cols[main_entity_col] += reverse_related_to
-
-        # Handle bidirectional relations for entity class relations
-        reverse_related_to = []
-        for entity, entities in entity_class_relation.items():
-            if entity_types[main_entity_col] in entities:
-                reverse_related_to.append(entity)
-                entities.remove(entity_types[main_entity_col])
-        if len(entity_class_relation) > 0:
-            entity_class_relation[entity_types[main_entity_col]] += reverse_related_to
-
     def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):
         """
         Convert dataframe results into objects based on template structure.
@@ -293,39 +217,110 @@ class LoadModel:
         """
         if df.empty:
             return []
+        value_templates,entity_templates = get_template_types(ontology=self.ontology)
 
+        # Mapping columns to templates (which are also HPFS types)
+        entity_types = {}
+        attr_types = {}
+
+        # Type of entity and types of related attributes
+        entity_attr_types = {}
+        entity_entity_types = {}
+
+        # # May delete, not sure if I need this
+        # entity_class_relation = {}
+        value_templates,entity_templates = get_template_types(ontology='s223')
+
+        # mapping entity cols to related point cols in df
+        entity_attr_cols = {}
+
+        # mapping entity cols to related entity cols in df
+        entity_entity_cols = {}
         row = df.iloc[0]
-        
-        # Extract types and build mappings using helper methods
-        entity_types, value_types, value_templates, entity_templates = self._extract_entity_and_value_types(row)
-        attr_types = self._build_attribute_mappings(entity_types, value_templates)
-        entity_class_relation = self._build_entity_relationships(entity_types)
-        entity_attr_cols, entity_entity_cols = self._build_column_mappings(
-            entity_types, value_types, attr_types, entity_class_relation
-        )
+        # get all the entity types
+        for col, entity in row.items():
+            for p, o in self.g.predicate_objects(entity):
+                # o is entity class
+                if p == A and (self.g.compute_qname(o)[1]) == URIRef(HPFS):
+                    entity_type = get_uri_name(self.g,o)
+                    if entity_type in entity_templates:
+                        # getting entity types
+                        entity_types[col] = entity_type
+                    if entity_type in value_templates:
+                        # getting value types
+                        attr_types[col] = entity_type
+                    continue
+                # o is an attribute of entity
+                if p == HPFS['has-point']:
+                    # getting entity attr cols
+                        if col not in entity_attr_cols.keys():
+                            entity_attr_cols[col] = set()
+                        # Should always be a single value, may have to validate this
+                        col_names = row.index[row == o]
+                        if len(col_names) != 1:
+                            print(f'incorrect amount of columns returned for {o}')
+                        else:
+                            entity_attr_cols[col].add(col_names.values[0])
+                for p2, o2 in self.g.predicate_objects(o):
+                    # getting entity relations if o is another defined entity
+                    if p2 == A and (self.g.compute_qname(o2)[1]) == URIRef(HPFS):
+                        if o2 in [ HPFS[val] for val in entity_templates ]:
+                            if col not in entity_entity_cols:
+                                entity_entity_cols[col] = set()
+                            # no self relations allowed
+                            col_names = row.index[row == o]
+                            if len(col_names) != 1:
+                                print(f'incorrect amount of columns returned for {o}')
+                            else:
+                                col_value = col_names.values[0]
+                                if col_value != col:
+                                    entity_entity_cols[col].add(col_value)
 
-        # Reshape entity relationships to handle bidirectional relations
-        self._reshape_entity_relationships(entity_entity_cols, entity_class_relation, 
-                                         entity_types, main_entity_col)
+        #change sets to iterables
+        entity_attr_cols = {entity:list(attrs) for entity, attrs in entity_attr_cols.items()}
+        entity_entity_cols = {entity:list(other_entities) for entity, other_entities in entity_entity_cols.items()}
+
+        # reshape direction relationships to make direction from main template of focus
+        reverse_related_to = []
+        for entity, entities in entity_entity_cols.items():
+            if main_entity_col in entities:
+                reverse_related_to.append(entity)
+                entities.remove(main_entity_col)
+        if len(reverse_related_to) > 0:
+            entity_entity_cols[main_entity_col] += reverse_related_to
+
+        # creating type dictionaries to dynamically instantiate classes
+        entity_attr_types = { 
+            entity_types[entity_col]: [
+                attr_types[val_col] for val_col in val_cols
+            ] 
+            for entity_col, val_cols in entity_attr_cols.items()
+        }
+        entity_entity_types = { 
+            entity_types[entity_col]: [
+                entity_types[other_entity_col] for other_entity_col in other_entity_cols
+            ] 
+            for entity_col, other_entity_cols in entity_entity_cols.items()
+        }
+
         # TODO: deal with underscores vs. dashes more consistently
         entity_classes = {}
-        for entity_type, attrs in attr_types.items():
-            contained_types = entity_class_relation[entity_type] if entity_type in entity_class_relation.keys() else []
+        for entity_type, attrs in entity_attr_types.items():
+            contained_types = entity_entity_types[entity_type] if entity_type in entity_entity_types.keys() else []
+            contained_types = [c.replace('-','_') for c in contained_types]
             entity_classes[entity_type] = self._create_dynamic_class(
                 entity_type.replace('-','_'), contained_types=contained_types,attributes = {attr.replace('-','_'): 'Value' for attr in attrs}
             )
-        for entity_type, contained_types in entity_class_relation.items():
+        for entity_type, contained_types in entity_entity_types.items():
             if entity_type in entity_classes.keys():
                 continue
-            contained_types = entity_class_relation[entity_type] if entity_type in entity_class_relation.keys() else []
             contained_types = [c.replace('-','_') for c in contained_types]
             entity_classes[entity_type] = self._create_dynamic_class(
                 entity_type.replace('-','_'), contained_types=contained_types, attributes = {}
             )            
-        # # TODO: Delete if unused
-        # completed_entities = {}
-        # Don't redo attributes 
-        completed_attribute_names = []
+        
+        container_class = entity_classes[entity_types[main_entity_col]]
+        completed_attributes = []
         entity_dict = {}
         containers = {}
         for _, row in df.iterrows():
@@ -337,25 +332,25 @@ class LoadModel:
                     # col_name 
                     entity_name = val
                     # related_entity_cols
-                    entity_cols = entity_entity_cols[col]
+                    entity_cols = entity_entity_cols[col] if col in entity_entity_cols.keys() else []
                     # related attr_cols
-                    attr_cols = entity_attr_cols[col]
+                    attr_cols = entity_attr_cols[col] if col in entity_attr_cols.keys() else []
                     attrs = {}
                     # TODO: Relying on naming convention in template, use hasUnit and hasValue/value instead. 
                     for attr_col in attr_cols:
-                        attr_name = row[attr_col]
-                        if attr_name in completed_attribute_names:
-                            continue
-                        attr_class_name = value_types[attr_col]
+                        attr_class_name = attr_types[attr_col]
                         attr_value = self._get_value(row[attr_col])
                         attr_unit = self._get_unit(row[attr_col])
+                        attr_name = row[attr_col]
                         is_delta = self._is_delta_quantity(attr_name)
                         attr = Value(value=attr_value, unit=attr_unit, is_delta = is_delta, name=attr_name)
                         if self.as_si_units:
                             attr.convert_to_si()
                         # TODO: Will cause issue if there are multiple identical properties on a class. May need to change
+                        if attr_name in completed_attributes:
+                            continue
                         attrs[attr_class_name.replace('-','_')] = attr
-                        completed_attribute_names.append(attr_name)
+                        completed_attributes.append(attr_name)
                     entity_class = entity_classes[class_name]
                     if entity_name not in entity_dict.keys():
                         entity = entity_class(name=entity_name, **attrs)
@@ -387,8 +382,20 @@ class LoadModel:
                             add_method(related_entity)
         
             assemble_objects(container_skeleton)
-            # TODO: probably want to return dictionaries not lists, but don't have to decide now
         return list(containers.values())
+    
+    # temporary
+    def _get_dataframe(self, template_name: str = 'hvac-zone'):
+        template = self.library.get_template_by_name(template_name)
+        if not template:
+            raise ValueError(f"Template '{template_name}' not found")
+        
+        template_inlined = template.inline_dependencies()
+        query = self._get_query(template_inlined.body)
+        
+        df = query_to_df(query, self.g, prefixed=False)
+        
+        return df 
 
     def _get_objects(self, template_name: str = 'hvac-zone'):
         """
@@ -420,12 +427,14 @@ class LoadModel:
         results = {}
         
         for result_key, template_name in template_dict.items():
-            try:
-                objects = self._get_objects(template_name)
-                results[result_key] = objects
-            except Exception as e:
-                print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
-                results[result_key] = []
+            # try:
+            #     objects = self._get_objects(template_name)
+            #     results[result_key] = objects
+            # except Exception as e:
+            #     print(f"Warning: Could not retrieve objects for template '{template_name}': {e}")
+            #     results[result_key] = []
+            objects = self._get_objects(template_name)
+            results[result_key] = objects
         
         return results
 
@@ -451,148 +460,6 @@ class LoadModel:
         List all available templates in the library.
         """
         return [template.name for template in self.library.get_templates()]
-
-# Helper functions for extracting attribute values and units
-def _extract_value_and_unit(obj, attr_name: str, default_value=None, default_unit='Unknown'):
-    """Extract value and unit from an object attribute safely."""
-    if hasattr(obj, attr_name):
-        attr = getattr(obj, attr_name)
-        if attr:
-            value = attr.value if hasattr(attr, 'value') else default_value
-            unit = str(attr.unit) if hasattr(attr, 'unit') and attr.unit else default_unit
-            return value, unit
-    return default_value, default_unit
-
-def _safe_get_attribute_value(obj, attr_name: str, default=None):
-    """Safely get an attribute value from an object."""
-    if hasattr(obj, attr_name):
-        attr = getattr(obj, attr_name)
-        if attr and hasattr(attr, 'value'):
-            return attr.value
-    return default
-
-def _extract_zone_id(zone_name: str) -> str:
-    """Extract zone ID from zone name."""
-    return zone_name.split('#')[-1] if '#' in zone_name else zone_name
-
-def _process_thermostat_properties(tstat, thermostat_data: Dict):
-    """Process thermostat properties and add to thermostat_data."""
-    # Tolerance values
-    tolerance_val = _safe_get_attribute_value(tstat, 'tolerance')
-    if tolerance_val is not None:
-        thermostat_data["heat_tolerance"].append(-1.0 * tolerance_val)
-        thermostat_data["cool_tolerance"].append(1.0 * tolerance_val)
-    
-    # Setpoint deadband
-    deadband_val = _safe_get_attribute_value(tstat, 'setpoint_deadband')
-    if deadband_val is not None:
-        thermostat_data["setpoint_deadband"].append(deadband_val)
-    
-    # Active status
-    active_val = _safe_get_attribute_value(tstat, 'active')
-    if active_val is not None:
-        thermostat_data["active"].append(bool(active_val))
-    
-    # Control type based on stage count
-    stage_count = _safe_get_attribute_value(tstat, 'stage_count')
-    if stage_count is not None:
-        control_type = "binary" if stage_count == 1 else "stage"
-        thermostat_data["control_type_list"].append(control_type)
-    
-    # Resolution and temperature unit
-    resolution_val = _safe_get_attribute_value(tstat, 'resolution')
-    if resolution_val is not None:
-        thermostat_data["resolution"].append(resolution_val)
-        
-        # Extract temperature unit from resolution
-        if hasattr(tstat, 'resolution') and hasattr(tstat.resolution, 'unit') and tstat.resolution.unit:
-            unit_str = str(tstat.resolution.unit)
-            thermostat_data["temperature_unit"].append(unit_str)
-
-def _process_hvac_data(zone, thermostat_data: Dict):
-    """Process HVAC data and add to thermostat_data."""
-    if hasattr(zone, 'hvacs') and zone.hvacs:
-        hvac = zone.hvacs[0]
-        hvac_id = hvac.name
-        thermostat_data["hvacs"].append(hvac_id)
-        
-        # Cooling capacity
-        cooling_cap, cooling_cap_unit = _extract_value_and_unit(hvac, 'cooling_capacity', 'Unknown', 'Unknown')
-        thermostat_data["cooling_capacity"].append(cooling_cap)
-        thermostat_data["cooling_capacity_unit"].append(cooling_cap_unit)
-        
-        # Heating capacity
-        heating_cap, heating_cap_unit = _extract_value_and_unit(hvac, 'heating_capacity', 'Unknown', 'Unknown')
-        thermostat_data["heating_capacity"].append(heating_cap)
-        thermostat_data["heating_capacity_unit"].append(heating_cap_unit)
-        
-        # COP values
-        cooling_cop = _safe_get_attribute_value(hvac, 'cooling_COP')
-        if cooling_cop is not None:
-            thermostat_data["cooling_cop"].append(cooling_cop)
-        
-        heating_cop = _safe_get_attribute_value(hvac, 'heating_COP')
-        if heating_cop is not None:
-            thermostat_data["heating_cop"].append(heating_cop)
-    else:
-        thermostat_data["hvacs"].append("unknown")
-
-def _process_space_data(zone, thermostat_data: Dict):
-    """Process space data (floor area) and add to thermostat_data."""
-    total_floor_area = 0.0
-    floor_area_unit = 'Unknown'
-    
-    if hasattr(zone, 'spaces') and zone.spaces:
-        for space in zone.spaces:
-            area_val, area_unit = _extract_value_and_unit(space, 'area', 0.0, 'Unknown')
-            total_floor_area += area_val
-            if area_unit != 'Unknown':
-                floor_area_unit = area_unit
-    
-    thermostat_data["floor_area_list"].append(total_floor_area)
-    thermostat_data["floor_area_unit"].append(floor_area_unit)
-
-def _process_window_data(zone, thermostat_data: Dict):
-    """Process window data (take largest window by area) and add to thermostat_data."""
-    largest_window_area = 0.0
-    window_area_unit = 'Unknown'
-    window_azimuth = None
-    window_azimuth_unit = 'Unknown'
-    window_tilt = None
-    window_tilt_unit = 'Unknown'
-    
-    if hasattr(zone, 'windows') and zone.windows:
-        for window in zone.windows:
-            area_val, area_unit = _extract_value_and_unit(window, 'area', 0.0, 'Unknown')
-            
-            if area_val > largest_window_area:
-                largest_window_area = area_val
-                window_area_unit = area_unit
-                
-                # Get azimuth and tilt for the largest window
-                window_azimuth, window_azimuth_unit = _extract_value_and_unit(window, 'azimuth', None, 'Unknown')
-                window_tilt, window_tilt_unit = _extract_value_and_unit(window, 'tilt', None, 'Unknown')
-    
-    thermostat_data["window_area_list"].append(largest_window_area)
-    thermostat_data["window_area_unit"].append(window_area_unit)
-    thermostat_data["azimuth_list"].append(window_azimuth)
-    thermostat_data["azimuth_unit"].append(window_azimuth_unit)
-    thermostat_data["tilt_list"].append(window_tilt)
-    thermostat_data["tilt_unit"].append(window_tilt_unit)
-
-def _add_default_values(thermostat_data: Dict):
-    """Add default values for fuel and availability assumptions."""
-    # Default fuel and availability assumptions (electric heat pump)
-    thermostat_data["fuel_heat_list"].append("electricity")
-    thermostat_data["fuel_cool_list"].append("electricity")
-    thermostat_data["heat_availability"].append(True)
-    thermostat_data["cool_availability"].append(True)
-    thermostat_data["cooling_electricity"].append(True)
-    thermostat_data["heating_electricity"].append(True)
-    
-    # Default values for control group and setpoint type
-    thermostat_data["control_group"].append("DEPRECATED")
-    thermostat_data["setpoint_type"].append("double")  # Default assumption
 
 # To be migrated to MPC repo
 def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[str]] = None) -> Dict:
@@ -657,22 +524,149 @@ def get_thermostat_data(model_loader: LoadModel, for_zone_list: Optional[List[st
             if hasattr(zone, 'tstats') and zone.tstats:
                 for tstat in zone.tstats:
                     # Extract zone ID
-                    zone_id = _extract_zone_id(zone.name)
+                    zone_id = zone.name.split('#')[-1] if '#' in zone.name else zone.name
                     thermostat_data["zone_ids"].append(zone_id)
                     
-                    # Process thermostat properties using helper function
-                    _process_thermostat_properties(tstat, thermostat_data)
+                    # Process thermostat properties
+                    if hasattr(tstat, 'tstat_tolerance') and tstat.tstat_tolerance:
+                        tstat_tolerance_val = tstat.tstat_tolerance.value
+                        thermostat_data["heat_tolerance"].append(-1.0 * tstat_tolerance_val)
+                        thermostat_data["cool_tolerance"].append(1.0 * tstat_tolerance_val)
+
+                    if hasattr(tstat, 'setpoint_deadband') and tstat.tstat_setpoint_deadband:
+                        deadband_val = tstat.tstat_setpoint_deadband.value 
+                        thermostat_data["setpoint_deadband"].append(deadband_val)
                     
-                    # Process HVAC data using helper function
-                    _process_hvac_data(zone, thermostat_data)
+                    if hasattr(tstat, 'active') and tstat.tstat_active:
+                        active_val = tstat.tstat_active.value 
+                        thermostat_data["active"].append(bool(active_val))
                     
-                    # Process space data using helper function
-                    _process_space_data(zone, thermostat_data)
+                    if hasattr(tstat, 'stage_count') and tstat.tstat_stage_count:
+                        stage_count = tstat.tstat_stage_count.value
+                        thermostat_data["control_type_list"].append("binary" if stage_count == 1 else "stage")
                     
-                    # Process window data using helper function
-                    _process_window_data(zone, thermostat_data)
+                    if hasattr(tstat, 'resolution') and tstat.tstat_resolution:
+                        resolution_val = tstat.tstat_resolution.value
+                        thermostat_data["resolution"].append(resolution_val)
                     
-                    # Add default values using helper function
-                    _add_default_values(thermostat_data)
+                    # Determine temperature unit from resolution unit
+                    if hasattr(tstat.tstat_resolution, 'unit') and tstat.tstat_resolution.unit:
+                        unit_str = str(tstat.tstat_resolution.unit)
+                        thermostat_data["temperature_unit"].append('unit_str')
+
+                    # Default values for control group and setpoint type
+                    thermostat_data["control_group"].append("DEPRECATED")
+                    # TODO: Double check what setpoint_type should be and how it is determined
+                    thermostat_data["setpoint_type"].append("double")  # Default assumption
+                    
+                    # Process HVAC data
+                    if hasattr(zone, 'hp_rtus') and zone.hp_rtus:
+                        hvac = zone.hp_rtus[0] 
+                        # hvac_id = hvac.name.split('#')[-1] if '#' in hvac.name else hvac.name
+                        hvac_id = hvac.name
+                        thermostat_data["hvacs"].append(hvac_id)
+                        
+                        # Cooling capacity
+                        if hasattr(hvac, 'cooling_capacity') and hvac.cooling_capacity:
+                            cooling_cap = hvac.cooling_capacity.value 
+                            thermostat_data["cooling_capacity"].append(cooling_cap)
+                        else:
+                            thermostat_data["cooling_capacity"].append('Unkown')
+                            
+                        if hasattr(hvac.cooling_capacity, 'unit') and hvac.cooling_capacity.unit:
+                            unit_str = str(hvac.cooling_capacity.unit)
+                            thermostat_data["cooling_capacity_unit"].append(unit_str)
+                        else:
+                            thermostat_data["cooling_capacity_unit"].append('Unkown')
+                        
+                        # Heating capacity
+                        if hasattr(hvac, 'heating_capacity') and hvac.heating_capacity:
+                            heating_cap = hvac.heating_capacity.value
+                            thermostat_data["heating_capacity"].append(heating_cap)
+                        else:
+                            thermostat_data["heating_capacity"].append('Unkown')
+                            
+                        if hasattr(hvac.heating_capacity, 'unit') and hvac.heating_capacity.unit:
+                            unit_str = str(hvac.heating_capacity.unit)
+                            thermostat_data["heating_capacity_unit"].append(unit_str)
+                        else:
+                            thermostat_data["heating_capacity_unit"].append('Unkown')
+                        
+                        # COP values
+                        if hasattr(hvac, 'cooling_COP') and hvac.cooling_COP:
+                            cooling_cop = hvac.cooling_COP.value 
+                            thermostat_data["cooling_cop"].append(cooling_cop)
+                        
+                        if hasattr(hvac, 'heating_COP') and hvac.heating_COP:
+                            heating_cop = hvac.heating_COP.value 
+                            thermostat_data["heating_cop"].append(heating_cop)
+                    else:
+                        # Default HVAC values
+                        thermostat_data["hvacs"].append("unknown")
+                    # Process space data (floor area)
+                    total_floor_area = 0.0
+
+                    if hasattr(zone, 'spaces') and zone.spaces:
+                        for space in zone.spaces:
+                            if hasattr(space, 'area') and space.area:
+                                area_val = space.area.value
+                                total_floor_area += area_val
+                                
+                                if hasattr(space.area, 'unit') and space.area.unit:
+                                    unit_str = str(space.area.unit)
+                                    floor_area_unit = unit_str
+                    
+                    thermostat_data["floor_area_list"].append(total_floor_area)
+                    thermostat_data["floor_area_unit"].append(floor_area_unit)
+                    
+                    # Process window data (take largest window by area)
+                    largest_window_area = 0.0
+                    
+                    if hasattr(zone, 'windows') and zone.windows:
+                        for window in zone.windows:
+                            if hasattr(window, 'area') and window.area:
+                                area_val = window.area.value 
+                                if area_val > largest_window_area:
+                                    largest_window_area = area_val
+                                    
+                                    if hasattr(window.area, 'unit') and window.area.unit:
+                                        unit_str = str(window.area.unit)
+                                        window_area_unit = unit_str
+                                    
+                                    if hasattr(window, 'azimuth') and window.azimuth:
+                                        window_azimuth = window.azimuth.value
+                                    
+                                    if hasattr(window.azimuth, 'unit') and window.azimuth.unit:
+                                        unit_str = str(window.azimuth.unit)
+                                        window_azimuth_unit = unit_str
+                                    else:
+                                            window_azimuth_unit = 'Unkown'
+
+                                    if hasattr(window, 'tilt') and window.tilt:
+                                        window_tilt = window.tilt.value 
+                                    
+                                    if hasattr(window.tilt, 'unit') and window.tilt.unit:
+                                        unit_str = str(window.tilt.unit) if hasattr(window.azimuth, 'unit') else 'Unkown'
+                                        window_tilt_unit = unit_str
+                                    else:
+                                        window_tilt_unit = 'Unkown'
+                                        
+                    
+                    thermostat_data["window_area_list"].append(largest_window_area)
+                    thermostat_data["window_area_unit"].append(window_area_unit)
+                    thermostat_data["azimuth_list"].append(window_azimuth)
+                    thermostat_data["azimuth_unit"].append(window_azimuth_unit)
+                    thermostat_data["tilt_list"].append(window_tilt)
+                    thermostat_data["tilt_unit"].append(window_tilt_unit)
+                    
+                    # Default fuel and availability assumptions (electric heat pump)
+                    # TODO: Fix this part based on old results
+                    thermostat_data["fuel_heat_list"].append("electricity")
+                    thermostat_data["fuel_cool_list"].append("electricity")
+                    # TODO: Are these needed or a part of the metadata
+                    thermostat_data["heat_availability"].append(True)
+                    thermostat_data["cool_availability"].append(True)
+                    thermostat_data["cooling_electricity"].append(True)
+                    thermostat_data["heating_electricity"].append(True)
     
     return thermostat_data

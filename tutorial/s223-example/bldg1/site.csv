@@ -1,2 +1,2 @@
-name,timezone,latitude,noaastation,longitude
-s223-example,US/Pacific,37.879134,,-122.254433
+name,noaastation,longitude,timezone,latitude
+s223-example,1.0,1.0,1.0,1.0
