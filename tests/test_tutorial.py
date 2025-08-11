@@ -28,6 +28,9 @@ from semantic_mpc_interface import (
 logging.disable(logging.CRITICAL)
 warnings.filterwarnings("ignore")
 
+@pytest.fixture(scope="module", params=['s223','brick'])
+def ontology(request):
+    return request.param
 
 class TestTutorialPackageWorkflow:
     """Test cases that replicate the tutorial notebook workflow."""
@@ -54,13 +57,11 @@ class TestTutorialPackageWorkflow:
             'window_csv': base_path / "window.csv"
         }
 
-    def test_1_survey_creation_and_file_validation(self, temp_dir):
+    def test_1_survey_creation_and_file_validation(self, temp_dir, ontology):
         """
         Test 1: Creates the survey using s223, and makes sure the right files 
         are created with the right headers (order doesn't matter).
         """
-        # Set ontology and base path like in notebook
-        ontology = 's223'
         base_path = f'{ontology}-test_site/test_build'
         
         # Create survey with same parameters as notebook
@@ -127,14 +128,12 @@ class TestTutorialPackageWorkflow:
             # Verify file has content (at least one row of data)
             assert len(df) > 0, f"{filename} is empty"
 
-    def test_2_shacl_generation_and_semantic_model_validation(self, temp_dir, reference_files):
+    def test_2_shacl_generation_and_semantic_model_validation(self, temp_dir, reference_files, ontology):
         """
         Test 2: Fills in the survey, generates SHACL, creates a semantic model, 
         and makes sure the semantic model looks like the current semantic model 
         in reference files.
         """
-        # Set up like in notebook
-        ontology = 's223'
         base_path = f'{ontology}-test_site/test_build'
         
         # Create and configure survey
@@ -143,7 +142,6 @@ class TestTutorialPackageWorkflow:
             base_path.split('/')[1], 
             temp_dir, 
             overwrite=True, 
-            ontology=ontology,
             template_dict={
                 'zone': 'hvac-zone',
                 "space": "space",
@@ -228,7 +226,7 @@ class TestTutorialPackageWorkflow:
             assert (entity, None, None) in reference_base_graph, f"Entity {entity} missing from reference base model"
             assert (entity, None, None) in reference_reasoned_graph, f"Entity {entity} missing from reference reasoned model"
 
-    def test_3_model_loading_and_site_info_validation(self, temp_dir, reference_files):
+    def test_3_model_loading_and_site_info_validation(self, temp_dir, reference_files, ontology):
         """
         Test 3: Loads the model and makes sure it looks like the current values for site_info.
         """
@@ -335,7 +333,7 @@ class TestTutorialPackageWorkflow:
         si_site_info = si_loader.get_all_building_objects()
         assert isinstance(si_site_info, dict), "SI site_info should be a dictionary"
 
-    def test_4_thermostat_data_validation(self, temp_dir, reference_files):
+    def test_4_thermostat_data_validation(self, temp_dir, reference_files, ontology):
         """
         Test 4: Makes sure get_thermostat_data returns data that looks exactly 
         like the current export.
@@ -454,7 +452,7 @@ class TestTutorialPackageWorkflow:
                 assert isinstance(thermostat_data_all["heating_capacity"][i], (int, float)), \
                     f"heating_capacity[{i}] should be numeric"
 
-    def test_5_site_and_zone_attributes_validation(self, temp_dir, reference_files):
+    def test_5_site_and_zone_attributes_validation(self, temp_dir, reference_files, ontology):
         """
         Test 5: Validates that site and zones have all the correct attributes 
         and all the attributes have the expected values and units.
