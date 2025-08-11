@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union, Type
 from dataclasses import dataclass, field
 
 from rdflib import Graph, Literal, Namespace, URIRef
-from buildingmotif import BuildingMOTIF
+from buildingmotif import BuildingMOTIF, get_building_motif
 from buildingmotif.dataclasses import Library, Model
 
 from .namespaces import *
@@ -91,16 +91,26 @@ class LoadModel:
         # Only one query so far requires loading the ontology to use subClassOf in 223:
         if ontology == "s223":
             self.g.parse("https://open223.info/223p.ttl", format="ttl")
-            
-        # Initialize BuildingMOTIF components
-        self.bm = BuildingMOTIF("sqlite://")
+        
         self.model = Model.create(self.HPF)
+        # Initialize BuildingMOTIF components
         if ontology == 'brick':
-            self.library = Library.load(directory=brick_templates)
+            template_dir = brick_templates
         elif ontology == 's223':
-            self.library = Library.load(directory=s223_templates)
+            template_dir = s223_templates
         else:
             raise ValueError('invalid ontology')
+        # try:
+        #     self.bm = get_building_motif()
+        #     self.library = Library.load(db_id=1)
+        # Can't do this if I'm switching ontologies. TODO: figure out better bmotif management
+        # except Exception as e:
+        #     print("BuildingMOTIF does not exist, instantiating:", e)
+        #     self.bm = BuildingMOTIF("sqlite://")
+        #     self.library = Library.load(directory=template_dir)
+        self.bm = BuildingMOTIF("sqlite://")
+        self.library = Library.load(directory=template_dir)
+    
 
     def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
