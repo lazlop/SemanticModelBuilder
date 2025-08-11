@@ -13,7 +13,7 @@ import pytest
 import pandas as pd
 from rdflib import Graph
 from pyshacl.rdfutil import clone
-from tests.utils import prefill_csv_survey
+from utils import prefill_csv_survey
 
 from semantic_mpc_interface import (
     LoadModel,
