@@ -12,6 +12,9 @@ install-dev:  ## Install the package with development dependencies
 test:  ## Run tests from tests directory
 	pytest tests/ --show-capture=no --disable-warnings -v --tb=short
 
+make test-refs: ## Make references that models are tested against
+	python tests/make_references.py
+
 # test-cov:  ## Run tests with coverage (requires pytest-cov)
 # 	pytest tests/ --cov=src/semantic_mpc_interface --cov-report=html --cov-report=term-missing
 
