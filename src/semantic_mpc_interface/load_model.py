@@ -1,3 +1,4 @@
+# TODO: Manage BuildingMOTIF better
 import os
 import re
 import pandas as pd
@@ -83,7 +84,6 @@ class LoadModel:
         bind_prefixes(self.g)
         BRICK = Namespace("https://brickschema.org/schema/Brick#")
         self.HPF = Namespace("urn:hpflex#")
-        self.site = self.g.value(None, RDF.type, BRICK.Site)
         self.ontology = ontology
         self.template_dict = template_dict
         # TODO: Adjust how we do as_si and as_ip
@@ -91,8 +91,7 @@ class LoadModel:
         # Only one query so far requires loading the ontology to use subClassOf in 223:
         if ontology == "s223":
             self.g.parse("https://open223.info/223p.ttl", format="ttl")
-        
-        self.model = Model.create(self.HPF)
+    
         # Initialize BuildingMOTIF components
         if ontology == 'brick':
             template_dir = brick_templates
@@ -110,6 +109,7 @@ class LoadModel:
         #     self.library = Library.load(directory=template_dir)
         self.bm = BuildingMOTIF("sqlite://")
         self.library = Library.load(directory=template_dir)
+        self.model = Model.create(self.HPF)
     
 
     def _get_var_name(self, graph, node, force_as_variable = False):
@@ -215,10 +215,11 @@ class LoadModel:
     
     # TODO: use has-value template
     def _get_value(self, uri):
-        if self.ontology == 's223': 
-            return self.g.value(URIRef(uri), S223['hasValue'])
-        else:
-            raise ValueError('Ontology not implemented')
+        # if self.ontology == 's223': 
+        #     return self.g.value(URIRef(uri), S223['hasValue'])
+        # else:
+        #     raise ValueError('Ontology not implemented')
+        return self.g.value(URIRef(uri), HPFS['has-value'])
 
     def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):
         """
@@ -236,10 +237,6 @@ class LoadModel:
         # Type of entity and types of related attributes
         entity_attr_types = {}
         entity_entity_types = {}
-
-        # # May delete, not sure if I need this
-        # entity_class_relation = {}
-        value_templates,entity_templates = get_template_types(ontology='s223')
 
         # mapping entity cols to related point cols in df
         entity_attr_cols = {}

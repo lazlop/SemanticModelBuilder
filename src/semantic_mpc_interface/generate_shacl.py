@@ -296,7 +296,7 @@ class SHACLHandler:
             )
 
 
-    def infer(self, data_graph, shapes_graph=None, use_ontology = False):
+    def infer(self, data_graph, shapes_graph=None, use_ontology = False, handle_edge_cases = True):
         """Validate a data graph against SHACL shapes
 
         Args:
@@ -317,6 +317,9 @@ class SHACLHandler:
         
         if use_ontology:
             raise Exception("Ontology inference not yet implemented")
+        
+        if handle_edge_cases:
+            infer_entity_prop_has_point(data_graph)
         
         return infer(data_graph, shapes_graph)
 
@@ -356,3 +359,17 @@ class SHACLHandler:
         if self.shapes_graph is None:
             raise ValueError("No shapes graph available. Generate shapes first.")
         self.shapes_graph.serialize(filename, format=format)
+
+# Handling edge case of brick entity properties
+def infer_entity_prop_has_point(graph):
+    query = """
+    PREFIX hpfs: <urn:hpflex/shapes#>
+    INSERT {
+        ?s hpfs:has-point ?o .    
+    }
+    WHERE {
+        ?s ?p ?o .
+        ?o a brick:EntityPropertyValue .
+    }
+    """
+    graph.update(query)

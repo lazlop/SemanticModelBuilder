@@ -6,69 +6,69 @@ hvac-zone:
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     p:name a brick:HVAC_Zone .
-  optional: [space-name,window-name,tstat-name,hvac-name]
+  optional: [space,window,tstat,hvac]
   dependencies:
     - template: has-space
-      args: {"name":"name", "target":"space-name"}
+      args: {"name":"name", "target":"space"}
     - template: space
-      args: {"name":"space-name"}
+      args: {"name":"space"}
     - template: has-window
-      args: {'name': 'name', 'target':'window-name'}
+      args: {'name': 'name', 'target':'window'}
     - template: window
-      args: {'name': 'window-name'}
+      args: {'name': 'window'}
     - template: has-location
-      args: {'name': 'tstat-name', 'target':"name"}
+      args: {'name': 'tstat', 'target':"name"}
     - template: tstat
-      args: {'name': 'tstat-name'}
+      args: {'name': 'tstat'}
     - template: air-connected-to
-      args: {'name':'hvac-name', 'target':'name'}
+      args: {'name':'hvac', 'target':'name'}
     - template: hp-rtu
-      args: {'name': 'hvac-name'}
+      args: {'name': 'hvac'}
 
 space:
   body: >
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     p:name a brick:Space ;
-        brick:area p:area-name .
+        brick:area p:area .
   dependencies:
     - template: area
-      args: {"name": "area-name"}
+      args: {"name": "area"}
 window:
   body: >
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     p:name a brick:Window ;
-        brick:area p:area-name ;
-        brick:azimuth p:azimuth-name ;
-        brick:tilt p:tilt-name .
+        brick:area p:area ;
+        brick:azimuth p:azimuth ;
+        brick:tilt p:tilt .
   dependencies:
     - template: area
-      args: {"name": "area-name"}
+      args: {"name": "area"}
     - template: azimuth
-      args: {"name": "azimuth-name"}
+      args: {"name": "azimuth"}
     - template: tilt
-      args: {"name": "tilt-name"}
+      args: {"name": "tilt"}
 hp-rtu:
   body: >
     @prefix p: <urn:___param___#> .
     @prefix brick: <https://brickschema.org/schema/Brick#> .
     p:name a brick:RTU, brick:Packaged_Heat_Pump ;
-      brick:coolingCapacity p:cooling_capacity-name ;
-      brick:heatingCapacity p:heating_capacity-name ;
-      brick:heatingCoefficientOfPerformance p:heating_COP-name ;
-      brick:coolingCoefficientOfPerformance p:cooling_COP-name ;
+      brick:coolingCapacity p:cooling_capacity ;
+      brick:heatingCapacity p:heating_capacity ;
+      brick:heatingCoefficientOfPerformance p:heating_COP ;
+      brick:coolingCoefficientOfPerformance p:cooling_COP ;
       .
   dependencies:
     - template: cooling-capacity
-      args: {"name": "cooling_capacity-name"}
+      args: {"name": "cooling_capacity"}
     - template: heating-capacity
-      args: {"name": "heating_capacity-name"}
+      args: {"name": "heating_capacity"}
     - template: cooling-COP
-      args: {"name": "cooling_COP-name"}
+      args: {"name": "cooling_COP"}
     - template: heating-COP
-      args: {"name": "heating_COP-name"}
+      args: {"name": "heating_COP"}
 tstat:
   body: >
     @prefix p: <urn:___param___#> .
@@ -77,23 +77,23 @@ tstat:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name a brick:Thermostat ;
-      brick:operationalStageCount p:stage_count-name ;
-      brick:hasPoint p:setpoint_deadband-name ;
-      brick:hasPoint p:tolerance-name ;
-      brick:hasPoint p:active-name ;
-      brick:resolution p:resolution-name ;
+      brick:operationalStageCount p:stage_count ;
+      brick:hasPoint p:setpoint_deadband ;
+      brick:hasPoint p:tolerance ;
+      brick:hasPoint p:active ;
+      brick:resolution p:resolution ;
       .
   dependencies:
     - template: tstat-stage_count
-      args: {"name": "stage_count-name"}
+      args: {"name": "stage_count"}
     - template: tstat-deadband
-      args: {"name": "setpoint_deadband-name"}
+      args: {"name": "setpoint_deadband"}
     - template: tstat-tolerance
-      args: {"name": "tolerance-name"}
+      args: {"name": "tolerance"}
     - template: tstat-active
-      args: {"name": "active-name"}
+      args: {"name": "active"}
     - template: tstat-resolution
-      args: {"name": "resolution-name"}
+      args: {"name": "resolution"}
 
 # Adding thermostat with heating/cooling/occupancy settings to match S223 template
 tstat-heating-cooling-occupancy:
@@ -136,20 +136,20 @@ site:
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
     p:name a brick:Site ;
-      brick:timezone p:timezone-name ;
-      brick:latitude p:latitude-name ;
-      brick:longitude p:longitude-name ;
-      brick:hasNOAAStation p:noaastation-name ;
+      brick:timezone p:timezone ;
+      brick:latitude p:latitude ;
+      brick:longitude p:longitude ;
+      brick:hasNOAAStation p:noaastation ;
       .
   dependencies:
     - template: timezone
-      args: {"name": "timezone-name"}
+      args: {"name": "timezone"}
     - template: latitude
-      args: {"name": "latitude-name"}
+      args: {"name": "latitude"}
     - template: longitude
-      args: {"name": "longitude-name"}
+      args: {"name": "longitude"}
     - template: noaastation
-      args: {"name": "noaastation-name"}
+      args: {"name": "noaastation"}
 
 # Adding connection point templates to match S223, 
 # TODO: AI generated, need to check

@@ -1,64 +1,81 @@
 {
     "site_id": "brick-test_site",
     "hvac_type": "hp-rtu",
-    "variatic_params": {
+    "variable_params": {
         "hvac-zone": {},
         "space": {
-            "area-name": "<name>-area-name"
+            "area": "<name>-area"
         },
         "hp-rtu": {
-            "cooling_capacity-name": "<name>-cooling_capacity-name",
-            "cooling_COP-name": "<name>-cooling_COP-name",
-            "heating_capacity-name": "<name>-heating_capacity-name",
-            "heating_COP-name": "<name>-heating_COP-name"
+            "heating_capacity": "<name>-heating_capacity",
+            "cooling_COP": "<name>-cooling_COP",
+            "cooling_capacity": "<name>-cooling_capacity",
+            "heating_COP": "<name>-heating_COP"
         },
         "tstat": {
-            "active-name": "<name>-active-name",
-            "setpoint_deadband-name": "<name>-setpoint_deadband-name",
-            "stage_count-name": "<name>-stage_count-name",
-            "tolerance-name": "<name>-tolerance-name",
-            "resolution-name": "<name>-resolution-name"
+            "tolerance": "<name>-tolerance",
+            "active": "<name>-active",
+            "setpoint_deadband": "<name>-setpoint_deadband",
+            "resolution": "<name>-resolution",
+            "stage_count": "<name>-stage_count"
         },
         "window": {
-            "area-name": "<name>-area-name",
-            "tilt-name": "<name>-tilt-name",
-            "azimuth-name": "<name>-azimuth-name"
+            "area": "<name>-area",
+            "tilt": "<name>-tilt",
+            "azimuth": "<name>-azimuth"
         },
         "site": {
-            "timezone-name": "<name>-timezone-name",
-            "longitude-name": "<name>-longitude-name",
-            "latitude-name": "<name>-latitude-name",
-            "noaastation-name": "<name>-noaastation-name"
+            "noaastation": "<name>-noaastation",
+            "longitude": "<name>-longitude",
+            "timezone": "<name>-timezone",
+            "latitude": "<name>-latitude"
         }
     },
     "param_mapping": {
         "hvac-zone": {},
         "space": {
-            "area": "area-name-value"
+            "area": "area-value",
+            "area-name": "area"
         },
         "hp-rtu": {
-            "cooling_capacity": "cooling_capacity-name-value",
-            "cooling_COP": "cooling_COP-name-value",
-            "heating_COP": "heating_COP-name-value",
-            "heating_capacity": "heating_capacity-name-value"
+            "heating_capacity": "heating_capacity-value",
+            "cooling_COP": "cooling_COP-value",
+            "cooling_capacity": "cooling_capacity-value",
+            "heating_COP": "heating_COP-value",
+            "heating_capacity-name": "heating_capacity",
+            "cooling_COP-name": "cooling_COP",
+            "cooling_capacity-name": "cooling_capacity",
+            "heating_COP-name": "heating_COP"
         },
         "tstat": {
-            "stage_count": "stage_count-name-value",
-            "resolution": "resolution-name-value",
-            "setpoint_deadband": "setpoint_deadband-name-value",
-            "active": "active-name-value",
-            "tolerance": "tolerance-name-value"
+            "tolerance": "tolerance-value",
+            "resolution": "resolution-value",
+            "setpoint_deadband": "setpoint_deadband-value",
+            "stage_count": "stage_count-value",
+            "active": "active-value",
+            "tolerance-name": "tolerance",
+            "active-name": "active",
+            "setpoint_deadband-name": "setpoint_deadband",
+            "resolution-name": "resolution",
+            "stage_count-name": "stage_count"
         },
         "window": {
-            "area": "area-name-value",
-            "azimuth": "azimuth-name-value",
-            "tilt": "tilt-name-value"
+            "azimuth": "azimuth-value",
+            "area": "area-value",
+            "tilt": "tilt-value",
+            "area-name": "area",
+            "tilt-name": "tilt",
+            "azimuth-name": "azimuth"
         },
         "site": {
-            "latitude": "latitude-name-value",
-            "longitude": "longitude-name-value",
-            "timezone": "timezone-name-value",
-            "noaastation": "noaastation-name-value"
+            "longitude": "longitude-value",
+            "timezone": "timezone-value",
+            "latitude": "latitude-value",
+            "noaastation": "noaastation-value",
+            "noaastation-name": "noaastation",
+            "longitude-name": "longitude",
+            "timezone-name": "timezone",
+            "latitude-name": "latitude"
         }
     },
     "hvacs_feed_hvacs": {},

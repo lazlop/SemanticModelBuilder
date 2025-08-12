@@ -6,7 +6,7 @@ area:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name a brick:EntityPropertyValue;
-      brick:value p:value ;
+        brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Area .
 tilt:
@@ -32,7 +32,7 @@ azimuth:
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Azimuth .
 
-
+# TODO: Ask Gabe about using brick tags for heating/cooling info. 
 cooling-COP:
   body: >
     @prefix p: <urn:___param___#> .
@@ -40,10 +40,12 @@ cooling-COP:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue;
       brick:value p:value ;
         qudt:hasUnit p:unit ;
-        qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
+        qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+        a hpfs:cooling_COP. 
 
 heating-COP:
   body: >
@@ -52,10 +54,12 @@ heating-COP:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue;
       brick:value p:value ;
         qudt:hasUnit p:unit ;
-        qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
+        qudt:hasQuantityKind quantitykind:CoefficientOfPerformance ;
+        a hpfs:heating_COP. 
 cooling-capacity:
   body: >
     @prefix p: <urn:___param___#> .
@@ -63,10 +67,14 @@ cooling-capacity:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue;
       brick:value p:value ;
         qudt:hasUnit p:unit ;
-        qudt:hasQuantityKind quantitykind:Power .
+        qudt:hasQuantityKind quantitykind:Power ;
+        a hpfs:cooling_capacity . 
+
+# TODO: Check on brick heating and cooling capacities. 
 heating-capacity:
   body: >
     @prefix p: <urn:___param___#> .
@@ -74,10 +82,12 @@ heating-capacity:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue;
       brick:value p:value ;
         qudt:hasUnit p:unit ;
-        qudt:hasQuantityKind quantitykind:Power .
+        qudt:hasQuantityKind quantitykind:Power ;
+        a hpfs:heating_capacity . 
 temperature:
   body: >
     @prefix p: <urn:___param___#> .
@@ -207,6 +217,7 @@ tstat-deadband:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue;
       brick:value p:value ;
         a brick:Temperature_Deadband_Setpoint ;
@@ -221,13 +232,17 @@ tstat-tolerance:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue; 
-      brick:value p:value ;
+        brick:value p:value ;
         qudt:hasUnit p:unit ;
         a brick:Temperature_Tolerance_Parameter ;
         qudt:isDeltaQuantity true ;
-        qudt:hasQuantityKind quantitykind:Temperature .
+        qudt:hasQuantityKind quantitykind:Temperature ;
+        a hpfs:tstat_tolerance .
 
+# TODO: See if there is a generic way of making these 1 to 1 (like exact matching aspects) and saying there are no other brick point values allowed (maybe that would be enough)
+# TODO: Alternatively, can have a config workflow to attach these labels using other information. 
 tstat-resolution:
   body: >
     @prefix p: <urn:___param___#> .
@@ -235,10 +250,12 @@ tstat-resolution:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue; 
-       brick:value p:value ;
-        qudt:isDeltaQuantity true ;
-        qudt:hasUnit p:unit .
+      brick:value p:value ;
+      qudt:isDeltaQuantity true ;
+      qudt:hasUnit p:unit ;
+      a hpfs:tstat_resolution .
 
 tstat-active:
   body: >
@@ -249,7 +266,7 @@ tstat-active:
     @prefix unit: <http://qudt.org/vocab/unit/> .
     p:name a brick:EntityPropertyValue;
        brick:value p:value ;
-        a brick:Availability_Status.
+       a brick:Availability_Status.
 
 
 timezone:
@@ -272,11 +289,12 @@ latitude:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue; 
         brick:value p:value ;
         qudt:hasUnit unit:Degree ;
         qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
-        a hpf:Latitude .
+        a hpfs:latitude .
 
 longitude:
   body: >
@@ -286,11 +304,12 @@ longitude:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue; 
         brick:value p:value ;
         qudt:hasUnit unit:Degree ;
         qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
-        a hpf:Longitude .
+        a hpfs:longitude .
 
 noaastation:
   body: >
@@ -300,9 +319,12 @@ noaastation:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a brick:EntityPropertyValue;
-      hpf:hasNOAAStation p:value .
+      brick:value p:value ;
+      a hpfs:noaastation .
 
+# TODO: See where this is used and change brick:buildingID
 building_id:
   body: >
     @prefix p: <urn:___param___#> .
@@ -311,7 +333,8 @@ building_id:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:name brick:buildingID p:value .
+    p:name a brick:EntityPropertyValue; 
+      brick:buildingID p:value .
 
 volttron-external-reference:
   body: >
@@ -334,6 +357,5 @@ point:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:name a p:point_type ;
-        qudt:hasUnit p:unit ;
-    .
+    p:name a brick:Point, p:point_type ;
+        qudt:hasUnit p:unit .

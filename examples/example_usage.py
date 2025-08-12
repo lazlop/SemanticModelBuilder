@@ -15,7 +15,7 @@ from buildingmotif.dataclasses import Library
 import csv
 from pyshacl.rdfutil import clone
 
-ontology = 's223'
+ontology = 'brick'
 
 # %%
 # still working on loader, will clean up class, but functionality about right

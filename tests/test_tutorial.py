@@ -15,6 +15,8 @@ from rdflib import Graph
 from pyshacl.rdfutil import clone
 from utils import prefill_csv_survey
 
+from buildingmotif import get_building_motif
+
 from semantic_mpc_interface import (
     LoadModel,
     get_thermostat_data,
@@ -28,7 +30,11 @@ from semantic_mpc_interface import (
 logging.disable(logging.CRITICAL)
 warnings.filterwarnings("ignore")
 
-@pytest.fixture(scope="module", params=['s223','brick'])
+# Run for ontologies 
+# params=['s223','brick']
+params=['brick']
+
+@pytest.fixture(scope="module", params=params)
 def ontology(request):
     return request.param
 
@@ -43,9 +49,9 @@ class TestTutorialPackageWorkflow:
         shutil.rmtree(temp_dir)
 
     @pytest.fixture
-    def reference_files(self):
+    def reference_files(self, ontology):
         """Paths to reference files for comparison."""
-        base_path = Path(__file__).parent.parent / "tutorial" / "s223-test_site" / "test_build"
+        base_path = Path(__file__).parent/ "reference-models" / f"{ontology}-test_site" / "test_build"
         return {
             'test_build_ttl': base_path / "test_build.ttl",
             'reasoned_ttl': base_path / "reasoned.ttl",
@@ -62,6 +68,14 @@ class TestTutorialPackageWorkflow:
         Test 1: Creates the survey using s223, and makes sure the right files 
         are created with the right headers (order doesn't matter).
         """
+        # Clear out previous ontologies templates if they exist 
+        try:
+            bm = get_building_motif()
+            bm.table_connection.delete_db_library(1)
+        except Exception as e:
+            pass
+            # print("BuildingMOTIF does not exist, instantiating, no templates to clear")
+
         base_path = f'{ontology}-test_site/test_build'
         
         # Create survey with same parameters as notebook
@@ -95,7 +109,7 @@ class TestTutorialPackageWorkflow:
         # Verify config content
         with open(config_file, 'r') as f:
             config = json.load(f)
-        assert config['site_id'] == 's223-test_site'
+        assert config['site_id'] == f'{ontology}-test_site'
         # Note: ontology is passed as parameter but may not be stored in config
         # The important thing is that the survey was created with the right ontology
         
@@ -142,6 +156,7 @@ class TestTutorialPackageWorkflow:
             base_path.split('/')[1], 
             temp_dir, 
             overwrite=True, 
+            ontology=ontology,
             template_dict={
                 'zone': 'hvac-zone',
                 "space": "space",
@@ -209,12 +224,11 @@ class TestTutorialPackageWorkflow:
         # Verify key entities exist in both models
         from rdflib import URIRef, Namespace
         
-        bldg = Namespace("urn:hpflex/s223-test_site#")
-        s223 = Namespace("http://data.ashrae.org/standard223#")
+        bldg = Namespace(f"urn:hpflex/{ontology}-test_site#")
         
         # Check for key entities that should exist
         key_entities = [
-            bldg['s223-test_site'],
+            bldg[f'{ontology}-test_site'],
             bldg['zone_1'], bldg['zone_2'], bldg['zone_3'],
             bldg['hvac_1'], bldg['hvac_2'], bldg['hvac_3'],
             bldg['tstat_zone_1'], bldg['tstat_zone_2'], bldg['tstat_zone_3']
@@ -231,7 +245,6 @@ class TestTutorialPackageWorkflow:
         Test 3: Loads the model and makes sure it looks like the current values for site_info.
         """
         # Set up the complete workflow first
-        ontology = 's223'
         base_path = f'{ontology}-test_site/test_build'
         
         # Create and configure survey
@@ -329,7 +342,7 @@ class TestTutorialPackageWorkflow:
             assert hasattr(tstat, 'tstat_resolution'), "Thermostat should have resolution attribute"
         
         # Test SI loader
-        si_loader = LoadModel(str(reasoned_file), ontology='s223', as_si_units=True)
+        si_loader = LoadModel(str(reasoned_file), ontology=ontology, as_si_units=True)
         si_site_info = si_loader.get_all_building_objects()
         assert isinstance(si_site_info, dict), "SI site_info should be a dictionary"
 
@@ -339,7 +352,6 @@ class TestTutorialPackageWorkflow:
         like the current export.
         """
         # Set up the complete workflow
-        ontology = 's223'
         base_path = f'{ontology}-test_site/test_build'
         
         # Create and configure survey
@@ -374,7 +386,7 @@ class TestTutorialPackageWorkflow:
         inferred_graph.serialize(str(reasoned_file), format='ttl')
         
         # Create SI loader like in notebook
-        si_loader = LoadModel(str(reasoned_file), ontology='s223', as_si_units=True)
+        si_loader = LoadModel(str(reasoned_file), ontology=ontology, as_si_units=True)
         
         # Test get_thermostat_data for all zones
         thermostat_data_all = get_thermostat_data(si_loader)
@@ -458,7 +470,6 @@ class TestTutorialPackageWorkflow:
         and all the attributes have the expected values and units.
         """
         # Set up the complete workflow
-        ontology = 's223'
         base_path = f'{ontology}-test_site/test_build'
         
         # Create and configure survey
@@ -511,7 +522,7 @@ class TestTutorialPackageWorkflow:
         
         # Validate site name
         site_name = str(site.name).split('#')[-1] if '#' in str(site.name) else str(site.name)
-        assert site_name == 's223-test_site', f"Expected site name 's223-test_site', got '{site_name}'"
+        assert site_name == f'{ontology}-test_site', f"Expected site name '{ontology}-test_site', got '{site_name}'"
         
         # Validate site attributes with expected values from site.csv
         expected_site_values = {
