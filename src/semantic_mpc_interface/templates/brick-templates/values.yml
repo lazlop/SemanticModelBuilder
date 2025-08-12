@@ -5,7 +5,8 @@ area:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Area .
 tilt:
@@ -15,7 +16,8 @@ tilt:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Tilt .
 azimuth:
@@ -25,7 +27,8 @@ azimuth:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+       brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Azimuth .
 
@@ -37,7 +40,8 @@ cooling-COP:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
 
@@ -48,7 +52,8 @@ heating-COP:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:CoefficientOfPerformance . 
 cooling-capacity:
@@ -58,7 +63,8 @@ cooling-capacity:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Power .
 heating-capacity:
@@ -68,7 +74,8 @@ heating-capacity:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         qudt:hasUnit p:unit ;
         qudt:hasQuantityKind quantitykind:Power .
 temperature:
@@ -188,7 +195,8 @@ tstat-stage_count:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue; 
+      brick:value p:value ;
         qudt:hasUnit unit:NUM ;
         qudt:hasQuantityKind quantitykind:Count .
 
@@ -199,7 +207,8 @@ tstat-deadband:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         a brick:Temperature_Deadband_Setpoint ;
         qudt:hasUnit p:unit ;
         qudt:isDeltaQuantity true ;
@@ -212,7 +221,8 @@ tstat-tolerance:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue; 
+      brick:value p:value ;
         qudt:hasUnit p:unit ;
         a brick:Temperature_Tolerance_Parameter ;
         qudt:isDeltaQuantity true ;
@@ -225,7 +235,8 @@ tstat-resolution:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue; 
+       brick:value p:value ;
         qudt:isDeltaQuantity true ;
         qudt:hasUnit p:unit .
 
@@ -236,7 +247,8 @@ tstat-active:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+       brick:value p:value ;
         a brick:Availability_Status.
 
 
@@ -248,7 +260,8 @@ timezone:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue;
+      brick:value p:value ;
         qudt:hasUnit unit:Timezone .
 
 latitude:
@@ -259,7 +272,8 @@ latitude:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue; 
+        brick:value p:value ;
         qudt:hasUnit unit:Degree ;
         qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
         a hpf:Latitude .
@@ -272,7 +286,8 @@ longitude:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:name brick:value p:value ;
+    p:name a brick:EntityPropertyValue; 
+        brick:value p:value ;
         qudt:hasUnit unit:Degree ;
         qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
         a hpf:Longitude .
@@ -285,7 +300,8 @@ noaastation:
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
     @prefix hpf: <urn:hpflex#> .
-    p:name hpf:hasNOAAStation p:value .
+    p:name a brick:EntityPropertyValue;
+      hpf:hasNOAAStation p:value .
 
 building_id:
   body: >
