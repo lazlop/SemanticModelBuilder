@@ -304,11 +304,11 @@ timezone:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
     p:name a s223:EnumeratedProperty ;
         s223:hasValue p:value ;
-        a hpf:Timezone ;
+        a hpfs:timezone ;
     .
 
 latitude:
@@ -321,12 +321,12 @@ latitude:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a s223:QuantifiableProperty ;
         s223:hasValue p:value ;
         qudt:hasUnit unit:Degree ;
         qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
-        a hpf:Latitude .
+        a hpfs:latitude .
 
 longitude:
   body: >
@@ -336,12 +336,12 @@ longitude:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a s223:QuantifiableProperty ;
         s223:hasValue p:value ;
         qudt:hasUnit unit:Degree ;
         qudt:hasQuantityKind quantitykind:GeneralizedCoordinate ;
-        a hpf:Longitude .
+        a hpfs:longitude .
 
 noaastation:
   body: >
@@ -351,10 +351,10 @@ noaastation:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
+    @prefix hpfs: <urn:hpflex/shapes#> .
     p:name a s223:EnumeratedProperty ;
         s223:hasValue p:value ;
-        a hpf:NOAAStation .
+        a hpfs:noaastation .
 
 volttron-external-reference:
   body: >
@@ -379,7 +379,6 @@ point:
     @prefix qudt: <http://qudt.org/schema/qudt/> .
     @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
     @prefix unit: <http://qudt.org/vocab/unit/> .
-    @prefix hpf: <urn:hpflex#> .
     p:name a s223:Property, p:point_type ;
         qudt:hasUnit p:unit ;
     .

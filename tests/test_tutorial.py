@@ -31,8 +31,8 @@ logging.disable(logging.CRITICAL)
 warnings.filterwarnings("ignore")
 
 # Run for ontologies 
-# params=['s223','brick']
-params=['brick']
+params=['s223','brick']
+# params=['brick']
 
 @pytest.fixture(scope="module", params=params)
 def ontology(request):
