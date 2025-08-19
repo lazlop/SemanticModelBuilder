@@ -1,4 +1,5 @@
 # TODO: Manage BuildingMOTIF better
+# TODO: Maybe manage exact matching of hpfs labels here. Only necessary if we're loading models not built using this library
 import os
 import re
 import pandas as pd
@@ -89,8 +90,8 @@ class LoadModel:
         # TODO: Adjust how we do as_si and as_ip
         self.as_si_units = as_si_units
         # Only one query so far requires loading the ontology to use subClassOf in 223:
-        if ontology == "s223":
-            self.g.parse("https://open223.info/223p.ttl", format="ttl")
+        # if ontology == "s223":
+        #     self.g.parse("https://open223.info/223p.ttl", format="ttl")
     
         # Initialize BuildingMOTIF components
         if ontology == 'brick':

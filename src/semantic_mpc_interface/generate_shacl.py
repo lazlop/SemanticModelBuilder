@@ -1,5 +1,9 @@
+# TODO: Use dependencies to say what kind of property something is supposed to have. Code used to do this and should be restored. 
+# TODO: Think harder about how to treat optional depenendencies/parameters 
+
 from importlib.resources import files
 from pathlib import Path
+from typing import Literal as PyLiteral
 
 import rdflib
 import yaml
@@ -10,7 +14,6 @@ from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from brick_tq_shacl.topquadrant_shacl import infer
 from .namespaces import *
 from .utils import *
-
 
 class SHACLHandler:
     """Class to handle SHACL shape generation and validation"""
@@ -70,13 +73,12 @@ class SHACLHandler:
             raise ValueError("No main type found in template")
         return main_type, types
 
+    # TODO: could use native buildingmotif functionality for this. 
     def _get_dependency_name_by_arg_name(self, template_graph, template, name):
         name = get_uri_name(template_graph, name)
         for dependencies in template["dependencies"]:
             if dependencies["args"]["name"] == name:
                 return dependencies["template"]
-
-    # TODO: Values no longer have a type - need different logic ot handle
     def generate_shapes(self):
         with open(self.entity_templates, "r") as f:
             templates = yaml.safe_load(f)
@@ -90,9 +92,9 @@ class SHACLHandler:
             templates = yaml.safe_load(f)
         self.relations_templates_names = list(templates.keys())
 
-        self._generate_shapes(templates_file=self.entity_templates)
+        self._generate_shapes(templates_file=self.entity_templates, template_type='entity')
         # TODO: brick entity properties do not have a type...  should probably just add a type to the templates
-        self._generate_shapes(templates_file=self.value_templates)
+        self._generate_shapes(templates_file=self.value_templates, template_type='value')
         self._generate_relation_inference(templates_file=self.relations_templates)
 
     def _parse_template(self, template_data):
@@ -157,7 +159,7 @@ class SHACLHandler:
                 )
             )
     # TODO: need to fix SHACL gen... was using dependencies incorrectly
-    def _generate_shapes(self, templates_file):
+    def _generate_shapes(self, templates_file, template_type: PyLiteral['entity', 'value']):
         """Convert templates to SHACL shapes
 
         Args:
@@ -204,10 +206,11 @@ class SHACLHandler:
                 else:
                     prop_counts[p] = 1
 
-                if not isinstance(o, Literal):
-                    if PARAM == self.shapes_graph.compute_qname(o)[1]:
-                        continue
-                        # Constraint covered by mincount
+                # skipping triples with objects that are parameters
+                # if not isinstance(o, Literal):
+                #     if PARAM == self.shapes_graph.compute_qname(o)[1]:
+                #         continue
+                #         # Constraint covered by mincount
 
                 prop_shape = create_uri_name_from_uris(
                     self.shapes_graph, HPFS, [shape_uri, o]
@@ -215,25 +218,39 @@ class SHACLHandler:
                 self.shapes_graph.add((shape_uri, SH.property, prop_shape))
                 self.shapes_graph.add((prop_shape, RDF.type, SH.PropertyShape))
                 self.shapes_graph.add((prop_shape, SH.path, p))
-                self.shapes_graph.add((prop_shape, SH.qualifiedMinCount, Literal(1)))
 
                 qual_val_shape = create_uri_name_from_uris(
                     self.shapes_graph, HPFS, [shape_uri, o]
                 )
-                self.shapes_graph.add(
-                    (prop_shape, SH.qualifiedValueShape, qual_val_shape)
-                )
-                self.shapes_graph.add((qual_val_shape, RDF.type, SH.NodeShape))
-
+                
+                #TODO: don't know which parameters should be literals/named nodes vs instances of a particular class. Need template arg types
+                # Roughly, the value templates take named node/literal args and entity take instance args of a particular type. 
+                
+                # As a proxy for knowing param types, using whether this is a value or entity template
+                add_qual_val_shape = True
+                # has Literal value
                 if isinstance(o, Literal):
+                    print('value or value template', o)
                     self.shapes_graph.add((qual_val_shape, SH["hasValue"], o))
+                # has value parameter (uses predicate has value but no object)
+                elif template_type == 'value':
+                    add_qual_val_shape = False
+                    pass # no qualified value shape. 
+                # intances of a particular type 
                 elif o in dependency_names.keys():
                     self.shapes_graph.add(
                         (qual_val_shape, SH["class"], HPFS[dependency_names[o]])
                     )
+                # named nodes 
                 else:
                     self.shapes_graph.add((qual_val_shape, SH["hasValue"], o))
 
+                if add_qual_val_shape == True:
+                    self.shapes_graph.add((prop_shape, SH.qualifiedMinCount, Literal(1)))
+                    self.shapes_graph.add(
+                        (prop_shape, SH.qualifiedValueShape, qual_val_shape)
+                    )
+                    self.shapes_graph.add((qual_val_shape, RDF.type, SH.NodeShape))
             # Need to specify that properties can't have any other aspects - this is very specific to 223.
             # If templates defined EVERYTHING that would exist in 223 this could be generalized, but currently we do not do this.
             # It's a struggle in 223P using SPARQL to get just a temperature measurement and not a temperature deadband property, because the temperature deadband has everything the temperature sensor property has and more
