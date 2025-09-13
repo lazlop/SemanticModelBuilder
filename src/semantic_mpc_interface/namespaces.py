@@ -64,7 +64,7 @@ def bind_prefixes(graph):
     graph.bind("brick", BRICK)
     graph.bind("tag", TAG)
     graph.bind("bsh", BSH)
-    graph.bind("P", PARAM)
+    graph.bind("p", PARAM)
     graph.bind("constraint", CONSTRAINT)
     graph.bind("bmotif", BM)
     graph.bind("hpflex", HPF)
@@ -85,7 +85,7 @@ namespace_dict = {
     "brick": BRICK,
     "tag": TAG,
     "bsh": BSH,
-    "P": PARAM,
+    "p": PARAM,
     "constraint": CONSTRAINT,
     "bmotif": BM,
     "hpflex": HPF,
