@@ -44,6 +44,7 @@ CONSTRAINT = Namespace("https://nrel.gov/BuildingMOTIF/constraints#")
 S223 = Namespace("http://data.ashrae.org/standard223#")
 
 A = RDF.type
+WATR = Namespace("urn:nawi-water-ontology#")
 
 
 def bind_prefixes(graph):
@@ -69,6 +70,7 @@ def bind_prefixes(graph):
     graph.bind("bmotif", BM)
     graph.bind("hpflex", HPF)
     graph.bind("hpfs", HPFS)
+    graph.bind('watr', WATR)
     graph.bind("s223", S223)
 
 
@@ -91,6 +93,7 @@ namespace_dict = {
     "hpflex": HPF,
     "hpfs": HPFS,
     "s223": S223,
+    "watr": WATR,
     "ex1": "http://data.ashrae.org/standard223/data/scb-vrf#",
 }
 
