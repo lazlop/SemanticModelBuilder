@@ -30,14 +30,16 @@ class SHACLHandler:
         self.ontology = ontology
         self._load_templates()
 
-    def _load_templates(self) -> None:
-        """Load ontology-specific templates."""
+    def _load_templates(self, template_base_dir=None) -> None:
+        """Load ontology-specific templates. Can optionally provide a template directory with entity, value, and relation templates"""
         if self.ontology == "brick":
             self.ontology_ns = BRICK
         elif self.ontology == "s223":
             self.ontology_ns = S223
         else:
             raise ValueError("Invalid ontology. Must be 'brick' or 's223'")
+        if template_base_dir is not None:
+            self.template_dir = Path(template_base_dir)
         self.template_dir = (
             files("semantic_mpc_interface")
             .joinpath("templates")
