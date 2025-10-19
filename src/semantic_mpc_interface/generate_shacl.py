@@ -171,7 +171,9 @@ class SHACLHandler:
             # Add basic shape properties
             self.shapes_graph.add((shape_uri, RDF.type, SH.NodeShape))
             self.shapes_graph.add((shape_uri, RDF.type, RDFS["Class"]))
-            self.shapes_graph.add((shape_uri, RDF.type, S223["Class"]))
+            # TODO: Check to see if this type declaration is necessary or helpful 
+            if self.ontology_ns == S223:
+                self.shapes_graph.add((shape_uri, RDF.type, S223["Class"]))
             # self.shapes_graph.add((shape_uri, SH.targetClass, main_type))
             for rdf_type in types:
                 self.shapes_graph.add((shape_uri, SH["class"], rdf_type))
@@ -258,7 +260,7 @@ class SHACLHandler:
                 self.shapes_graph.add((prop_shape, SH.minCount, Literal(count)))
                 self.shapes_graph.add((prop_shape, SH.maxCount, Literal(count)))
                 self.shapes_graph.add((prop_shape, SH.path, p))
-            if S223["hasAspect"] not in prop_counts.keys():
+            if (S223["hasAspect"] not in prop_counts.keys()) & (self.ontology_ns == S223):
                 prop_shape = create_uri_name_from_uris(
                     self.shapes_graph, HPFS, [shape_uri], "_noAspects"
                 )
@@ -359,7 +361,7 @@ class SHACLHandler:
             self.template_library = Library.load(directory=str(self.template_dir))
         
         self.model = Model.create(self.ontology_ns)
-        
+
         self.model.add_graph(data_graph)
         
         return self.model.validate([shapes_graph.get_shape_collection()])
