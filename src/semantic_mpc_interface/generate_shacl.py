@@ -161,6 +161,7 @@ class SHACLHandler:
             templates = yaml.safe_load(f)
         # Kind of turning SHACL into OWL for 223
         for template_name, template_data in templates.items():
+            shape_path_name_dct = {}
             template_graph = self._parse_template(template_data)
 
             main_type, types = self._get_template_types(template_graph)
@@ -209,6 +210,10 @@ class SHACLHandler:
                 self.shapes_graph.add((prop_shape, RDF.type, SH.PropertyShape))
                 self.shapes_graph.add((prop_shape, SH.path, p))
 
+                # If there is just one of a property, then we can do this, 
+                # if there are multiple properties that have different values (that aren't qualifiedValueShapes) this could cause an error. This won't happen currently
+                shape_path_name_dct[p] = prop_shape
+
                 qual_val_shape = create_uri_name_from_uris(
                     self.shapes_graph, HPFS, [shape_uri, o]
                 )
@@ -252,14 +257,22 @@ class SHACLHandler:
 
             # Not great implementation, but works for now
             for p, count in prop_counts.items():
-                prop_shape = create_uri_name_from_uris(
-                    self.shapes_graph, HPFS, [shape_uri, p]
-                )
-                self.shapes_graph.add((shape_uri, SH.property, prop_shape))
-                self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
+                if p in shape_path_name_dct.keys():
+                    prop_shape = shape_path_name_dct[p]
+                else:
+                    # TODO: Having minCount with a particular shape could cause errors for pyshacl, may need a separate shape with min and max count if so
+                    prop_shape = create_uri_name_from_uris(
+                        self.shapes_graph, HPFS, [shape_uri, p]
+                    )
+                    self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                    self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
+                    self.shapes_graph.add((prop_shape, SH.path, p))
+
                 self.shapes_graph.add((prop_shape, SH.minCount, Literal(count)))
-                self.shapes_graph.add((prop_shape, SH.maxCount, Literal(count)))
-                self.shapes_graph.add((prop_shape, SH.path, p))
+                # TODO: Max Count causes errors in some cases, and is not really needed for others.
+                # templates don't support distinguishing what should be min count vs exact, this should probably be delivered by object oriented interface.
+                # self.shapes_graph.add((prop_shape, SH.maxCount, Literal(count)))
+
             if (S223["hasAspect"] not in prop_counts.keys()) & (self.ontology_ns == S223):
                 prop_shape = create_uri_name_from_uris(
                     self.shapes_graph, HPFS, [shape_uri], "_noAspects"
