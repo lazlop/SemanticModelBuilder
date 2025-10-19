@@ -72,6 +72,7 @@ def bind_prefixes(graph):
     graph.bind("hpfs", HPFS)
     graph.bind('watr', WATR)
     graph.bind("s223", S223)
+    graph.bind('ref',REF)
 
 
 namespace_dict = {
@@ -95,6 +96,7 @@ namespace_dict = {
     "s223": S223,
     "watr": WATR,
     "ex1": "http://data.ashrae.org/standard223/data/scb-vrf#",
+    "ref": REF,
 }
 
 prefix_dict = {value: key for key, value in namespace_dict.items()}

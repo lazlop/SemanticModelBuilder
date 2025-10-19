@@ -1,6 +1,7 @@
 # TODO: Use dependencies to say what kind of property something is supposed to have. Code used to do this and should be restored. 
 # TODO: Think harder about how to treat optional depenendencies/parameters 
 
+from warnings import warn
 from importlib.resources import files
 from pathlib import Path
 from typing import Literal as PyLiteral
@@ -40,11 +41,12 @@ class SHACLHandler:
             raise ValueError("Invalid ontology. Must be 'brick' or 's223'")
         if template_base_dir is not None:
             self.template_dir = Path(template_base_dir)
-        self.template_dir = (
-            files("semantic_mpc_interface")
-            .joinpath("templates")
-            .joinpath(f"{self.ontology}-templates")
-        )
+        else:
+            self.template_dir = (
+                files("semantic_mpc_interface")
+                .joinpath("templates")
+                .joinpath(f"{self.ontology}-templates")
+            )
         self.entity_templates = str(self.template_dir.joinpath("entities.yml"))
         self.value_templates = str(self.template_dir.joinpath("values.yml"))
         self.relations_templates = str(self.template_dir.joinpath("relations.yml"))
@@ -71,6 +73,8 @@ class SHACLHandler:
                 main_type = rdf_type
             if URIRef(BRICK) == g.compute_qname(rdf_type)[1]:
                 main_type = rdf_type
+            else:
+                main_type = rdf_type
         if main_type is None:
             raise ValueError("No main type found in template")
         return main_type, types
@@ -82,18 +86,6 @@ class SHACLHandler:
             if dependencies["args"]["name"] == name:
                 return dependencies["template"]
     def generate_shapes(self):
-        with open(self.entity_templates, "r") as f:
-            templates = yaml.safe_load(f)
-        self.entity_templates_names = list(templates.keys())
-
-        with open(self.value_templates, "r") as f:
-            templates = yaml.safe_load(f)
-        self.value_templates_names = list(templates.keys())
-
-        with open(self.relations_templates, "r") as f:
-            templates = yaml.safe_load(f)
-        self.relations_templates_names = list(templates.keys())
-
         self._generate_shapes(templates_file=self.entity_templates, template_type='entity')
         # TODO: brick entity properties do not have a type...  should probably just add a type to the templates
         self._generate_shapes(templates_file=self.value_templates, template_type='value')
@@ -109,6 +101,9 @@ class SHACLHandler:
     def _generate_relation_inference(self, templates_file):
         with open(templates_file, "r") as f:
             templates = yaml.safe_load(f)
+        if not templates:
+            warn(f"No templates found in {templates_file}")
+            return 
         # Kind of turning SHACL into OWL for 223
         for template_name in templates.keys():
             template = self.template_library.get_template_by_name(template_name)
