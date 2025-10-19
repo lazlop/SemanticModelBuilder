@@ -1,0 +1,8 @@
+name,tilt-unit,area,azimuth-unit,tilt,azimuth,area-unit
+window_1_1,Degree,1.0,Degree,1.0,1.0,FT2
+window_1_2,Degree,2.0,Degree,2.0,2.0,FT2
+window_2_1,Degree,3.0,Degree,3.0,3.0,FT2
+window_2_2,Degree,4.0,Degree,4.0,4.0,FT2
+window_3_1,Degree,5.0,Degree,5.0,5.0,FT2
+window_3_2,Degree,6.0,Degree,6.0,6.0,FT2
+window_3_3,Degree,7.0,Degree,7.0,7.0,FT2

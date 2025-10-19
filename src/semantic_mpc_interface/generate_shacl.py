@@ -1,0 +1,406 @@
+# TODO: Use dependencies to say what kind of property something is supposed to have. Code used to do this and should be restored. 
+# TODO: Think harder about how to treat optional depenendencies/parameters 
+
+from warnings import warn
+from importlib.resources import files
+from pathlib import Path
+from typing import Literal as PyLiteral
+
+import rdflib
+import yaml
+from buildingmotif import BuildingMOTIF, get_building_motif
+from buildingmotif.dataclasses import Library, Model
+from pyshacl import validate
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
+from brick_tq_shacl.topquadrant_shacl import infer
+from .namespaces import *
+from .utils import *
+
+class SHACLHandler:
+    """Class to handle SHACL shape generation and validation"""
+
+    def __init__(self, ontology="s223", template_dir=None):
+        """Initialize SHACL handler
+        May want option to pass in existing buildingmotif instance.
+        Args:
+            template_dir: Directory containing templates. If None, uses default s223 templates
+        """
+        # Not sure how to manage building motif
+        self.shapes_graph = Graph()
+        bind_prefixes(self.shapes_graph)
+        self.ontology = ontology
+        self._load_templates(template_base_dir=template_dir)
+
+    def _load_templates(self, template_base_dir=None) -> None:
+        """Load ontology-specific templates. Can optionally provide a template directory with entity, value, and relation templates"""
+        if self.ontology == "brick":
+            self.ontology_ns = BRICK
+        elif self.ontology == "s223":
+            self.ontology_ns = S223
+        else:
+            raise ValueError("Invalid ontology. Must be 'brick' or 's223'")
+        if template_base_dir is not None:
+            self.template_dir = Path(template_base_dir)
+        else:
+            self.template_dir = (
+                files("semantic_mpc_interface")
+                .joinpath("templates")
+                .joinpath(f"{self.ontology}-templates")
+            )
+        
+        try:
+            self.bm = get_building_motif()
+            self.template_library = Library.load(db_id=1)
+        except Exception as e:
+            print("BuildingMOTIF does not exist, instantiating:", e)
+            self.bm = BuildingMOTIF("sqlite://")
+            self.template_library = Library.load(directory=str(self.template_dir))
+            
+        self.entity_templates = str(self.template_dir.joinpath("entities.yml"))
+        self.value_templates = str(self.template_dir.joinpath("values.yml"))
+        self.relations_templates = str(self.template_dir.joinpath("relations.yml"))
+
+    def _get_template_types(self, g):
+        """Parse the RDF template body and extract type information"""
+
+        # Find the type of the main entity (p:name)
+        p = Namespace("urn:___param___#")
+        types = list(g.objects(p.name, RDF.type))
+        main_type = None
+        # TODO: Added for brick classes - not sure what else to cover
+        for rdf_type in types:
+            if URIRef(S223) == g.compute_qname(rdf_type)[1]:
+                main_type = rdf_type
+            if URIRef(BRICK) == g.compute_qname(rdf_type)[1]:
+                main_type = rdf_type
+            else:
+                main_type = rdf_type
+        if main_type is None:
+            raise ValueError("No main type found in template")
+        return main_type, types
+
+    # TODO: could use native buildingmotif functionality for this. 
+    def _get_dependency_name_by_arg_name(self, template_graph, template, name):
+        name = get_uri_name(template_graph, name)
+        for dependencies in template["dependencies"]:
+            if dependencies["args"]["name"] == name:
+                return dependencies["template"]
+    def generate_shapes(self):
+        self._generate_shapes(templates_file=self.entity_templates, template_type='entity')
+        # TODO: brick entity properties do not have a type...  should probably just add a type to the templates
+        self._generate_shapes(templates_file=self.value_templates, template_type='value')
+        self._generate_relation_inference(templates_file=self.relations_templates)
+
+    def _parse_template(self, template_data):
+        if "body" not in template_data:
+            raise ValueError(f"Template does not have a body")
+        template_graph = Graph()
+        template_graph.parse(data=template_data["body"], format="turtle")
+        return template_graph
+
+    def _generate_relation_inference(self, templates_file):
+        with open(templates_file, "r") as f:
+            templates = yaml.safe_load(f)
+        if not templates:
+            warn(f"No templates found in {templates_file}")
+            return 
+        # Kind of turning SHACL into OWL for 223
+        for template_name in templates.keys():
+            template = self.template_library.get_template_by_name(template_name)
+            template_graph = template.inline_dependencies().body
+            # main_relation, main_target = list(template.body.predicate_objects(PARAM.name))[0]
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}Annotation"], RDF.type, SH.NodeShape)
+            )
+            main_relation, main_target = list(
+                template.body.predicate_objects(PARAM.name)
+            )[0]
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}Annotation"], SH.targetSubjectsOf, main_relation)
+            )
+            self.shapes_graph.add(
+                (
+                    HPFS[f"{template_name}Annotation"],
+                    SH.rule,
+                    HPFS[f"{template_name}AnnotationRule"],
+                )
+            )
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}AnnotationRule"], RDF.type, SH.SPARQLRule)
+            )
+            sparql_rule = f"""
+                CONSTRUCT {{
+                    ?name <{HPFS[template_name]}> ?target .
+                }}
+                """
+            sparql_rule += "WHERE {\n"
+            for s, p, o in template_graph.triples((None, None, None)):
+                if template_graph.compute_qname(s)[1] == URIRef(PARAM):
+                    s_var = "?" + get_uri_name(template_graph, s).replace("-", "_")
+                else:
+                    s_var = f"<{s}>"
+                if isinstance(o, Literal):
+                    o_var = str(o).capitalize()
+                elif template_graph.compute_qname(o)[1] == URIRef(PARAM):
+                    o_var = "?" + get_uri_name(template_graph, o).replace("-", "_")
+                else:
+                    o_var = f"<{o}>"
+                sparql_rule += f"\t{s_var} <{p}> {o_var} . \n"
+            sparql_rule += "}"
+
+            self.shapes_graph.add(
+                (
+                    HPFS[f"{template_name}AnnotationRule"],
+                    SH.construct,
+                    Literal(sparql_rule),
+                )
+            )
+    # TODO: need to fix SHACL gen... was using dependencies incorrectly
+    def _generate_shapes(self, templates_file, template_type: PyLiteral['entity', 'value']):
+        """Convert templates to SHACL shapes
+
+        Args:
+            templates_file: Path to templates YAML file. If None, uses default s223 templates
+
+        Returns:
+            Graph: The generated SHACL shapes graph
+        """
+        # Parse YAML
+        with open(templates_file, "r") as f:
+            templates = yaml.safe_load(f)
+        # Kind of turning SHACL into OWL for 223
+        for template_name, template_data in templates.items():
+            shape_path_name_dct = {}
+            template_graph = self._parse_template(template_data)
+
+            main_type, types = self._get_template_types(template_graph)
+            is_relation_shape = False
+
+            shape_uri = HPFS[f"{template_name}"]
+
+            # Add basic shape properties
+            self.shapes_graph.add((shape_uri, RDF.type, SH.NodeShape))
+            self.shapes_graph.add((shape_uri, RDF.type, RDFS["Class"]))
+            # TODO: Check to see if this type declaration is necessary or helpful 
+            if self.ontology_ns == S223:
+                self.shapes_graph.add((shape_uri, RDF.type, S223["Class"]))
+            # self.shapes_graph.add((shape_uri, SH.targetClass, main_type))
+            for rdf_type in types:
+                self.shapes_graph.add((shape_uri, SH["class"], rdf_type))
+
+            if "dependencies" in template_data:
+                dependency_names = {
+                    PARAM[template["args"]["name"]]: template["template"]
+                    for template in template_data["dependencies"]
+                }
+            else:
+                dependency_names = {}
+
+            prop_counts = {}
+            for s, p, o in template_graph.triples((None, None, None)):
+                if p == RDF.type:
+                    continue
+
+                if p in prop_counts.keys():
+                    prop_counts[p] += 1
+                else:
+                    prop_counts[p] = 1
+
+                # skipping triples with objects that are parameters
+                # if not isinstance(o, Literal):
+                #     if PARAM == self.shapes_graph.compute_qname(o)[1]:
+                #         continue
+                #         # Constraint covered by mincount
+
+                prop_shape = create_uri_name_from_uris(
+                    self.shapes_graph, HPFS, [shape_uri, o]
+                )
+                self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                self.shapes_graph.add((prop_shape, RDF.type, SH.PropertyShape))
+                self.shapes_graph.add((prop_shape, SH.path, p))
+
+                # If there is just one of a property, then we can do this, 
+                # if there are multiple properties that have different values (that aren't qualifiedValueShapes) this could cause an error. This won't happen currently
+                shape_path_name_dct[p] = prop_shape
+
+                qual_val_shape = create_uri_name_from_uris(
+                    self.shapes_graph, HPFS, [shape_uri, o]
+                )
+                
+                #TODO: don't know which parameters should be literals/named nodes vs instances of a particular class. Need template arg types
+                # Roughly, the value templates take named node/literal args and entity take instance args of a particular type. 
+                
+                # As a proxy for knowing param types, using whether this is a value or entity template
+                add_qual_val_shape = True
+                # has Literal value
+                if isinstance(o, Literal):
+                    print('value or value template', o)
+                    self.shapes_graph.add((qual_val_shape, SH["hasValue"], o))
+                # has value parameter (uses predicate has value but no object)
+                elif template_type == 'value':
+                    add_qual_val_shape = False
+                    pass # no qualified value shape. 
+                # intances of a particular type 
+                elif o in dependency_names.keys():
+                    self.shapes_graph.add(
+                        (qual_val_shape, SH["class"], HPFS[dependency_names[o]])
+                    )
+                # named nodes 
+                else:
+                    self.shapes_graph.add((qual_val_shape, SH["hasValue"], o))
+
+                if add_qual_val_shape == True:
+                    self.shapes_graph.add((prop_shape, SH.qualifiedMinCount, Literal(1)))
+                    self.shapes_graph.add(
+                        (prop_shape, SH.qualifiedValueShape, qual_val_shape)
+                    )
+                    self.shapes_graph.add((qual_val_shape, RDF.type, SH.NodeShape))
+            # Need to specify that properties can't have any other aspects - this is very specific to 223.
+            # If templates defined EVERYTHING that would exist in 223 this could be generalized, but currently we do not do this.
+            # It's a struggle in 223P using SPARQL to get just a temperature measurement and not a temperature deadband property, because the temperature deadband has everything the temperature sensor property has and more
+            # Brick classification makes it easier to say if you want a specific class, or if you want to include all the superclasses.
+            # perhaps this just means that SPARQL is not a sufficient query engine for this use case.
+
+            # Might just add mincount of 0 for aspects, not sure there will be that many edge cases
+            # Might learn more about how aspect can be used by helping haystack define their RDF/SHACL export
+
+            # Not great implementation, but works for now
+            for p, count in prop_counts.items():
+                if p in shape_path_name_dct.keys():
+                    prop_shape = shape_path_name_dct[p]
+                else:
+                    # TODO: Having minCount with a particular shape could cause errors for pyshacl, may need a separate shape with min and max count if so
+                    prop_shape = create_uri_name_from_uris(
+                        self.shapes_graph, HPFS, [shape_uri, p]
+                    )
+                    self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                    self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
+                    self.shapes_graph.add((prop_shape, SH.path, p))
+
+                self.shapes_graph.add((prop_shape, SH.minCount, Literal(count)))
+                # TODO: Max Count causes errors in some cases, and is not really needed for others.
+                # templates don't support distinguishing what should be min count vs exact, this should probably be delivered by object oriented interface.
+                # self.shapes_graph.add((prop_shape, SH.maxCount, Literal(count)))
+
+            if (S223["hasAspect"] not in prop_counts.keys()) & (self.ontology_ns == S223):
+                prop_shape = create_uri_name_from_uris(
+                    self.shapes_graph, HPFS, [shape_uri], "_noAspects"
+                )
+                self.shapes_graph.add((shape_uri, SH.property, prop_shape))
+                self.shapes_graph.add((prop_shape, A, SH.PropertyShape))
+                self.shapes_graph.add((prop_shape, SH.minCount, Literal(0)))
+                self.shapes_graph.add((prop_shape, SH.maxCount, Literal(0)))
+                self.shapes_graph.add((prop_shape, SH.path, S223.hasAspect))
+
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}Annotation"], RDF.type, SH.NodeShape)
+            )
+            self.shapes_graph.add(
+                (
+                    HPFS[f"{template_name}Annotation"],
+                    SH.rule,
+                    HPFS[f"{template_name}AnnotationRule"],
+                )
+            )
+            # Can be done using buildingMOTIF inline dependencies before creating sparql rather than relying on other shape classes
+            # Inline dependencies works well for inference for both nodes and properties, but doesn't have other capabilities for validation
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}AnnotationRule"], RDF.type, SH.TripleRule)
+            )
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}Annotation"], SH.targetClass, main_type)
+            )
+
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}AnnotationRule"], SH.subject, SH.this)
+            )
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}AnnotationRule"], SH.predicate, RDF.type)
+            )
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}AnnotationRule"], SH.object, shape_uri)
+            )
+            self.shapes_graph.add(
+                (HPFS[f"{template_name}AnnotationRule"], SH.condition, shape_uri)
+            )
+
+
+    def infer(self, data_graph, shapes_graph=None, use_ontology = False, handle_edge_cases = True):
+        """Validate a data graph against SHACL shapes
+
+        Args:
+            data_graph: The RDF graph to validate
+            shapes_graph: Optional SHACL shapes graph. If None, uses previously generated shapes
+            inference: Reasoning to apply ('none', 'rdfs', 'owlrl', etc.)
+
+        Returns:
+            tuple: (conforms, results_graph, results_text)
+        """
+        # TODO: generic validation output is so verbose that it's useless. Need to use the results to provide a better validation report
+        if shapes_graph is None:
+            if self.shapes_graph is None:
+                raise ValueError(
+                    "No shapes graph available. Generate shapes first or provide a shapes graph."
+                )
+            shapes_graph = self.shapes_graph
+        
+        if use_ontology:
+            raise Exception("Ontology inference not yet implemented")
+        
+        if handle_edge_cases:
+            infer_entity_prop_has_point(data_graph)
+        
+        return infer(data_graph, shapes_graph)
+
+    def validate_model(self, data_graph, shapes_graph=None, use_ontology = False):
+        """Validate a data graph against SHACL shapes
+
+        Args:
+            data_graph: The RDF graph to validate
+            shapes_graph: Optional SHACL shapes graph. If None, uses previously generated shapes
+            inference: Reasoning to apply ('none', 'rdfs', 'owlrl', etc.)
+
+        Returns:
+            tuple: (conforms, results_graph, results_text)
+        """
+        # TODO: generic validation output is so verbose that it's useless. Need to use the results to provide a better validation report
+        if shapes_graph is None:
+            if self.shapes_graph is None:
+                raise ValueError(
+                    "No shapes graph available. Generate shapes first or provide a shapes graph."
+                )
+            shapes_graph = Library.load(ontology_graph=self.shapes_graph)
+        
+        if use_ontology:
+            raise Exception("Ontology validation not yet implemented")
+        
+        self.model = Model.create(self.ontology_ns)
+
+        self.model.add_graph(data_graph)
+        
+        return self.model.validate([shapes_graph.get_shape_collection()])
+
+    def save_shapes(self, filename, format="turtle"):
+        """Save the SHACL shapes graph to a file
+
+        Args:
+            filename: Output file path
+            format: RDF serialization format
+        """
+        if self.shapes_graph is None:
+            raise ValueError("No shapes graph available. Generate shapes first.")
+        self.shapes_graph.serialize(filename, format=format)
+
+# Handling edge case of brick entity properties
+def infer_entity_prop_has_point(graph):
+    query = """
+    PREFIX hpfs: <urn:hpflex/shapes#>
+    INSERT {
+        ?s hpfs:has-point ?o .    
+    }
+    WHERE {
+        ?s ?p ?o .
+        ?o a brick:EntityPropertyValue .
+    }
+    """
+    graph.update(query)

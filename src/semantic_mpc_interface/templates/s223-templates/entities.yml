@@ -1,0 +1,218 @@
+# S223 templates for entities
+# Updated to match brick templates structure
+
+# connection points are complicated, as we don't know cardinality at the template level
+# zone can connect to many windows, can't easily add connection points. 
+# Maybe bending the rules - but this is really what we mean by hvac-zone 
+
+hvac-zone:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:DomainSpace, s223:PhysicalSpace ;
+      s223:encloses p:name ;
+      s223:hasDomain s223:Domain-HVAC  .
+  optional: [space,window,tstat,hvac]
+  dependencies:
+    - template: has-space
+      args: {"name":"name", "target":"space"}
+    - template: space
+      args: {"name":"space"}
+    - template: has-window
+      args: {'name': 'name', 'target':'window'}
+    - template: window
+      args: {'name': 'window'}
+    - template: has-location
+      args: {'name': 'tstat', 'target':"name"}
+    - template: tstat
+      args: {'name': 'tstat'}
+    - template: air-connected-to
+      args: {'name':'hvac', 'target':'name'}
+    - template: hp-rtu
+      args: {'name': 'hvac'}
+
+space:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:PhysicalSpace ;
+        s223:hasProperty p:area .
+  dependencies:
+    - template: area
+      args: {"name": "area"}
+
+window:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    p:name a s223:Window ;
+        s223:hasProperty p:area ;
+        s223:hasProperty p:azimuth ;
+        s223:hasProperty p:tilt .
+  dependencies:
+    - template: area
+      args: {"name": "area"}
+    - template: azimuth
+      args: {"name": "azimuth"}
+    - template: tilt
+      args: {"name": "tilt"}
+
+hp-rtu:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:AirToAirHeatPump ;
+      s223:hasProperty p:cooling_capacity ;
+      s223:hasProperty p:heating_capacity ;
+      s223:hasProperty p:heating_COP ;
+      s223:hasProperty p:cooling_COP ;
+      .
+  dependencies:
+    - template: cooling-capacity
+      args: {"name": "cooling_capacity"}
+    - template: heating-capacity
+      args: {"name": "heating_capacity"}
+    - template: cooling-COP
+      args: {"name": "cooling_COP"}
+    - template: heating-COP
+      args: {"name": "heating_COP"}
+
+tstat:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    p:name a s223:Thermostat ;
+      s223:hasProperty p:stage_count ;
+      s223:hasProperty p:setpoint_deadband ;
+      s223:hasProperty p:tolerance ;
+      s223:hasProperty p:active ;
+      s223:hasProperty p:resolution ;
+      .
+  dependencies:
+    - template: tstat-stage_count
+      args: {"name": "stage_count"}
+    - template: tstat-deadband
+      args: {"name": "setpoint_deadband"}
+    - template: tstat-tolerance
+      args: {"name": "tolerance"}
+    - template: tstat-active
+      args: {"name": "active"}
+    - template: tstat-resolution
+      args: {"name": "resolution"}
+
+# one possible way of doing different types of thermostats without having to redo a lot of things.
+tstat-heating-cooling-occupancy:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    p:name a s223:Thermostat ;
+      s223:hasProperty p:occ-heating-setpoint ;
+      s223:hasProperty p:occ-cooling-setpoint ;
+      s223:hasProperty p:unocc-heating-setpoint ;
+      s223:hasProperty p:unocc-cooling-setpoint ;
+      s223:hasProperty p:active-heating-stages ;
+      s223:hasProperty p:active-cooling-stages ;
+      s223:hasProperty p:temperature ;
+      .
+  dependencies:
+    - template: occ-heating-setpoint
+      args: {"name": "occ-heating-setpoint"}
+    - template: occ-cooling-setpoint
+      args: {"name": "occ-cooling-setpoint"}
+    - template: unocc-heating-setpoint
+      args: {"name": "unocc-heating-setpoint"}
+    - template: unocc-cooling-setpoint
+      args: {"name": "unocc-cooling-setpoint"}
+    - template: tstat
+      args: {"name": "name"}
+    - template: temperature
+      args: {"name": "temperature"}  
+    - template: active-heating-stages
+      args: {"name": "active-heating-stages"}
+    - template: active-cooling-stages
+      args: {"name": "active-cooling-stages"}
+
+site:
+# No good notion for a site, would have to make use of another ontology (could also be rec)
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    p:name a s223:PhysicalSpace ;
+      s223:hasProperty p:timezone ;
+      s223:hasProperty p:latitude ;
+      s223:hasProperty p:longitude ;
+      s223:hasProperty p:noaastation ;
+      a hpf:Site .
+  dependencies:
+    - template: timezone
+      args: {"name": "timezone"}
+    - template: latitude
+      args: {"name": "latitude"}
+    - template: longitude
+      args: {"name": "longitude"}
+    - template: noaastation
+      args: {"name": "noaastation"}
+
+air-bidirectional-cp:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:BidirectionalConnectionPoint;
+      s223:hasMedium s223:Medium-Air ;
+    .
+
+air-outlet-cp:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:OutletConnectionPoint;
+      s223:hasMedium s223:Medium-Air ;
+    .
+
+air-inlet-cp:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:InletConnectionPoint;
+      s223:hasMedium s223:Medium-Air ;
+    .
+
+connection:
+  body: >
+    @prefix p: <urn:___param___#> .
+    @prefix brick: <https://brickschema.org/schema/Brick#> .
+    @prefix s223: <http://data.ashrae.org/standard223#> .
+    @prefix qudt: <http://qudt.org/schema/qudt/> .
+    @prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+    @prefix unit: <http://qudt.org/vocab/unit/> .
+    @prefix hpf: <urn:hpflex#> .
+    p:name a s223:Connection .
