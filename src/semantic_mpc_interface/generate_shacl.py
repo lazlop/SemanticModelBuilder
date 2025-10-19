@@ -51,6 +51,14 @@ class SHACLHandler:
         self.value_templates = str(self.template_dir.joinpath("values.yml"))
         self.relations_templates = str(self.template_dir.joinpath("relations.yml"))
 
+        try:
+            self.bm = get_building_motif()
+            self.template_library = Library.load(db_id=1)
+        except Exception as e:
+            print("BuildingMOTIF does not exist, instantiating:", e)
+            self.bm = BuildingMOTIF("sqlite://")
+            self.template_library = Library.load(directory=str(self.template_dir))
+
     def _get_template_types(self, g):
         """Parse the RDF template body and extract type information"""
 
@@ -95,7 +103,6 @@ class SHACLHandler:
         if not templates:
             warn(f"No templates found in {templates_file}")
             return 
-        # Kind of turning SHACL into OWL for 223
         for template_name in templates.keys():
             template = self.template_library.get_template_by_name(template_name)
             template_graph = template.inline_dependencies().body
@@ -371,14 +378,6 @@ class SHACLHandler:
         
         if use_ontology:
             raise Exception("Ontology validation not yet implemented")
-
-        try:
-            self.bm = get_building_motif()
-            self.template_library = Library.load(db_id=1)
-        except Exception as e:
-            print("BuildingMOTIF does not exist, instantiating:", e)
-            self.bm = BuildingMOTIF("sqlite://")
-            self.template_library = Library.load(directory=str(self.template_dir))
         
         self.model = Model.create(self.ontology_ns)
 
