@@ -210,20 +210,26 @@ class SHACLHandler:
                 self.shapes_graph.add((prop_shape, RDF.type, SH.PropertyShape))
                 self.shapes_graph.add((prop_shape, SH.path, p))
 
+                # TODO: double check this works before merging in
+                if template_graph.compute_qname(o)[1] != URIRef(PARAM):
+                    self.shapes_graph.add((prop_shape, SH.hasValue, o))
+                    
+
                 # If there is just one of a property, then we can do this, 
                 # if there are multiple properties that have different values (that aren't qualifiedValueShapes) this could cause an error. This won't happen currently
                 shape_path_name_dct[p] = prop_shape
+                
+                #TODO: don't know which parameters should be literals/named nodes vs instances of a particular class. Need template arg types
+                # Roughly, the value templates take named node/literal args and entity take instance args of a particular type. 
+    
+                # As a proxy for knowing param types, using whether this is a value or entity template
+                add_qual_val_shape = True
+                # has Literal value
 
                 qual_val_shape = create_uri_name_from_uris(
                     self.shapes_graph, HPFS, [shape_uri, o]
                 )
                 
-                #TODO: don't know which parameters should be literals/named nodes vs instances of a particular class. Need template arg types
-                # Roughly, the value templates take named node/literal args and entity take instance args of a particular type. 
-                
-                # As a proxy for knowing param types, using whether this is a value or entity template
-                add_qual_val_shape = True
-                # has Literal value
                 if isinstance(o, Literal):
                     print('value or value template', o)
                     self.shapes_graph.add((qual_val_shape, SH["hasValue"], o))
@@ -241,6 +247,7 @@ class SHACLHandler:
                     self.shapes_graph.add((qual_val_shape, SH["hasValue"], o))
 
                 if add_qual_val_shape == True:
+                    self.shapes_graph.add((qual_val_shape, RDFS.label, Literal(get_uri_name(self.shapes_graph, qual_val_shape))))
                     self.shapes_graph.add((prop_shape, SH.qualifiedMinCount, Literal(1)))
                     self.shapes_graph.add(
                         (prop_shape, SH.qualifiedValueShape, qual_val_shape)

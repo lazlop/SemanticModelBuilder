@@ -71,7 +71,6 @@ def create_uri_name_from_uris(graph, ns, uri_lst, suffix: Optional[str] = ""):
         else:
             node_names.append(uri)
     new_uri = get_unique_uri(graph, ns[f"{'_'.join(node_names)}{suffix}"])
-    graph.add((new_uri, RDFS.label, Literal(get_uri_name(graph, new_uri))))
     return new_uri
 
 def add_brick_inverse_relations(g):
