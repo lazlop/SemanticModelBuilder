@@ -18,7 +18,7 @@ from .utils import *
 class SHACLHandler:
     """Class to handle SHACL shape generation and validation"""
 
-    def __init__(self, ontology="s223"):
+    def __init__(self, ontology="s223", template_dir=None):
         """Initialize SHACL handler
         May want option to pass in existing buildingmotif instance.
         Args:
@@ -28,7 +28,7 @@ class SHACLHandler:
         self.shapes_graph = Graph()
         bind_prefixes(self.shapes_graph)
         self.ontology = ontology
-        self._load_templates()
+        self._load_templates(template_base_dir=template_dir)
 
     def _load_templates(self, template_base_dir=None) -> None:
         """Load ontology-specific templates. Can optionally provide a template directory with entity, value, and relation templates"""
