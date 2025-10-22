@@ -7,7 +7,7 @@ from.namespaces import *
 import csv
 from rdflib import Graph, Literal, Namespace, URIRef
 
-qudt_dir = files("semantic_mpc_interface").joinpath("data/qudt")
+qudt_dir = files("semantic_mpc_interface").joinpath("data").joinpath("qudt")
 # Helper --------------------------------------------------------------------
 # When a Python package is installed from a wheel it is often imported from a
 # zip-file.  In that case the resources (csv / ttl) are not present on the file
