@@ -3,6 +3,7 @@ from collections import Counter
 import pandas as pd
 import yaml
 from rdflib import Graph, Literal, URIRef, BNode
+from pathlib import Path
 
 from .namespaces import *
 
@@ -115,8 +116,8 @@ def get_template_types(ontology):
         raise ValueError(f"Unsupported ontology: {ontology}")
 
     # Load values.yml and entities.yml files
-    values_file = f"{templates}/values.yml"
-    entities_file = f"{templates}/entities.yml"
+    values_file = Path(templates) / "values.yml"
+    entities_file = Path(templates) / "entities.yml"
     
     # Read and parse YAML files
     with open(values_file, 'r') as f:
