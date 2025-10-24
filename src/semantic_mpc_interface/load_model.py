@@ -73,7 +73,7 @@ class LoadModel:
     # Could do all alignment through templates by redefining mapping brick and s223 to hpf namespace, but this seems onerous
     def __init__(self, source: Union[str, Graph], ontology: str, template_dict = {
             'sites': 'site',
-            'zones': 'hvac-zone',}, as_si_units = False):
+            'zones': 'hvac-zone',}, as_si_units = False,  template_base_dir=None):
         #TODO: Consider changing to just template list. Renaming of templates is not important nor consistent
         if os.path.isfile(source):
             self.g = Graph(store = 'Oxigraph')
@@ -94,12 +94,15 @@ class LoadModel:
         #     self.g.parse("https://open223.info/223p.ttl", format="ttl")
     
         # Initialize BuildingMOTIF components
-        if ontology == 'brick':
-            template_dir = brick_templates
-        elif ontology == 's223':
-            template_dir = s223_templates
+        if template_base_dir is not None:
+            template_dir = template_base_dir
         else:
-            raise ValueError('invalid ontology')
+            if ontology == 'brick':
+                template_dir = brick_templates
+            elif ontology == 's223':
+                template_dir = s223_templates
+            else:
+                raise ValueError('invalid ontology')
         # try:
         #     self.bm = get_building_motif()
         #     self.library = Library.load(db_id=1)
@@ -128,8 +131,23 @@ class LoadModel:
     # TODO: May be good to use additional results from templates to make sure I'm returning all entities
     # TODO: SPARQL has issue with enumeration kinds. Either reimplement logic to get correct SPARQL results or use information inferred from SHACL. 
     # TODO: Going to implement a temporary patch for this 
+    def _make_where_brick(self, graph):
+        """Generate WHERE clause for SPARQL query from RDF graph."""
+        where = []
+        filters = {}
+        for s, p, o in graph.triples((None, None, None)):
+            qs = self._get_var_name(graph, s)
+            qo = self._get_var_name(graph, o)
+            qp = convert_to_prefixed(p, graph) #.replace('-','_')
+            # if p == A and (o in self.graph.objects(None, BRICK['hasPoint'])) and (s not in filters.keys()):
+            where.append(f"{qs} {qp} {qo} .")
+        where += list(filters.values())
+        return "\n".join(where)
+    
     def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
+        if self.ontology == 'brick':
+            return self._make_where_brick(graph)
         where = []
         filters = {}
         for s, p, o in graph.triples((None, None, None)):
@@ -220,7 +238,10 @@ class LoadModel:
         #     return self.g.value(URIRef(uri), S223['hasValue'])
         # else:
         #     raise ValueError('Ontology not implemented')
-        return self.g.value(URIRef(uri), HPFS['has-value'])
+        value = self.g.value(URIRef(uri), HPFS['has-value'])
+        if value is None:
+            value = 0 
+        return value 
 
     def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):
         """
