@@ -218,8 +218,11 @@ class SHACLHandler:
                 self.shapes_graph.add((prop_shape, SH.path, p))
 
                 # TODO: double check this works before merging in
-                if template_graph.compute_qname(o)[1] != URIRef(PARAM):
+                if o == rdflib.term.Literal('true', datatype=rdflib.term.URIRef('http://www.w3.org/2001/XMLSchema#boolean')):
                     self.shapes_graph.add((prop_shape, SH.hasValue, o))
+                else:
+                    if template_graph.compute_qname(o)[1] != URIRef(PARAM):
+                        self.shapes_graph.add((prop_shape, SH.hasValue, o))
                     
 
                 # If there is just one of a property, then we can do this, 

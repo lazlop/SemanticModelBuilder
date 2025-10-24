@@ -1,5 +1,3 @@
-# TODO: Manage BuildingMOTIF better
-# TODO: Maybe manage exact matching of hpfs labels here. Only necessary if we're loading models not built using this library
 import os
 import re
 import pandas as pd
@@ -7,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union, Type
 from dataclasses import dataclass, field
 
 from rdflib import Graph, Literal, Namespace, URIRef
-from buildingmotif import BuildingMOTIF, get_building_motif
+from buildingmotif import BuildingMOTIF
 from buildingmotif.dataclasses import Library, Model
 
 from .namespaces import *
@@ -73,7 +71,8 @@ class LoadModel:
     # Could do all alignment through templates by redefining mapping brick and s223 to hpf namespace, but this seems onerous
     def __init__(self, source: Union[str, Graph], ontology: str, template_dict = {
             'sites': 'site',
-            'zones': 'hvac-zone',}, as_si_units = False,  template_base_dir=None):
+            'zones': 'hvac-zone',}, as_si_units = False,
+            template_dir = None):
         #TODO: Consider changing to just template list. Renaming of templates is not important nor consistent
         if os.path.isfile(source):
             self.g = Graph(store = 'Oxigraph')
@@ -85,36 +84,28 @@ class LoadModel:
         bind_prefixes(self.g)
         BRICK = Namespace("https://brickschema.org/schema/Brick#")
         self.HPF = Namespace("urn:hpflex#")
+        self.site = self.g.value(None, RDF.type, BRICK.Site)
         self.ontology = ontology
         self.template_dict = template_dict
         # TODO: Adjust how we do as_si and as_ip
         self.as_si_units = as_si_units
         # Only one query so far requires loading the ontology to use subClassOf in 223:
-        # if ontology == "s223":
-        #     self.g.parse("https://open223.info/223p.ttl", format="ttl")
-    
+        if ontology == "s223":
+            self.g.parse("https://open223.info/223p.ttl", format="ttl")
+            
         # Initialize BuildingMOTIF components
-        if template_base_dir is not None:
-            template_dir = template_base_dir
+        self.bm = BuildingMOTIF("sqlite://")
+        self.model = Model.create(self.HPF)
+        if template_dir is not None:
+            self.template_dir = template_dir
         else:
             if ontology == 'brick':
-                template_dir = brick_templates
+                self.template_dir = str(brick_templates)
             elif ontology == 's223':
-                template_dir = s223_templates
+                self.template_dir = str(s223_templates)
             else:
                 raise ValueError('invalid ontology')
-        # try:
-        #     self.bm = get_building_motif()
-        #     self.library = Library.load(db_id=1)
-        # Can't do this if I'm switching ontologies. TODO: figure out better bmotif management
-        # except Exception as e:
-        #     print("BuildingMOTIF does not exist, instantiating:", e)
-        #     self.bm = BuildingMOTIF("sqlite://")
-        #     self.library = Library.load(directory=template_dir)
-        self.bm = BuildingMOTIF("sqlite://")
-        self.library = Library.load(directory=template_dir)
-        self.model = Model.create(self.HPF)
-    
+        self.library = Library.load(directory=self.template_dir)
 
     def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
@@ -131,23 +122,8 @@ class LoadModel:
     # TODO: May be good to use additional results from templates to make sure I'm returning all entities
     # TODO: SPARQL has issue with enumeration kinds. Either reimplement logic to get correct SPARQL results or use information inferred from SHACL. 
     # TODO: Going to implement a temporary patch for this 
-    def _make_where_brick(self, graph):
-        """Generate WHERE clause for SPARQL query from RDF graph."""
-        where = []
-        filters = {}
-        for s, p, o in graph.triples((None, None, None)):
-            qs = self._get_var_name(graph, s)
-            qo = self._get_var_name(graph, o)
-            qp = convert_to_prefixed(p, graph) #.replace('-','_')
-            # if p == A and (o in self.graph.objects(None, BRICK['hasPoint'])) and (s not in filters.keys()):
-            where.append(f"{qs} {qp} {qo} .")
-        where += list(filters.values())
-        return "\n".join(where)
-    
     def _make_where(self, graph):
         """Generate WHERE clause for SPARQL query from RDF graph."""
-        if self.ontology == 'brick':
-            return self._make_where_brick(graph)
         where = []
         filters = {}
         for s, p, o in graph.triples((None, None, None)):
@@ -156,19 +132,20 @@ class LoadModel:
             qp = convert_to_prefixed(p, graph) #.replace('-','_')
             #TODO: Might have to do this closed set filter for all aspects, roles, etc. on everything
             #TODO: Do 223 ontology inferencing before this and change specific property callouts to just o == S223['Property]
-            if p == A and (o == S223['QuantifiableObservableProperty'] or 
-                           o == S223['QuantifiableActuatableProperty'] or
-                           o == S223['EnumeratedObservableProperty'] or 
-                           o == S223['EnumeratedActuatableProperty'] ) and (s not in filters.keys()):
-                aspects = list(graph.objects(s,S223['hasAspect']))
-                if len(aspects) > 0:
-                    aspects = [self._get_var_name(graph,a) for a in aspects]
-                    aspect_var = qs + '_aspects_in'
-                    where.append(f"{qs} <{str(S223['hasAspect'])}> {aspect_var} .")
-                    filters[s] = f"FILTER({aspect_var} IN ({','.join(aspects)}) ) "
-                else:
-                    aspect_var = qs + '_aspects_in'
-                    filters[s] = f"FILTER NOT EXISTS {{ {qs} <{str(S223['hasAspect'])}> {aspect_var} }}"
+            if self.ontology == 's223':
+                if p == A and (o == S223['QuantifiableObservableProperty'] or 
+                            o == S223['QuantifiableActuatableProperty'] or
+                            o == S223['EnumeratedObservableProperty'] or 
+                            o == S223['EnumeratedActuatableProperty'] ) and (s not in filters.keys()):
+                    aspects = list(graph.objects(s,S223['hasAspect']))
+                    if len(aspects) > 0:
+                        aspects = [self._get_var_name(graph,a) for a in aspects]
+                        aspect_var = qs + '_aspects_in'
+                        where.append(f"{qs} <{str(S223['hasAspect'])}> {aspect_var} .")
+                        filters[s] = f"FILTER({aspect_var} IN ({','.join(aspects)}) ) "
+                    else:
+                        aspect_var = qs + '_aspects_in'
+                        filters[s] = f"FILTER NOT EXISTS {{ {qs} <{str(S223['hasAspect'])}> {aspect_var} }}"
             where.append(f"{qs} {qp} {qo} .")
         where += list(filters.values())
         return "\n".join(where)
@@ -232,16 +209,13 @@ class LoadModel:
         unit = self.g.value(URIRef(uri), QUDT["hasUnit"])
         return unit
     
-    # TODO: use has-value template
+    # TODO: use has-value template. Consider how we handle external references longterm
     def _get_value(self, uri):
-        # if self.ontology == 's223': 
-        #     return self.g.value(URIRef(uri), S223['hasValue'])
-        # else:
-        #     raise ValueError('Ontology not implemented')
-        value = self.g.value(URIRef(uri), HPFS['has-value'])
-        if value is None:
-            value = 0 
-        return value 
+        if self.g.value(URIRef(uri), S223['hasValue']):
+            return self.g.value(URIRef(uri), S223['hasValue'])
+        else:
+            return self.g.value(URIRef(uri), REF["hasExternalReference"] / REF['name'])
+        
 
     def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):
         """
@@ -250,7 +224,7 @@ class LoadModel:
         """
         if df.empty:
             return []
-        value_templates,entity_templates = get_template_types(ontology=self.ontology)
+        value_templates,entity_templates = get_template_types(self.template_dir)
 
         # Mapping columns to templates (which are also HPFS types)
         entity_types = {}

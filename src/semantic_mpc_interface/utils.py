@@ -107,17 +107,10 @@ def add_brick_inverse_relations(g):
 
     return g
 
-def get_template_types(ontology):
-    if ontology == 's223':
-        templates = s223_templates
-    elif ontology == 'brick':
-        templates = brick_templates
-    else:
-        raise ValueError(f"Unsupported ontology: {ontology}")
-
+def get_template_types(template_dir):
     # Load values.yml and entities.yml files
-    values_file = Path(templates) / "values.yml"
-    entities_file = Path(templates) / "entities.yml"
+    values_file = Path(template_dir) / "values.yml"
+    entities_file = Path(template_dir) / "entities.yml"
     
     # Read and parse YAML files
     with open(values_file, 'r') as f:
