@@ -105,7 +105,7 @@ class LoadModel:
                 self.template_dir = str(s223_templates)
             else:
                 raise ValueError('invalid ontology')
-        self.library = Library.load(directory=self.template_dir)
+        self.library = Library.load(directory=self.template_dir, overwrite=True)
 
     def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
