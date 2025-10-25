@@ -1,4 +1,4 @@
-name,active,stage_count,resolution-unit,resolution,tolerance-unit,setpoint_deadband-unit,setpoint_deadband,tolerance
-tstat_zone_1,1.0,1.0,DEG_F,1.0,DEG_F,DEG_F,1.0,1.0
-tstat_zone_2,2.0,2.0,DEG_F,2.0,DEG_F,DEG_F,2.0,2.0
-tstat_zone_3,3.0,3.0,DEG_F,3.0,DEG_F,DEG_F,3.0,3.0
+name,stage_count,resolution-unit,tolerance,setpoint_deadband,setpoint_deadband-unit,resolution,active,tolerance-unit
+tstat_zone_1,1.0,DEG_F,1.0,1.0,DEG_F,1.0,1.0,DEG_F
+tstat_zone_2,2.0,DEG_F,2.0,2.0,DEG_F,2.0,2.0,DEG_F
+tstat_zone_3,3.0,DEG_F,3.0,3.0,DEG_F,3.0,3.0,DEG_F

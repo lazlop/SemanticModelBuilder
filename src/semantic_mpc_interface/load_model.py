@@ -107,11 +107,11 @@ class LoadModel:
                 raise ValueError('invalid ontology')
         try:
             self.bm = get_building_motif()
-            self.template_library = Library.load(db_id=1, overwrite=True)
+            self.library = Library.load(db_id=1, overwrite=True)
         except Exception as e:
             print("BuildingMOTIF does not exist, instantiating:", e)
             self.bm = BuildingMOTIF("sqlite://")
-            self.template_library = Library.load(directory=str(self.template_dir), overwrite=True)
+            self.library = Library.load(directory=str(self.template_dir), overwrite=True)
 
     def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
