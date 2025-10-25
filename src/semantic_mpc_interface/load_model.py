@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union, Type
 from dataclasses import dataclass, field
 
 from rdflib import Graph, Literal, Namespace, URIRef
-from buildingmotif import BuildingMOTIF
+from buildingmotif import BuildingMOTIF, get_building_motif
 from buildingmotif.dataclasses import Library, Model
 
 from .namespaces import *
@@ -105,7 +105,13 @@ class LoadModel:
                 self.template_dir = str(s223_templates)
             else:
                 raise ValueError('invalid ontology')
-        self.library = Library.load(directory=self.template_dir, overwrite=True)
+        try:
+            self.bm = get_building_motif()
+            self.template_library = Library.load(db_id=1, overwrite=True)
+        except Exception as e:
+            print("BuildingMOTIF does not exist, instantiating:", e)
+            self.bm = BuildingMOTIF("sqlite://")
+            self.template_library = Library.load(directory=str(self.template_dir), overwrite=True)
 
     def _get_var_name(self, graph, node, force_as_variable = False):
         """Generate variable names for SPARQL queries from RDF nodes."""
