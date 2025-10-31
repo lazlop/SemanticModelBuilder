@@ -40,6 +40,14 @@ def build_tree(graph):
         tree[root] = dfs(root, set())
     return tree
 
+class Reference:
+    def __init__(self, ref_type, name):
+        self.ref_type = ref_type
+        self.name = name
+        
+    def __repr__(self):
+        return f"Reference(ref_type='{self.ref_type}', name='{self.name}')"
+
 # TODO: Still in vibe coded state - should clean up and generalize a little
 class Value:
     def __init__(self, value, unit, is_delta = False, name=None):
@@ -220,7 +228,21 @@ class LoadModel:
         if self.g.value(URIRef(uri), S223['hasValue']):
             return self.g.value(URIRef(uri), S223['hasValue'])
         else:
-            return self.g.value(URIRef(uri), REF["hasExternalReference"] / REF['name'])
+            return self._get_references(uri)
+    
+    def _get_references(self, uri):
+        references = []
+        for ref in self.g.objects(URIRef(uri), REF["hasExternalReference"]):
+            name = self.g.value(ref, REF['name'])
+            ref_types = list(self.g.objects(ref, A))
+            # preferring type of ref class if possible 
+            if len(ref_types) == 1:
+                ref_type = ref_types[0]
+            for ref_type in ref_types:
+                if uri_in_namespace(ref_type, REF):
+                    break
+            references.append(Reference(get_uri_name(self.g,ref_type), name))
+        return references
         
 
     def _dataframe_to_objects_generalized(self, df: pd.DataFrame, template_name: str, main_entity_col = 'name'):

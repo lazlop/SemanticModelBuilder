@@ -61,6 +61,8 @@ def get_uri_name(graph, uri):
     else:
         return uri
 
+def uri_in_namespace(uri, ns):
+    return uri.startswith(ns)
 
 def create_uri_name_from_uris(graph, ns, uri_lst, suffix: Optional[str] = ""):
     # append uri names in namespace and check uniqueness against graph
