@@ -56,7 +56,7 @@ class Value:
             try:
                 self.value = float(value)
             except (ValueError, TypeError):
-                self.value = str(value)
+                self.value = value
         else:
             self.value = None
             
